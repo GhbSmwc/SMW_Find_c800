@@ -105,7 +105,7 @@
 ;
 ;
 ;Formula:
-; Index = (RAM_13D7 * %XXXXX) + %00yyyyyyyyyy0000 + %000000000000xxxx
+; Index = (RAM_13D7 * %XXXXX) + (%00yyyyyyyyyy0000 | %000000000000xxxx)
 ;
 
 GetLevelMap16IndexByPosition:
@@ -132,10 +132,9 @@ GetLevelMap16IndexByPosition:
 		LDA $0A				;\$02-$03 (now $0A-$0B if SA-1): %000000yyyyyyyyyy becomes %00yyyyyyyyyy0000
 		ASL #4				;|
 		STA $02				;/
-		LDA $08				;\%000000000000xxxx + %00yyyyyyyyyy0000 + (RAM_13D7 * %XXXXX)
+		LDA $08				;\(%000000000000xxxx | %00yyyyyyyyyy0000) + (RAM_13D7 * %XXXXX)
 		AND.w #%0000000000001111	;|in this order
-		CLC				;|
-		ADC $02				;|
+		ORA $02				;|
 		CLC				;|
 		ADC $04				;/
 	else
@@ -155,10 +154,9 @@ GetLevelMap16IndexByPosition:
 		ASL #4				;|
 		STA $02				;/
 		
-		LDA $00				;\%000000000000xxxx + %00yyyyyyyyyy0000 + (RAM_13D7 * %XXXXX)
+		LDA $00				;\(%000000000000xxxx | %00yyyyyyyyyy0000) + (RAM_13D7 * %XXXXX)
 		AND.w #%0000000000001111	;|in this order
-		CLC				;|
-		ADC $02				;|
+		ORA $02				;|
 		CLC				;|
 		ADC $2306			;/
 	endif
