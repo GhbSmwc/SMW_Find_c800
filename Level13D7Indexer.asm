@@ -68,10 +68,15 @@
 ;;coordinates.
 ;;
 ;;Input:
-;; $00-$01: X position, in units of blocks
-;; $02-$03: Same as above but for Y position
+;; -$00 to $01: X position, in units of blocks
+;; -$02 to $03: Same as above but for Y position
 ;;Output:
-;; A (16-bit): The index of the blocks.
+;; -$00-$01: The index of the blocks.
+;;Overwritten:
+;  -If SA-1 not applied:
+;; --$04 to $0B: copy of $00 due to math routines.
+;; -If SA-1 applied:
+;; --None overwritten
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Things to note: A level screen is ALWAYS 16 blocks wide
 ;(regardless of the level dimension), thus, index can be written
@@ -112,4 +117,90 @@ GetLevelMap16IndexByPosition:
 	;or LSR #4) gives the units in blocks, multiply that by 16 (ASL #4) will
 	;give you the number of blocks per screen column. But because you are
 	;multiplying by 16 then dividing by 16, this cancel each other out.
-	LDA $13D7|!addr
+	if !sa1 == 0
+		REP #$20
+		LDA $02				;\Move $02-$03 to $0A-$0B (Y pos)
+		STA $0A				;/
+		LDA $00				;\Move $00-$01 to $08-$09 (X pos)
+		STA $08				;/
+		LSR #4				;\what screen column
+		STA $00				;/
+		LDA $13D7|!addr			;\blocks per screen column
+		STA $02				;/
+		JSL MathMul16_16		;>$04-$05: Total number of blocks of all screen columns to the left of (exclude at) the coordinate point.
+		REP #$20			
+		LDA $0A				;\$02-$03 (now $0A-$0B if SA-1): %000000yyyyyyyyyy becomes %00yyyyyyyyyy0000
+		ASL #4				;|
+		STA $02				;/
+		LDA $08				;\%000000000000xxxx + %00yyyyyyyyyy0000 + (RAM_13D7 * %XXXXX)
+		AND.w #%0000000000001111	;|in this order
+		CLC				;|
+		ADC $02				;|
+		CLC				;|
+		ADC $04				;/
+	else
+		LDA #$00			;\ Multiplication Mode.
+		STA $2250			;/
+
+		REP #$20				;
+		LDA $00 			;\what screen column
+		LSR #4				;|
+		STA $2251			;/
+		LDA $13D7|!addr			;\Blocks per screen column
+		STA $2253			;/
+		NOP				;\ ... Wait 5 cycles!
+		BRA $00 			;/$2306-$2307: Total number of blocks of all screen columns to the left of (exclude at) the coordinate point.
+		
+		LDA $02				;\$02-$03: %000000yyyyyyyyyy becomes %00yyyyyyyyyy0000
+		ASL #4				;|
+		STA $02				;/
+		
+		LDA $00				;\%000000000000xxxx + %00yyyyyyyyyy0000 + (RAM_13D7 * %XXXXX)
+		AND.w #%0000000000001111	;|in this order
+		CLC				;|
+		ADC $02				;|
+		CLC				;|
+		ADC $2306			;/
+	endif
+	STA $00					;>Output
+	SEP #$20
+	RTL
+if !sa1 == 0
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; 16bit * 16bit unsigned Multiplication
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Argusment
+; $00-$01 : Multiplicand
+; $02-$03 : Multiplier
+; Return values
+; $04-$07 : Product
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+MathMul16_16:	REP #$20
+		LDY $00
+		STY $4202
+		LDY $02
+		STY $4203
+		STZ $06
+		LDY $03
+		LDA $4216
+		STY $4203
+		STA $04
+		LDA $05
+		REP #$11
+		ADC $4216
+		LDY $01
+		STY $4202
+		SEP #$10
+		CLC
+		LDY $03
+		ADC $4216
+		STY $4203
+		STA $05
+		LDA $06
+		CLC
+		ADC $4216
+		STA $06
+		SEP #$20
+		RTL
+endif
