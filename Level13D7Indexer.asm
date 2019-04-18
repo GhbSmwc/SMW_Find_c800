@@ -209,12 +209,15 @@ ConvertC800IndexToCoordinates:
 	CMP #$3800
 	BCS .Invalid
 	if !sa1 == 0
-		AND.w %0000000000001111		;>Use for %000000000000xxxx (x position of the 16 blocks line)
+		AND.w #%0000000000001111		;>Use for %000000000000xxxx (x position of the 16 blocks line)
 		STA $04				;>Back it up due to division routine.
 		LDA $13D7|!addr			;\Index divide by number of blocks per screen column
 		STA $02				;|
-		JSL MathDiv			;/Q = %00000000000XXXXX, R = %000000yyyyyyyyyy (Y position already written in $02-$03)
-		REP #$20
+		JSL MathDiv			;/Q = %00000000000XXXXX, R = %00yyyyyyyyyy0000
+		REP #$20			;
+		LDA $02				;\Divide by 16 (%00yyyyyyyyyy0000 -> %000000yyyyyyyyyy)
+		LSR #4				;|
+		STA $02				;/
 		LDA $00				;\$00-$01: %00000000000XXXXX -> %0000000XXXXX0000
 		ASL #4				;/
 		ORA $04				;>%0000000XXXXXxxxx = (%000000000000xxxx | %0000000XXXXX0000)
@@ -225,13 +228,14 @@ ConvertC800IndexToCoordinates:
 		REP #$20
 		LDA $00				;\Index divide by number of blocks per screen column
 		STA $2251			;|
-		AND.w %0000000000001111		;|\$00-$01: %000000000000xxxx
+		AND.w #%0000000000001111	;|\$00-$01: %000000000000xxxx
 		STA $00				;|/
 		LDA $13D7|!addr			;|
 		STA $2253			;/Q = %00000000000XXXXX, R = %000000yyyyyyyyyy
 		NOP				;\Wait 5 cycles.
 		BRA $00				;/
-		LDA $2308			;\$2308-$2309 is remainder for Y position
+		LDA $2308			;\$2308-$2309 is remainder for Y position, times 16 ((%00yyyyyyyyyy0000)
+		LSR #4				;|>Divide by 16 (%00yyyyyyyyyy0000 -> %000000yyyyyyyyyy)
 		STA $02				;/
 		LDA $2306			;>$2306-$2307 (quotient) = %00000000000XXXXX
 		ASL #4				;>Convert to %0000000XXXXX0000
