@@ -72,6 +72,7 @@
 ;; -$02 to $03: Same as above but for Y position
 ;;Output:
 ;; -$00-$01: The index of the blocks.
+;; -Carry: Set if coordinate points to outside of level.
 ;;Overwritten:
 ;  -If SA-1 not applied:
 ;; --$04 to $0B: copy of $00 due to math routines.
@@ -100,7 +101,7 @@
 ;  Lowercase x: What block within the row of 16 blocks.
 ; $02-$03: %000000yyyyyyyyyy
 ;  Lowercase y: What row of 16x16 blocks. Note currently
-;  as of LM3.03, the highest value for Y (bottomost block) is
+;  as of LM3.03, the highest value for Y (bottommost block) is
 ;  $037F (%0000001101111111).
 ;
 ;
@@ -110,6 +111,18 @@
 
 GetLevelMap16IndexByPosition:
 	;Check if the given position is outside the level.
+	REP #$20
+	LDA $13D7|!addr				;\Check if Y position is past the bottom of the level.
+	LSR #4					;|
+	CMP $02					;|
+	BEQ .Invalid				;|
+	BCC .Invalid				;/
+	
+	LDA $00					;\Check if X position is past the last screen column of the level
+	LSR #4					;|>%0000000XXXXXxxxx -> %00000000000XXXXX
+	SEP #$20				;|>%000XXXXX
+	CMP $5E					;|>Compare with the last screen number +1
+	BCS .Invalid				;/If that or higher, mark as invalid.
 	
 	;Obtain number of blocks per screen column.
 	;Thankfully, $13D7 is also the number of blocks per screen column, because
@@ -162,6 +175,12 @@ GetLevelMap16IndexByPosition:
 	endif
 	STA $00					;>Output
 	SEP #$20
+	CLC
+	RTL
+	
+	.Invalid
+	SEP #$20
+	SEC
 	RTL
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Obtain block coordinate from $7EC800/$7FC800 indexing.
@@ -173,24 +192,54 @@ GetLevelMap16IndexByPosition:
 ;; -$00 to $01: X position (in units of blocks).
 ;; -$02 to $03: Y position, same as above.
 ;; -Carry: Set if index is invalid.
+;;Overwritten:
+;; -If sa1 not applied:
+;; --$04 to $05: Needed to handle x position within row of 16
+;;   blocks.
+;; -If SA-1 applied:
+;; --None overwritten
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Computation as follows:
-;ScreenColumn = Index/RAM_13D7		;>This gets what screen column
-;BlockYPos = Index MOD RAM_13D7		;>This gets what row of 16 blocks
+;ScreenColumn = floor(Index/RAM_13D7)	;>This gets what screen column (X position as screens)
+;BlockYPos = Index MOD RAM_13D7		;>This gets what row of 16 blocks (Y position)
 ;BlockXPos = Index MOD 16		;>This gets the X position of the 16 blocks row.
 ConvertC800IndexToCoordinates:
 	REP #$20
 	LDA $00
-	CMP $3800
+	CMP #$3800
 	BCS .Invalid
-	
 	if !sa1 == 0
-		LDA $13D7|!addr
-		STA $02
-		JSL MathDiv
+		AND.w %0000000000001111		;>Use for %000000000000xxxx (x position of the 16 blocks line)
+		STA $04				;>Back it up due to division routine.
+		LDA $13D7|!addr			;\Index divide by number of blocks per screen column
+		STA $02				;|
+		JSL MathDiv			;/Q = %00000000000XXXXX, R = %000000yyyyyyyyyy (Y position already written in $02-$03)
+		REP #$20
+		LDA $00				;\$00-$01: %00000000000XXXXX -> %0000000XXXXX0000
+		ASL #4				;/
+		ORA $04				;>%0000000XXXXXxxxx = (%000000000000xxxx | %0000000XXXXX0000)
 	else
-	
+		SEP #$20
+		LDA #$01			;\Divide mode
+		STA $2250			;/
+		REP #$20
+		LDA $00				;\Index divide by number of blocks per screen column
+		STA $2251			;|
+		AND.w %0000000000001111		;|\$00-$01: %000000000000xxxx
+		STA $00				;|/
+		LDA $13D7|!addr			;|
+		STA $2253			;/Q = %00000000000XXXXX, R = %000000yyyyyyyyyy
+		NOP				;\Wait 5 cycles.
+		BRA $00				;/
+		LDA $2308			;\$2308-$2309 is remainder for Y position
+		STA $02				;/
+		LDA $2306			;>$2306-$2307 (quotient) = %00000000000XXXXX
+		ASL #4				;>Convert to %0000000XXXXX0000
+		ORA $00				;>%0000000XXXXXxxxx = (%0000000XXXXX0000 | %000000000000xxxx)
 	endif
+	STA $00				;>And you get %0000000XXXXXxxxx
+	CLC				;>Mark that this is a valid coordinate.
+	RTL
 	
 	.Invalid
 	SEP #$20
