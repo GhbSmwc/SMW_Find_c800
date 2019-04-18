@@ -163,6 +163,40 @@ GetLevelMap16IndexByPosition:
 	STA $00					;>Output
 	SEP #$20
 	RTL
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;Obtain block coordinate from $7EC800/$7FC800 indexing.
+;;
+;;Input:
+;; -$00 to $01: The index of $7EC800/$7FC800. Index above $37FF is
+;;  invalid.
+;;Output:
+;; -$00 to $01: X position (in units of blocks).
+;; -$02 to $03: Y position, same as above.
+;; -Carry: Set if index is invalid.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Computation as follows:
+;ScreenColumn = Index/RAM_13D7		;>This gets what screen column
+;BlockYPos = Index MOD RAM_13D7		;>This gets what row of 16 blocks
+;BlockXPos = Index MOD 16		;>This gets the X position of the 16 blocks row.
+ConvertC800IndexToCoordinates:
+	REP #$20
+	LDA $00
+	CMP $3800
+	BCS .Invalid
+	
+	if !sa1 == 0
+		LDA $13D7|!addr
+		STA $02
+		JSL MathDiv
+	else
+	
+	endif
+	
+	.Invalid
+	SEP #$20
+	SEC
+	RTL
+	
 if !sa1 == 0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; 16bit * 16bit unsigned Multiplication
@@ -199,6 +233,31 @@ MathMul16_16:	REP #$20
 		CLC
 		ADC $4216
 		STA $06
+		SEP #$20
+		RTL
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; unsigned 16bit / 16bit Division
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Arguments
+; $00-$01 : Dividend
+; $02-$03 : Divisor
+; Return values
+; $00-$01 : Quotient
+; $02-$03 : Remainder
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+MathDiv:	REP #$20
+		ASL $00
+		LDY #$0F
+		LDA.w #$0000
+-		ROL A
+		CMP $02
+		BCC +
+		SBC $02
++		ROL $00
+		DEY
+		BPL -
+		STA $02
 		SEP #$20
 		RTL
 endif
