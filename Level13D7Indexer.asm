@@ -1,4 +1,4 @@
-if and(defined("sa1"), and(defined("bank"), defined("bank8")))
+if defined("sa1")
 	!sa1 = 0			; SA-1 flag
 	!dp = $0000			; Direct Page remap ($0000 - LoROM/FastROM, $3000 - SA-1 ROM)
 	!addr = $0000			; Address remap ($0000 - LoROM/FastROM, $6000 - SA-1 ROM)
@@ -265,7 +265,6 @@ ConvertC800IndexToCoordinates:
 	SEP #$20
 	SEC
 	RTL
-	
 if !sa1 == 0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; 16bit * 16bit unsigned Multiplication
