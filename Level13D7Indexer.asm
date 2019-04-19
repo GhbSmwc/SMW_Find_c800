@@ -1,3 +1,19 @@
+if and(defined("sa1"), and(defined("bank"), defined("bank8")))
+	!sa1 = 0			; SA-1 flag
+	!dp = $0000			; Direct Page remap ($0000 - LoROM/FastROM, $3000 - SA-1 ROM)
+	!addr = $0000			; Address remap ($0000 - LoROM/FastROM, $6000 - SA-1 ROM)
+	!bank = $800000			; Long address remap ($800000 - FastROM, $000000 - SA-1 ROM)
+	!bank8 = $80			; Bank byte remap ($80 - FastROM, $00 - SA-1 ROM)
+
+	if read1($00FFD5) == $23	; SA-1 detection code
+		sa1rom
+		!sa1 = 1		; SA-1 Pack v1.10+ identifier
+		!dp = $3000
+		!addr = $6000
+		!bank = $000000
+		!bank8 = $00
+	endif
+endif
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Index what horizontal level dimension currently set by LM that the
 ;;player is in.
