@@ -125,7 +125,7 @@ endif
 ; Index = (RAM_13D7 * %XXXXX) + (%00yyyyyyyyyy0000 | %000000000000xxxx)
 ;
 
-GetLevelMap16IndexByPosition:
+GetLevelMap16IndexByMap16Position:
 	;Check if the given position is outside the level.
 	REP #$20
 	LDA $13D7|!addr				;\Check if Y position is past the bottom of the level.
@@ -219,7 +219,7 @@ GetLevelMap16IndexByPosition:
 ;ScreenColumn = floor(Index/RAM_13D7)	;>This gets what screen column (X position as screens)
 ;BlockYPos = Index MOD RAM_13D7		;>This gets what row of 16 blocks (Y position)
 ;BlockXPos = Index MOD 16		;>This gets the X position of the 16 blocks row.
-ConvertC800IndexToCoordinates:
+GetMap16PositionByLevelMap16Index:
 	REP #$20
 	LDA $00
 	CMP #$3800
