@@ -192,7 +192,7 @@ Level dimension:
 								IndexToCoordsOutput += "Position: ($" + BlockXPosition.toString(16) + ", $" + BlockYPosition.toString(16) + ")"
 						} else {
 							//Indicate that index points to past the last block
-								IndexToCoordsOutput = "Index points beyond the last block. Valid index is from $0 to $" + (TotalNumberOfBlocksInLevel-1).toString(16)
+								IndexToCoordsOutput = "<font color='red'>Index points beyond the last block. Valid index is from $0 to $" + (TotalNumberOfBlocksInLevel-1).toString(16) + "</font>"
 						}
 					//Output:
 						document.getElementById("IndexToCoords").innerHTML = IndexToCoordsOutput
