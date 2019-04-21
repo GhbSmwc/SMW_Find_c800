@@ -216,9 +216,9 @@ GetLevelMap16IndexByMap16Position:
 ;; --None overwritten
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Computation as follows:
-;ScreenColumn = floor(Index/RAM_13D7)	;>This gets what screen column (X position as screens)
-;BlockYPos = Index MOD RAM_13D7		;>This gets what row of 16 blocks (Y position)
-;BlockXPos = Index MOD 16		;>This gets the X position of the 16 blocks row.
+;ScreenColumn = floor(Index/RAM_13D7)*16		;>This gets what screen column (X position as screens)
+;BlockYPos = floor((Index MOD RAM_13D7)/16)		;>This gets what row of 16 blocks (Y position)
+;BlockXPos = ScreenColumn+(Index MOD 16)		;>This gets the X position of the 16 blocks row.
 GetMap16PositionByLevelMap16Index:
 	REP #$20
 	LDA $00
@@ -247,7 +247,7 @@ GetMap16PositionByLevelMap16Index:
 		AND.w #%0000000000001111	;|\$00-$01: %000000000000xxxx
 		STA $00				;|/
 		LDA $13D7|!addr			;|
-		STA $2253			;/Q = %00000000000XXXXX, R = %000000yyyyyyyyyy
+		STA $2253			;/Q = %00000000000XXXXX, R = %00yyyyyyyyyy----
 		NOP				;\Wait 5 cycles.
 		BRA $00				;/
 		LDA $2308			;\$2308-$2309 is remainder for Y position, times 16 ((%00yyyyyyyyyy0000)

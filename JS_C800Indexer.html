@@ -35,12 +35,12 @@ Level dimension:
 <kbd>X: $</kbd><input type="text" id="BlockXPos" value ="0" maxlength="4" onchange="CorrectXYCoords()"><br>
 <kbd>Y: $</kbd><input type="text" id="BlockYPos" value ="0" maxlength="4" onchange="CorrectXYCoords()"><br>
 <button type="button" onclick="ConvertCoordsToIndex()">Submit</button><button type="button" onclick="ClearConvertCoordsToIndex()">Clear</button><br>
-
 <kbd><span id="CoordsToIndex"></span></kbd>
 <hr>
 <h1>Convert $7EC800/$7FC800 index to coordinate</h1>
-<kbd>Block index: $</kbd><input type="text" id="BlockIndex" value ="0" maxlength="4" onchange="CorrectIndexx()"><br>
-
+<kbd>Block index: $</kbd><input type="text" id="BlockIndex" value ="0" maxlength="4" onchange="CorrectIndex()"><br>
+<button type="button" onclick="ConvertIndexToCoords()">Submit</button><button type="button" onclick="ClearConvertIndexToCoords()">Clear</button><br>
+<kbd><span id="IndexToCoords"></span></kbd>
 <script>
 	function ClearConvertCoordsToIndex() {
 		document.getElementById("BlockXPos").value = "0"
@@ -63,13 +63,13 @@ Level dimension:
 			BlockYPosition = clamp(BlockYPosition, 0, 65535)
 			document.getElementById("BlockYPos").value = BlockYPosition.toString(16)
 	}
-	function CorrectIndexx() {
+	function CorrectIndex() {
 		//Correct index input
 			var BlockIndexer = parseInt(document.getElementById("BlockIndex").value, 16)
 			if (isNaN(BlockIndexer) == true) {
 				BlockIndexer = 0
 			}
-			BlockIndexer = clamp(BlockIndexer, 0, 65535)
+			BlockIndexer = clamp(BlockIndexer, 0, 14336)
 			document.getElementById("BlockIndex").value = BlockIndexer.toString(16)
 	}
 	
@@ -178,7 +178,7 @@ Level dimension:
 				var Index = (BlocksPerScreenCol*ScreenColumnPassed) + (BlockYPosition*16) + (BlockXPosition % 16)
 				
 				CoordsToIndexOutput += "Index = $" + Index.toString(16) + "<br>"
-				CoordsToIndexOutput += "RAM location (page location only): $" + (51200 + Index).toString(16) + " ($c800 + $" + Index.toString(16) + ")"
+				CoordsToIndexOutput += "RAM location (page location displayed only): $" + (51200 + Index).toString(16) + " ($c800 + $" + Index.toString(16) + ")"
 			}
 		
 		
@@ -186,9 +186,66 @@ Level dimension:
 			document.getElementById("CoordsToIndex").innerHTML = CoordsToIndexOutput
 	}
 	//------------------------------------------------------------------------------------------------------
+	function ClearConvertIndexToCoords() {
+		document.getElementById("BlockIndex").value = "0"
+		document.getElementById("IndexToCoords").innerHTML = ""
+	}
 	function ConvertIndexToCoords() {
-	
-	
+		//This prevents re-concatenating by clearing the output first
+		//to make it instead replace.
+			var IndexToCoordsOutput = ""
+			document.getElementById("IndexToCoords").innerHTML = ""
+		//Level height in units of blocks.
+			var LevelHeight = [
+				"01B",
+				"01C",
+				"01D",
+				"020",
+				"022",
+				"025",
+				"026",
+				"028",
+				"02A",
+				"02C",
+				"02F",
+				"031",
+				"034",
+				"038",
+				"03B",
+				"040",
+				"044",
+				"04A",
+				"051",
+				"059",
+				"063",
+				"070",
+				"080",
+				"095",
+				"0B3",
+				"0E0",
+				"12A",
+				"1C0",
+				"380"
+			]
+		//Correct index
+			var BlockIndexer = parseInt(document.getElementById("BlockIndex").value, 16)
+			if (isNaN(BlockIndexer) == true) {
+				BlockIndexer = 0
+			}
+			BlockIndexer = clamp(BlockIndexer, 0, 14336)
+			document.getElementById("BlockIndex").value = BlockIndexer.toString(16)
+		//Convert to coordinates
+			var WhatLevelDimensionSetting = parseInt(document.getElementById("LevelDimensionSettings").value, 10)
+			var BlocksPerScreenCol = parseInt(LevelHeight[WhatLevelDimensionSetting], 16) * 16
+			
+			var ScreenColumnPassed = Math.floor(BlockIndexer/BlocksPerScreenCol)*16
+			var BlockYPosition = Math.floor((BlockIndexer % BlocksPerScreenCol)/16)
+			var BlockXPosition = ScreenColumnPassed+(BlockIndexer % 16)
+			
+			IndexToCoordsOutput += "Position: ($" + BlockXPosition.toString(16) + ", $" + BlockYPosition.toString(16) + ")"
+			
+		//Output:
+			document.getElementById("IndexToCoords").innerHTML = IndexToCoordsOutput
 	}
 
 
