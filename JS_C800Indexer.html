@@ -34,8 +34,12 @@ Level dimension:
 <option value=27>1B: Height=1C0 tiles, MaxHScreens=02</option>
 <option value=28>1C: Height=380 tiles, MaxHScreens=01</option>
 </select>
+<br><br>
+Normal level:<br>
+<kbd>Total number of blocks in level: <span id="TotalBlocks"></span></kbd><br><br>
 
-Total number of blocks in level: <span id="TotalBlocks"></span>
+Layer 2 level:<br>
+<kbd><span id="Layer2Statistics"></span></kbd>
 <hr>
 <h1>Convert coordinate to $7EC800/$7FC800 indexing</h1>
 <kbd>X: $</kbd><input type="text" id="BlockXPos" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseXPos()">+</button><button type="button" onclick="DecreaseXPos()">-</button><br>
@@ -189,6 +193,20 @@ Total number of blocks in level: <span id="TotalBlocks"></span>
 			//Total blocks:
 				var TotalBlocksInLevel = parseInt(LevelWidth[WhatLevelDimensionSetting], 16) * parseInt(LevelHeight[WhatLevelDimensionSetting], 16)
 				document.getElementById("TotalBlocks").innerHTML = TotalBlocksInLevel + " ($" + TotalBlocksInLevel.toString(16) + "), index up to $" + (TotalBlocksInLevel-1).toString(16)
+			//Layer 2 statistics
+				var Layer2StatisticsOutput = ""
+				
+				var BlocksPerScreenCol = parseInt(LevelHeight[WhatLevelDimensionSetting], 16) * 16
+				var NumberOfHscreens = Math.floor(parseInt(LevelWidth[WhatLevelDimensionSetting], 16)/16)
+				var NumberOfHscreensLayer2 = Math.floor(NumberOfHscreens/2)
+				var TotalBlocksInLevelLayer2 = NumberOfHscreensLayer2*BlocksPerScreenCol
+				
+				Layer2StatisticsOutput += "Number of screens wide: " + NumberOfHscreensLayer2 + " ($" + NumberOfHscreensLayer2.toString(16) + ")<br>"
+				Layer2StatisticsOutput += "Total number of blocks in each layer: " + TotalBlocksInLevelLayer2 + " ($" + TotalBlocksInLevelLayer2.toString(16) + ", index up to $" + (TotalBlocksInLevelLayer2-1).toString(16) + ")<br>"
+				Layer2StatisticsOutput += "Layer 1 address range (both banks): $c800 to $" + ((51200 + TotalBlocksInLevelLayer2)-1).toString(16) +"<br>"
+				Layer2StatisticsOutput += "Layer 2 address range (both banks): $" + (51200 + TotalBlocksInLevelLayer2).toString(16) + " to $" +((51200 + (TotalBlocksInLevelLayer2*2))-1).toString(16)
+				
+				document.getElementById("Layer2Statistics").innerHTML  = Layer2StatisticsOutput
 			//Correct values input
 				var BlockXPosition = parseInt(document.getElementById("BlockXPos").value, 16)
 				if (isNaN(BlockXPosition) == false) {
@@ -215,7 +233,6 @@ Total number of blocks in level: <span id="TotalBlocks"></span>
 						}
 					//Compute the index
 						if (OffLevel == 0) {
-							var BlocksPerScreenCol = parseInt(LevelHeight[WhatLevelDimensionSetting], 16) * 16
 							var ScreenColumnPassed = Math.floor(BlockXPosition/16)
 							
 							var Index = (BlocksPerScreenCol*ScreenColumnPassed) + (BlockYPosition*16) + (BlockXPosition % 16)
