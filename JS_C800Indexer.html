@@ -1,5 +1,9 @@
+<button type="button" onclick="Reset()">Reset</button>
+
+<body onload="Compute()">
+
 Level dimension: 
-<select id="LevelDimensionSettings">
+<select id="LevelDimensionSettings" onchange="Compute()">
 <option value=0>00: Height=01B tiles, MaxHScreens=20</option>
 <option value=1>01: Height=01C tiles, MaxHScreens=20</option>
 <option value=2>02: Height=01D tiles, MaxHScreens=1E</option>
@@ -32,224 +36,168 @@ Level dimension:
 </select>
 <hr>
 <h1>Convert coordinate to $7EC800/$7FC800 indexing</h1>
-<kbd>X: $</kbd><input type="text" id="BlockXPos" value ="0" maxlength="4" onchange="CorrectXYCoords()"><br>
-<kbd>Y: $</kbd><input type="text" id="BlockYPos" value ="0" maxlength="4" onchange="CorrectXYCoords()"><br>
-<button type="button" onclick="ConvertCoordsToIndex()">Submit</button><button type="button" onclick="ClearConvertCoordsToIndex()">Clear</button><br>
+<kbd>X: $</kbd><input type="text" id="BlockXPos" value ="0" maxlength="4" oninput="Compute()"><br>
+<kbd>Y: $</kbd><input type="text" id="BlockYPos" value ="0" maxlength="4" oninput="Compute()"><br>
 <kbd><span id="CoordsToIndex"></span></kbd>
 <hr>
 <h1>Convert $7EC800/$7FC800 index to coordinate</h1>
-<kbd>Block index: $</kbd><input type="text" id="BlockIndex" value ="0" maxlength="4" onchange="CorrectIndex()"><br>
-<button type="button" onclick="ConvertIndexToCoords()">Submit</button><button type="button" onclick="ClearConvertIndexToCoords()">Clear</button><br>
+<kbd>Block index: $</kbd><input type="text" id="BlockIndex" value ="0" maxlength="4" oninput="Compute()"><br>
 <kbd><span id="IndexToCoords"></span></kbd>
 <script>
-	function ClearConvertCoordsToIndex() {
-		document.getElementById("BlockXPos").value = "0"
-		document.getElementById("BlockYPos").value = "0"
-		document.getElementById("CoordsToIndex").innerHTML = ""
+	function Reset() {
+		document.getElementById("LevelDimensionSettings").value = 0
+		document.getElementById("BlockXPos").value = 0
+		document.getElementById("BlockYPos").value = 0
+		document.getElementById("CoordsToIndex").innerHTML = "Index = $0<br>RAM location (page location displayed only): $c800 ($c800 + $0)"
+		document.getElementById("BlockIndex").value = 0
+		document.getElementById("IndexToCoords").innerHTML = "Position: ($0, $0)"
 	}
-	function CorrectXYCoords() {
-		//Correct value input
-			var BlockXPosition = parseInt(document.getElementById("BlockXPos").value, 16)
-			if (isNaN(BlockXPosition) == true) {
-				BlockXPosition = 0
-			}
-			BlockXPosition = clamp(BlockXPosition, 0, 65535)
-			document.getElementById("BlockXPos").value = BlockXPosition.toString(16)
-			
-			var BlockYPosition = parseInt(document.getElementById("BlockYPos").value, 16)
-			if (isNaN(BlockYPosition) == true) {
-				BlockYPosition = 0
-			}
-			BlockYPosition = clamp(BlockYPosition, 0, 65535)
-			document.getElementById("BlockYPos").value = BlockYPosition.toString(16)
-	}
-	function CorrectIndex() {
-		//Correct index input
-			var BlockIndexer = parseInt(document.getElementById("BlockIndex").value, 16)
-			if (isNaN(BlockIndexer) == true) {
-				BlockIndexer = 0
-			}
-			BlockIndexer = clamp(BlockIndexer, 0, 14336)
-			document.getElementById("BlockIndex").value = BlockIndexer.toString(16)
-	}
-	
-	function ConvertCoordsToIndex() {
-		//This prevents re-concatenating by clearing the output first
-		//to make it instead replace.
-			var CoordsToIndexOutput = ""
-			document.getElementById("CoordsToIndex").innerHTML = ""
-		//Level width and height in units of blocks.
-			var LevelWidth = [
-				"200",
-				"200",
-				"1E0",
-				"1C0",
-				"1A0",
-				"180",
-				"170",
-				"160",
-				"150",
-				"140",
-				"130",
-				"120",
-				"110",
-				"100",
-				"0F0",
-				"0E0",
-				"0D0",
-				"0C0",
-				"0B0",
-				"0A0",
-				"090",
-				"080",
-				"070",
-				"060",
-				"050",
-				"040",
-				"030",
-				"020",
-				"010"
-			]
-			var LevelHeight = [
-				"01B",
-				"01C",
-				"01D",
-				"020",
-				"022",
-				"025",
-				"026",
-				"028",
-				"02A",
-				"02C",
-				"02F",
-				"031",
-				"034",
-				"038",
-				"03B",
-				"040",
-				"044",
-				"04A",
-				"051",
-				"059",
-				"063",
-				"070",
-				"080",
-				"095",
-				"0B3",
-				"0E0",
-				"12A",
-				"1C0",
-				"380"
-			]
-		//Correct values input
-			var BlockXPosition = parseInt(document.getElementById("BlockXPos").value, 16)
-			if (isNaN(BlockXPosition) == true) {
-				BlockXPosition = 0
-			}
-			BlockXPosition = clamp(BlockXPosition, 0, 65535)
-			document.getElementById("BlockXPos").value = BlockXPosition.toString(16)
-			
-			var BlockYPosition = parseInt(document.getElementById("BlockYPos").value, 16)
-			if (isNaN(BlockYPosition) == true) {
-				BlockYPosition = 0
-			}
-			BlockYPosition = clamp(BlockYPosition, 0, 65535)
-			document.getElementById("BlockYPos").value = BlockYPosition.toString(16)
-		
-		//Check if position is outside of level:
-			var WhatLevelDimensionSetting = parseInt(document.getElementById("LevelDimensionSettings").value, 10)
-			
-			var OffLevel = 0
-			if ((BlockXPosition >= parseInt(LevelWidth[WhatLevelDimensionSetting], 16))||(BlockYPosition >= parseInt(LevelHeight[WhatLevelDimensionSetting], 16))) {
-				OffLevel = 1
-			}
-			
-			if (BlockXPosition >= parseInt(LevelWidth[WhatLevelDimensionSetting], 16)) {
-				CoordsToIndexOutput += "Block X position is outside the level (X = $0 to X = $" + (parseInt(LevelWidth[WhatLevelDimensionSetting], 16) -1).toString(16) + " is valid).<br>"
-			}
-			if (BlockYPosition >= parseInt(LevelHeight[WhatLevelDimensionSetting], 16)) {
-				CoordsToIndexOutput += "Block Y position is outside the level (Y = $0 to Y = $" + (parseInt(LevelHeight[WhatLevelDimensionSetting], 16) -1).toString(16) + " is valid).<br>"
-			}
-		//Compute the index
-			if (OffLevel == 0) {
-				var BlocksPerScreenCol = parseInt(LevelHeight[WhatLevelDimensionSetting], 16) * 16
-				var ScreenColumnPassed = Math.floor(BlockXPosition/16)
+	function Compute() {
+		//Coords -> Index
+			//This prevents re-concatenating by clearing the output first
+			//to make it instead replace.
+				var CoordsToIndexOutput = ""
+				document.getElementById("CoordsToIndex").innerHTML = ""
+			//Level width and height in units of blocks.
+				var LevelWidth = [
+					"200",
+					"200",
+					"1E0",
+					"1C0",
+					"1A0",
+					"180",
+					"170",
+					"160",
+					"150",
+					"140",
+					"130",
+					"120",
+					"110",
+					"100",
+					"0F0",
+					"0E0",
+					"0D0",
+					"0C0",
+					"0B0",
+					"0A0",
+					"090",
+					"080",
+					"070",
+					"060",
+					"050",
+					"040",
+					"030",
+					"020",
+					"010"
+				]
+				var LevelHeight = [
+					"01B",
+					"01C",
+					"01D",
+					"020",
+					"022",
+					"025",
+					"026",
+					"028",
+					"02A",
+					"02C",
+					"02F",
+					"031",
+					"034",
+					"038",
+					"03B",
+					"040",
+					"044",
+					"04A",
+					"051",
+					"059",
+					"063",
+					"070",
+					"080",
+					"095",
+					"0B3",
+					"0E0",
+					"12A",
+					"1C0",
+					"380"
+				]
+			//Correct values input
+				var BlockXPosition = parseInt(document.getElementById("BlockXPos").value, 16)
+				if (isNaN(BlockXPosition) == false) {
+					BlockXPosition = clamp(BlockXPosition, 0, 65535)
+					document.getElementById("BlockXPos").value = BlockXPosition.toString(16)
+				}
+				var BlockYPosition = parseInt(document.getElementById("BlockYPos").value, 16)
+				if (isNaN(BlockYPosition) == false) {
+					BlockYPosition = clamp(BlockYPosition, 0, 65535)
+					document.getElementById("BlockYPos").value = BlockYPosition.toString(16)
+				}
 				
-				var Index = (BlocksPerScreenCol*ScreenColumnPassed) + (BlockYPosition*16) + (BlockXPosition % 16)
+				var IsNumber = 0
+				if ((isNaN(BlockXPosition) == false) && (isNaN(BlockYPosition) == false)) {
+					IsNumber = 1
+				}
 				
-				CoordsToIndexOutput += "Index = $" + Index.toString(16) + "<br>"
-				CoordsToIndexOutput += "RAM location (page location displayed only): $" + (51200 + Index).toString(16) + " ($c800 + $" + Index.toString(16) + ")"
-			}
-		
-		
-		//Output:
-			document.getElementById("CoordsToIndex").innerHTML = CoordsToIndexOutput
+				if (IsNumber != 0) {
+					//Check if position is outside of level:
+						var WhatLevelDimensionSetting = parseInt(document.getElementById("LevelDimensionSettings").value, 10)
+						
+						var OffLevel = 0
+						if ((BlockXPosition >= parseInt(LevelWidth[WhatLevelDimensionSetting], 16))||(BlockYPosition >= parseInt(LevelHeight[WhatLevelDimensionSetting], 16))) {
+							OffLevel = 1
+						}
+						
+						if (BlockXPosition >= parseInt(LevelWidth[WhatLevelDimensionSetting], 16)) {
+							CoordsToIndexOutput += "<font color='red'>Block X position is outside the level (X = $0 to X = $" + (parseInt(LevelWidth[WhatLevelDimensionSetting], 16) -1).toString(16) + " is valid).<br></font>"
+						}
+						if (BlockYPosition >= parseInt(LevelHeight[WhatLevelDimensionSetting], 16)) {
+							CoordsToIndexOutput += "<font color='red'>Block Y position is outside the level (Y = $0 to Y = $" + (parseInt(LevelHeight[WhatLevelDimensionSetting], 16) -1).toString(16) + " is valid).<br></font>"
+						}
+					//Compute the index
+						if (OffLevel == 0) {
+							var BlocksPerScreenCol = parseInt(LevelHeight[WhatLevelDimensionSetting], 16) * 16
+							var ScreenColumnPassed = Math.floor(BlockXPosition/16)
+							
+							var Index = (BlocksPerScreenCol*ScreenColumnPassed) + (BlockYPosition*16) + (BlockXPosition % 16)
+							
+							CoordsToIndexOutput += "Index = $" + Index.toString(16) + "<br>"
+							CoordsToIndexOutput += "RAM location (page location displayed only): $" + (51200 + Index).toString(16) + " ($c800 + $" + Index.toString(16) + ")"
+						}
+						
+					//Output:
+						document.getElementById("CoordsToIndex").innerHTML = CoordsToIndexOutput
+				}
+		//Handle Index -> Coords
+			//This prevents re-concatenating by clearing the output first
+			//to make it instead replace.
+				var IndexToCoordsOutput = ""
+				document.getElementById("IndexToCoords").innerHTML = ""
+			//Correct index
+				var BlockIndexer = parseInt(document.getElementById("BlockIndex").value, 16)
+				if (isNaN(BlockIndexer) == false) {
+					BlockIndexer = clamp(BlockIndexer, 0, 14335)
+					document.getElementById("BlockIndex").value = BlockIndexer.toString(16)
+					
+					//Check if index would point to beyond the last block in level
+						var TotalNumberOfBlocksInLevel = parseInt(LevelWidth[WhatLevelDimensionSetting], 16) * parseInt(LevelHeight[WhatLevelDimensionSetting], 16)
+						if (BlockIndexer < TotalNumberOfBlocksInLevel) {
+							//Convert to coordinates
+								var WhatLevelDimensionSetting = parseInt(document.getElementById("LevelDimensionSettings").value, 10)
+								var BlocksPerScreenCol = parseInt(LevelHeight[WhatLevelDimensionSetting], 16) * 16
+								
+								var ScreenColumnPassed = Math.floor(BlockIndexer/BlocksPerScreenCol)*16
+								var BlockYPosition = Math.floor((BlockIndexer % BlocksPerScreenCol)/16)
+								var BlockXPosition = ScreenColumnPassed+(BlockIndexer % 16)
+								
+								IndexToCoordsOutput += "Position: ($" + BlockXPosition.toString(16) + ", $" + BlockYPosition.toString(16) + ")"
+						} else {
+							//Indicate that index points to past the last block
+								IndexToCoordsOutput = "Index points beyond the last block. Valid index is from $0 to $" + (TotalNumberOfBlocksInLevel-1).toString(16)
+						}
+					//Output:
+						document.getElementById("IndexToCoords").innerHTML = IndexToCoordsOutput
+				}
 	}
-	//------------------------------------------------------------------------------------------------------
-	function ClearConvertIndexToCoords() {
-		document.getElementById("BlockIndex").value = "0"
-		document.getElementById("IndexToCoords").innerHTML = ""
-	}
-	function ConvertIndexToCoords() {
-		//This prevents re-concatenating by clearing the output first
-		//to make it instead replace.
-			var IndexToCoordsOutput = ""
-			document.getElementById("IndexToCoords").innerHTML = ""
-		//Level height in units of blocks.
-			var LevelHeight = [
-				"01B",
-				"01C",
-				"01D",
-				"020",
-				"022",
-				"025",
-				"026",
-				"028",
-				"02A",
-				"02C",
-				"02F",
-				"031",
-				"034",
-				"038",
-				"03B",
-				"040",
-				"044",
-				"04A",
-				"051",
-				"059",
-				"063",
-				"070",
-				"080",
-				"095",
-				"0B3",
-				"0E0",
-				"12A",
-				"1C0",
-				"380"
-			]
-		//Correct index
-			var BlockIndexer = parseInt(document.getElementById("BlockIndex").value, 16)
-			if (isNaN(BlockIndexer) == true) {
-				BlockIndexer = 0
-			}
-			BlockIndexer = clamp(BlockIndexer, 0, 14336)
-			document.getElementById("BlockIndex").value = BlockIndexer.toString(16)
-		//Convert to coordinates
-			var WhatLevelDimensionSetting = parseInt(document.getElementById("LevelDimensionSettings").value, 10)
-			var BlocksPerScreenCol = parseInt(LevelHeight[WhatLevelDimensionSetting], 16) * 16
-			
-			var ScreenColumnPassed = Math.floor(BlockIndexer/BlocksPerScreenCol)*16
-			var BlockYPosition = Math.floor((BlockIndexer % BlocksPerScreenCol)/16)
-			var BlockXPosition = ScreenColumnPassed+(BlockIndexer % 16)
-			
-			IndexToCoordsOutput += "Position: ($" + BlockXPosition.toString(16) + ", $" + BlockYPosition.toString(16) + ")"
-			
-		//Output:
-			document.getElementById("IndexToCoords").innerHTML = IndexToCoordsOutput
-	}
-
-
-
 
 
 	function clamp(num, min, max) {
