@@ -22,12 +22,9 @@
 <ul>
 <li>Coordinates here are in units of blocks, not pixels (to move 1 block over, increments by $1, not $10).</li>
 <li>Protip: you can use ENTER when selecting the button (by after clicking it or TAB, not highlighting) for a rapid press for the +/- buttons.</li>
-<li>For layer 2 levels, the data layout is a repeat of layer 1's data, meaning after the last byte of layer 1,
-will be the first byte of layer 2, on the top-leftmost, and continues the same &ldquo;row-major&rdquo; within a screen, then
-&ldquo;column-major&rdquo; for every screen column pattern as layer 1. You can get the layer 2 index by treating
-as if its a layer 1 position, take the index and add by the number of blocks in either layer. For example: Position ($1,$1)
-on <kbd>$00: Height=$01B tiles, MaxHScreens=$20</kbd> is $11, add this by $1b00 and you get $1B11, which is layer 2's ($1,$1). The Y position is
-the same for both layers.</li>
+<li>For layer 2 levels, the data layout is a repeat of layer 1's data, meaning the format is  the same &ldquo;row-major&rdquo; per screen column,
+then &ldquo;column-major&rdquo; for every screen column pattern as layer 1. You can get the layer 2 tile position by treating as if its layer 1, then
+take the starting byte of layer 2 tiles and index from there.</li>
 </ul>
 <button type="button" onclick="Reset()">Reset</button>
 
@@ -72,7 +69,7 @@ Level dimension:
 <h1>Convert coordinate to $7EC800/$7FC800 indexing</h1>
 <kbd>X: $</kbd><input type="text" id="BlockXPos" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseXPos()">+</button><button type="button" onclick="DecreaseXPos()">-</button><span id="InLayer2LevelOtherHalf"></span><br>
 <kbd>Y: $</kbd><input type="text" id="BlockYPos" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseYPos()">+</button><button type="button" onclick="DecreaseYPos()">-</button><br>
-<kbd><span id="CoordsToIndex"></span></kbd>
+<span id="CoordsToIndex"></span>
 <hr>
 <h1>Convert $7EC800/$7FC800 index to coordinate</h1>
 <kbd>Block index: $</kbd><input type="text" id="BlockIndex" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseBlockIndex()">+</button><button type="button" onclick="DecreaseBlockIndex()">-</button><br>
@@ -232,6 +229,14 @@ Level dimension:
 					LevelBlockStatisticsTable += "<td>RAM address range (banks $7E/$7F or $40/$41):</td>" 
 					LevelBlockStatisticsTable += "<td><kbd>$c800 to $" + ((51200 + TotalBlocksInLevel)-1).toString(16) + "</kbd></td>"
 					LevelBlockStatisticsTable += "</tr>"
+					LevelBlockStatisticsTable += "<tr>"
+					LevelBlockStatisticsTable += "<td>Valid X position range:</td>"
+					LevelBlockStatisticsTable += "<td><kbd>$0 to $" + (parseInt(LevelWidth[WhatLevelDimensionSetting], 16) -1).toString(16) + "</kbd></td>"
+					LevelBlockStatisticsTable += "</tr>"
+					LevelBlockStatisticsTable += "<tr>"
+					LevelBlockStatisticsTable += "<td>Valid Y position range:</td>"
+					LevelBlockStatisticsTable += "<td><kbd>$0 to $" + (parseInt(LevelHeight[WhatLevelDimensionSetting], 16) -1).toString(16) + "</kbd></td>"
+					LevelBlockStatisticsTable += "</tr>"
 				//Layer 2 statistics
 					LevelBlockStatisticsTable += "<tr><th colspan='2'>Layer 2 level</th></tr>"
 					var BlocksPerScreenCol = parseInt(LevelHeight[WhatLevelDimensionSetting], 16) * 16
@@ -244,6 +249,8 @@ Level dimension:
 						if ((NumberOfHscreens % 2) != 0) {
 							LeftOverScreen = BlocksPerScreenCol
 						}
+					var Layer2DataStart = 51200 + TotalBlocksInLevelLayer2 + LeftOverScreen
+					
 					if (NumberOfHscreensLayer2 != 0) {
 						LevelBlockStatisticsTable += "<tr>"
 						LevelBlockStatisticsTable += "<td>Number of screens wide:</td>"
@@ -259,7 +266,11 @@ Level dimension:
 						LevelBlockStatisticsTable += "</tr>"
 						LevelBlockStatisticsTable += "<tr>"
 						LevelBlockStatisticsTable += "<td>Layer 2 RAM address range (banks $7E/$7F or $40/$41):</td>"
-						LevelBlockStatisticsTable += "<td><kbd>$" + (51200 + TotalBlocksInLevelLayer2 + LeftOverScreen).toString(16) + " to $" + ((51200 + (TotalBlocksInLevelLayer2*2) + LeftOverScreen)-1).toString(16) + "</kbd></td>"
+						LevelBlockStatisticsTable += "<td><kbd>$" + Layer2DataStart.toString(16) + " to $" + ((Layer2DataStart + TotalBlocksInLevelLayer2)-1).toString(16) + "</kbd></td>"
+						LevelBlockStatisticsTable += "</tr>"
+						LevelBlockStatisticsTable += "<tr>"
+						LevelBlockStatisticsTable += "<td>Valid X Position range:</td>"
+						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + ((NumberOfHscreensLayer2*16)-1).toString(16) + "</kbd></td>"
 						LevelBlockStatisticsTable += "</tr>"
 					} else {
 						LevelBlockStatisticsTable += "<tr><td colspan='2'>Level have a width of 0 means invalid. A completely black screen viewed on Lunar Magic.</td></tr>"
@@ -282,7 +293,12 @@ Level dimension:
 				if ((isNaN(BlockXPosition) == false) && (isNaN(BlockYPosition) == false)) {
 					IsNumber = 1
 				}
-			//Display
+				
+				var IsXPositionPointsBeyondHalfedWidthLevel = 0
+				if (BlockXPosition >= (NumberOfHscreensLayer2*16)) {
+					IsXPositionPointsBeyondHalfedWidthLevel = 1
+				}
+			//Display output of coords -> index
 				if (IsNumber != 0) {
 					//Check if position is outside of level:
 						
@@ -296,30 +312,37 @@ Level dimension:
 							
 							var Index = (BlocksPerScreenCol*ScreenColumnPassed) + (BlockYPosition*16) + (BlockXPosition % 16)
 							
-							CoordsToIndexOutput += "Index: $" + Index.toString(16) + "<br>"
-							CoordsToIndexOutput += "RAM address location (in banks $7E/$7F or $40/$41): $" + (51200 + Index).toString(16) + " ($c800 + $" + Index.toString(16) + ")"
+							CoordsToIndexOutput += "<br><table>"
+							CoordsToIndexOutput += "<tr>"
+							CoordsToIndexOutput += "<td>Index:</td>"
+							CoordsToIndexOutput += "<td><kbd>$" + Index.toString(16) + "</kbd></td>"
+							CoordsToIndexOutput += "</tr>"
+							CoordsToIndexOutput += "<tr>"
+							CoordsToIndexOutput += "<td>RAM address location (in banks $7E/$7F or $40/$41):"
+							CoordsToIndexOutput += "<td><kbd>$" + (51200 + Index).toString(16) + " ($c800 + $" + Index.toString(16) + ")</kbd></td>"
+							CoordsToIndexOutput += "</tr>"
+							CoordsToIndexOutput += "<tr>"
+							CoordsToIndexOutput += "<td>Layer 2's RAM address location (in banks $7E/$7F or $40/$41):"
+							if (IsXPositionPointsBeyondHalfedWidthLevel == 0) {
+								CoordsToIndexOutput += "<td><kbd>$" + (Layer2DataStart + Index).toString(16) + " ($" + Layer2DataStart.toString(16) + " + $" + Index.toString(16) + ")</kbd></td>"
+							} else {
+								CoordsToIndexOutput += "<td><kbd>N/A (Only layer 1 level works)</kbd></td>"
+							}
+							CoordsToIndexOutput += "</tr>"
+							CoordsToIndexOutput += "</table>"
 						}
 				}
 			//Display layer 2 territory
 				document.getElementById("InLayer2LevelOtherHalf").innerHTML = ""
-				var LastBlockXPositionL2 = (NumberOfHscreensLayer2*16)-1
-				if ((BlockXPosition > LastBlockXPositionL2) && (BlockXPosition < parseInt(LevelWidth[WhatLevelDimensionSetting], 16)) && (NumberOfHscreensLayer2 != 0)) {
-					if (BlockXPosition < ((NumberOfHscreensLayer2*2)*16)) {
-						document.getElementById("InLayer2LevelOtherHalf").innerHTML = "<kbd><font color='orange'>In layer 2's territory if layer 2 is level (will be at L2's X = $" + (BlockXPosition % (NumberOfHscreensLayer2*16)).toString(16) + ").</font></kbd>"
-					} else {
-						//This is in the event there is an odd number of screens, divided by 2 for layer 2 levels, rounded down, then multiplied by 2 since both layers have the exact same
-						//number of blocks and screen columns, causes one leftover screen column entirely not used by either layers, for example: $17 (23) screens. 23/2 is $B (11) screens
-						//with a remainder of of 1. Take $B (rounded down) and times that by 2 and you have $16 (22) screens; 11 columns for layer 1 and 11 for layer 2, and the 23th column
-						//is empty.
-							document.getElementById("InLayer2LevelOtherHalf").innerHTML = "<kbd><font color='red'>Points to unused data for layer 2 levels (beyond both layer 1 and 2 data).</font></kbd>"
-					}
+				if (IsXPositionPointsBeyondHalfedWidthLevel != 0) {
+					document.getElementById("InLayer2LevelOtherHalf").innerHTML = "<kbd><font color='orange'>Only valid for layer 1 level.</font></kbd>"
 				}
 			//Check if given position is outside the level boundaries
 				if (BlockXPosition >= parseInt(LevelWidth[WhatLevelDimensionSetting], 16)) {
-					CoordsToIndexOutput += "<font color='red'>Block X position is outside the level (X = $0 to X = $" + (parseInt(LevelWidth[WhatLevelDimensionSetting], 16) -1).toString(16) + " is valid).<br></font>"
+					CoordsToIndexOutput += "<font color='red'><kbd>Block X position is outside the level (X = $0 to X = $" + (parseInt(LevelWidth[WhatLevelDimensionSetting], 16) -1).toString(16) + " is valid).</kbd><br></font>"
 				}
 				if (BlockYPosition >= parseInt(LevelHeight[WhatLevelDimensionSetting], 16)) {
-					CoordsToIndexOutput += "<font color='red'>Block Y position is outside the level (Y = $0 to Y = $" + (parseInt(LevelHeight[WhatLevelDimensionSetting], 16) -1).toString(16) + " is valid).<br></font>"
+					CoordsToIndexOutput += "<font color='red'><kbd>Block Y position is outside the level (Y = $0 to Y = $" + (parseInt(LevelHeight[WhatLevelDimensionSetting], 16) -1).toString(16) + " is valid).</kbd><br></font>"
 				}
 				//Output:
 					document.getElementById("CoordsToIndex").innerHTML = CoordsToIndexOutput
