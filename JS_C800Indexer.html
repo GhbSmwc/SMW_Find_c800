@@ -238,6 +238,12 @@ Level dimension:
 					var NumberOfHscreens = Math.floor(parseInt(LevelWidth[WhatLevelDimensionSetting], 16)/16)
 					var NumberOfHscreensLayer2 = Math.floor(NumberOfHscreens/2)
 					var TotalBlocksInLevelLayer2 = NumberOfHscreensLayer2*BlocksPerScreenCol
+					//There is a gap between the last byte of layer 1 and the first byte of layer 2 at the size of a screen column if
+					//there is an odd number of screens divided by 2.
+						var LeftOverScreen = 0
+						if ((NumberOfHscreens % 2) != 0) {
+							LeftOverScreen = BlocksPerScreenCol
+						}
 					if (NumberOfHscreensLayer2 != 0) {
 						LevelBlockStatisticsTable += "<tr>"
 						LevelBlockStatisticsTable += "<td>Number of screens wide:</td>"
@@ -253,7 +259,7 @@ Level dimension:
 						LevelBlockStatisticsTable += "</tr>"
 						LevelBlockStatisticsTable += "<tr>"
 						LevelBlockStatisticsTable += "<td>Layer 2 RAM address range (banks $7E/$7F or $40/$41):</td>"
-						LevelBlockStatisticsTable += "<td><kbd>$" + (51200 + TotalBlocksInLevelLayer2 + 608).toString(16) + " to $" + ((51200 + (TotalBlocksInLevelLayer2*2) + 608)-1).toString(16) + "</kbd></td>"
+						LevelBlockStatisticsTable += "<td><kbd>$" + (51200 + TotalBlocksInLevelLayer2 + LeftOverScreen).toString(16) + " to $" + ((51200 + (TotalBlocksInLevelLayer2*2) + LeftOverScreen)-1).toString(16) + "</kbd></td>"
 						LevelBlockStatisticsTable += "</tr>"
 					} else {
 						LevelBlockStatisticsTable += "<tr><td colspan='2'>Level have a width of 0 means invalid. A completely black screen viewed on Lunar Magic.</td></tr>"
