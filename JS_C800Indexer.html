@@ -371,11 +371,7 @@ Level dimension:
 								
 								IndexToCoordsOutput += "Position: ($" + BlockXPosition.toString(16) + ", $" + BlockYPosition.toString(16) + ")<br>"
 								if (BlockIndexer >= TotalBlocksInLevelLayer2) {
-									if (BlockXPosition < ((NumberOfHscreensLayer2*2)*16)) {
-										IndexToCoordsOutput += "If level is layer 2, this is layer 2's: ($" + (BlockXPosition % (NumberOfHscreensLayer2*16)).toString(16) + ", $" + BlockYPosition.toString(16) + ")"
-									} else {
-										IndexToCoordsOutput += "<font color='orange'>On layer 2 levels, the index points to data not used by both layers.</font>"
-									}
+									IndexToCoordsOutput += "<font color='orange'>If level is layer 2, this index is invalid</font>"
 								}
 						} else {
 							//Indicate that index points to past the last block
