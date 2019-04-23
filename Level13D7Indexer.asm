@@ -225,6 +225,7 @@ GetMap16PositionByLevelMap16Index:
 		STA $02				;|
 		JSL MathDiv			;/Q ($00-$01) = %00000000000XXXXX, R ($02-$03) = %00yyyyyyyyyyxxxx
 		REP #$20			;
+	print ".....................................................",pc
 		LDA $00				;\$00-$01: %00000000000XXXXX -> %0000000XXXXX0000 (part of converting to X position by convert to block units)
 		ASL #4				;|
 		STA $00				;/
@@ -250,13 +251,14 @@ GetMap16PositionByLevelMap16Index:
 		LSR #4				;|>Divide by 16 (%00yyyyyyyyyyxxxx -> %000000yyyyyyyyyy)
 		STA $02				;/
 		LDA $2308			;\%00yyyyyyyyyyxxxx -> %000000000000xxxx
-		AND.b #%0000000000001111	;|
+		AND.w #%0000000000001111	;|
 		STA $00				;/
 		LDA $2306			;>$2306-$2307 (quotient) = %00000000000XXXXX
 		ASL #4				;>A: %00000000000XXXXX -> %0000000XXXXX0000 ((ScreenColumnPassed*16)...)
 		ORA $00				;>A: (... + BlockXPosWithinColumn)
 		STA $00				;>(ScreenColumnPassed*16) + BlockXPosWithinColumn (%0000000XXXXX0000 + %00000000000XXXXX)
 	endif
+	SEP #$20
 	CLC				;>Mark that this is a valid coordinate.
 	RTL
 	
