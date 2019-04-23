@@ -225,7 +225,6 @@ GetMap16PositionByLevelMap16Index:
 		STA $02				;|
 		JSL MathDiv			;/Q ($00-$01) = %00000000000XXXXX, R ($02-$03) = %00yyyyyyyyyyxxxx
 		REP #$20			;
-	print ".....................................................",pc
 		LDA $00				;\$00-$01: %00000000000XXXXX -> %0000000XXXXX0000 (part of converting to X position by convert to block units)
 		ASL #4				;|
 		STA $00				;/
