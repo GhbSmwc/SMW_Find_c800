@@ -208,12 +208,6 @@ GetLevelMap16IndexByMap16Position:
 ;; -$00 to $01: X position (in units of blocks).
 ;; -$02 to $03: Y position, same as above.
 ;; -Carry: Set if index is invalid.
-;;Overwritten:
-;; -If sa1 not applied:
-;; --$04 to $05: Needed to handle x position within row of 16
-;;   blocks.
-;; -If SA-1 applied:
-;; --None overwritten
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Computation as follows:
 ;ScreenColumnPassed = floor(Index/RAM_13D7)			;>Number of screen column passed (%00000000000XXXXX)
