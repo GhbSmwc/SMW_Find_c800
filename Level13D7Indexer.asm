@@ -216,27 +216,31 @@ GetLevelMap16IndexByMap16Position:
 ;; --None overwritten
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Computation as follows:
-;ScreenColumn = floor(Index/RAM_13D7)*16		;>This gets what screen column (X position as screens)
-;BlockYPos = floor((Index MOD RAM_13D7)/16)		;>This gets what row of 16 blocks (Y position)
-;BlockXPos = ScreenColumn+(Index MOD 16)		;>This gets the X position of the 16 blocks row.
+;ScreenColumnPassed = floor(Index/RAM_13D7)			;>Number of screen column passed (%00000000000XXXXX)
+;PartialScreenColumn = Index MOD RAM_13D7			;>the screen column after the last screen column passed (%00yyyyyyyyyyxxxx)
+;BlockYPos = floor(PartialScreenColumn/16)			;>Y position (%00yyyyyyyyyyxxxx -> %000000yyyyyyyyyy)
+;BlockXPosWithinColumn = (PartialScreenColumn Mod 16)		;>X position within a screen column (%00yyyyyyyyyyxxxx -> %000000000000xxxx)
+;BlockXPos = (ScreenColumnPassed*16) + BlockXPosWithinColumn	;>X Position (%0000000XXXXXxxxx)
 GetMap16PositionByLevelMap16Index:
 	REP #$20
 	LDA $00
 	CMP #$3800
 	BCS .Invalid
 	if !sa1 == 0
-		AND.w #%0000000000001111		;>Use for %000000000000xxxx (x position of the 16 blocks line)
-		STA $04				;>Back it up due to division routine.
 		LDA $13D7|!addr			;\Index divide by number of blocks per screen column
 		STA $02				;|
-		JSL MathDiv			;/Q = %00000000000XXXXX, R = %00yyyyyyyyyy0000
+		JSL MathDiv			;/Q ($00-$01) = %00000000000XXXXX, R ($02-$03) = %00yyyyyyyyyyxxxx
 		REP #$20			;
-		LDA $02				;\Divide by 16 (%00yyyyyyyyyy0000 -> %000000yyyyyyyyyy)
+		LDA $00				;\$00-$01: %00000000000XXXXX -> %0000000XXXXX0000 (part of converting to X position by convert to block units)
+		ASL #4				;|
+		STA $00				;/
+		LDA $02				;>$02-$03: %00yyyyyyyyyyxxxx
+		AND.w #%0000000000001111	;>A: %000000000000xxxx
+		ORA $00				;>OR with %0000000XXXXX0000
+		STA $00				;>$00-$01:%0000000XXXXXxxxx ((ScreenColumnPassed*16) + XPosWithinCol)
+		LDA $02				;\$02-$03: %00yyyyyyyyyyxxxx -> %000000yyyyyyyyyy (divide Y by 16)
 		LSR #4				;|
 		STA $02				;/
-		LDA $00				;\$00-$01: %00000000000XXXXX -> %0000000XXXXX0000
-		ASL #4				;/
-		ORA $04				;>%0000000XXXXXxxxx = (%000000000000xxxx | %0000000XXXXX0000)
 	else
 		SEP #$20
 		LDA #$01			;\Divide mode
@@ -244,20 +248,21 @@ GetMap16PositionByLevelMap16Index:
 		REP #$20
 		LDA $00				;\Index divide by number of blocks per screen column
 		STA $2251			;|
-		AND.w #%0000000000001111	;|\$00-$01: %000000000000xxxx
-		STA $00				;|/
 		LDA $13D7|!addr			;|
-		STA $2253			;/Q = %00000000000XXXXX, R = %00yyyyyyyyyy----
+		STA $2253			;/Q ($2306-$2307) = %00000000000XXXXX, R ($2308-$2309) = %00yyyyyyyyyyxxxx
 		NOP				;\Wait 5 cycles.
 		BRA $00				;/
-		LDA $2308			;\$2308-$2309 is remainder for Y position, times 16 ((%00yyyyyyyyyy0000)
-		LSR #4				;|>Divide by 16 (%00yyyyyyyyyy0000 -> %000000yyyyyyyyyy)
+		LDA $2308			;\$2308-$2309 is a portion of the screen column (%00yyyyyyyyyyxxxx)
+		LSR #4				;|>Divide by 16 (%00yyyyyyyyyyxxxx -> %000000yyyyyyyyyy)
 		STA $02				;/
+		LDA $2308			;\%00yyyyyyyyyyxxxx -> %000000000000xxxx
+		AND.b #%0000000000001111	;|
+		STA $00				;/
 		LDA $2306			;>$2306-$2307 (quotient) = %00000000000XXXXX
-		ASL #4				;>Convert to %0000000XXXXX0000
-		ORA $00				;>%0000000XXXXXxxxx = (%0000000XXXXX0000 | %000000000000xxxx)
+		ASL #4				;>A: %00000000000XXXXX -> %0000000XXXXX0000 ((ScreenColumnPassed*16)...)
+		ORA $00				;>A: (... + BlockXPosWithinColumn)
+		STA $00				;>(ScreenColumnPassed*16) + BlockXPosWithinColumn (%0000000XXXXX0000 + %00000000000XXXXX)
 	endif
-	STA $00				;>And you get %0000000XXXXXxxxx
 	CLC				;>Mark that this is a valid coordinate.
 	RTL
 	

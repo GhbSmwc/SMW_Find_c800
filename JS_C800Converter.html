@@ -32,35 +32,35 @@ take the starting byte of layer 2 tiles and index from there.</li>
 
 Level dimension: 
 <select id="LevelDimensionSettings" onchange="Compute()">
-<option value=0>$00: Height=$01B tiles, MaxHScreens=$20</option>
-<option value=1>$01: Height=$01C tiles, MaxHScreens=$20</option>
-<option value=2>$02: Height=$01D tiles, MaxHScreens=$1E</option>
-<option value=3>$03: Height=$020 tiles, MaxHScreens=$1C</option>
-<option value=4>$04: Height=$022 tiles, MaxHScreens=$1A</option>
-<option value=5>$05: Height=$025 tiles, MaxHScreens=$18</option>
-<option value=6>$06: Height=$026 tiles, MaxHScreens=$17</option>
-<option value=7>$07: Height=$028 tiles, MaxHScreens=$16</option>
-<option value=8>$08: Height=$02A tiles, MaxHScreens=$15</option>
-<option value=9>$09: Height=$02C tiles, MaxHScreens=$14</option>
-<option value=10>$0A: Height=$02F tiles, MaxHScreens=$13</option>
-<option value=11>$0B: Height=$031 tiles, MaxHScreens=$12</option>
-<option value=12>$0C: Height=$034 tiles, MaxHScreens=$11</option>
-<option value=13>$0D: Height=$038 tiles, MaxHScreens=$10</option>
-<option value=14>$0E: Height=$03B tiles, MaxHScreens=$0F</option>
-<option value=15>$0F: Height=$040 tiles, MaxHScreens=$0E</option>
-<option value=16>$10: Height=$044 tiles, MaxHScreens=$0D</option>
-<option value=17>$11: Height=$04A tiles, MaxHScreens=$0C</option>
-<option value=18>$12: Height=$051 tiles, MaxHScreens=$0B</option>
-<option value=19>$13: Height=$059 tiles, MaxHScreens=$0A</option>
-<option value=20>$14: Height=$063 tiles, MaxHScreens=$09</option>
-<option value=21>$15: Height=$070 tiles, MaxHScreens=$08</option>
-<option value=22>$16: Height=$080 tiles, MaxHScreens=$07</option>
-<option value=23>$17: Height=$095 tiles, MaxHScreens=$06</option>
-<option value=24>$18: Height=$0B3 tiles, MaxHScreens=$05</option>
-<option value=25>$19: Height=$0E0 tiles, MaxHScreens=$04</option>
-<option value=26>$1A: Height=$12A tiles, MaxHScreens=$03</option>
-<option value=27>$1B: Height=$1C0 tiles, MaxHScreens=$02</option>
-<option value=28>$1C: Height=$380 tiles, MaxHScreens=$01</option>
+<option value="0">$00: Height=$01B tiles, MaxHScreens=$20</option>
+<option value="1">$01: Height=$01C tiles, MaxHScreens=$20</option>
+<option value="2">$02: Height=$01D tiles, MaxHScreens=$1E</option>
+<option value="3">$03: Height=$020 tiles, MaxHScreens=$1C</option>
+<option value="4">$04: Height=$022 tiles, MaxHScreens=$1A</option>
+<option value="5">$05: Height=$025 tiles, MaxHScreens=$18</option>
+<option value="6">$06: Height=$026 tiles, MaxHScreens=$17</option>
+<option value="7">$07: Height=$028 tiles, MaxHScreens=$16</option>
+<option value="8">$08: Height=$02A tiles, MaxHScreens=$15</option>
+<option value="9">$09: Height=$02C tiles, MaxHScreens=$14</option>
+<option value="A">$0A: Height=$02F tiles, MaxHScreens=$13</option>
+<option value="B">$0B: Height=$031 tiles, MaxHScreens=$12</option>
+<option value="C">$0C: Height=$034 tiles, MaxHScreens=$11</option>
+<option value="D">$0D: Height=$038 tiles, MaxHScreens=$10</option>
+<option value="E">$0E: Height=$03B tiles, MaxHScreens=$0F</option>
+<option value="F">$0F: Height=$040 tiles, MaxHScreens=$0E</option>
+<option value="10">$10: Height=$044 tiles, MaxHScreens=$0D</option>
+<option value="11">$11: Height=$04A tiles, MaxHScreens=$0C</option>
+<option value="12">$12: Height=$051 tiles, MaxHScreens=$0B</option>
+<option value="13">$13: Height=$059 tiles, MaxHScreens=$0A</option>
+<option value="14">$14: Height=$063 tiles, MaxHScreens=$09</option>
+<option value="15">$15: Height=$070 tiles, MaxHScreens=$08</option>
+<option value="16">$16: Height=$080 tiles, MaxHScreens=$07</option>
+<option value="17">$17: Height=$095 tiles, MaxHScreens=$06</option>
+<option value="18">$18: Height=$0B3 tiles, MaxHScreens=$05</option>
+<option value="19">$19: Height=$0E0 tiles, MaxHScreens=$04</option>
+<option value="1a">$1A: Height=$12A tiles, MaxHScreens=$03</option>
+<option value="1B">$1B: Height=$1C0 tiles, MaxHScreens=$02</option>
+<option value="1C">$1C: Height=$380 tiles, MaxHScreens=$01</option>
 </select>
 <br><br>
 <span id="LevelBlockStatistics"></span><br>
@@ -146,138 +146,138 @@ Level dimension:
 		Compute()
 	}
 	function Compute() {
-		//Coords -> Index
-			//This prevents re-concatenating by clearing the output first
-			//to make it instead replace.
-				var CoordsToIndexOutput = ""
-				document.getElementById("CoordsToIndex").innerHTML = ""
-			//Level width and height in units of blocks.
-				var LevelWidth = [
-					"200",
-					"200",
-					"1E0",
-					"1C0",
-					"1A0",
-					"180",
-					"170",
-					"160",
-					"150",
-					"140",
-					"130",
-					"120",
-					"110",
-					"100",
-					"0F0",
-					"0E0",
-					"0D0",
-					"0C0",
-					"0B0",
-					"0A0",
-					"090",
-					"080",
-					"070",
-					"060",
-					"050",
-					"040",
-					"030",
-					"020",
-					"010"
-				]
-				var LevelHeight = [
-					"01B",
-					"01C",
-					"01D",
-					"020",
-					"022",
-					"025",
-					"026",
-					"028",
-					"02A",
-					"02C",
-					"02F",
-					"031",
-					"034",
-					"038",
-					"03B",
-					"040",
-					"044",
-					"04A",
-					"051",
-					"059",
-					"063",
-					"070",
-					"080",
-					"095",
-					"0B3",
-					"0E0",
-					"12A",
-					"1C0",
-					"380"
-				]
-			var WhatLevelDimensionSetting = parseInt(document.getElementById("LevelDimensionSettings").value, 10)
-			//Statistics table
-				var LevelBlockStatisticsTable = ""
-				//Total blocks:
-					var TotalBlocksInLevel = parseInt(LevelWidth[WhatLevelDimensionSetting], 16) * parseInt(LevelHeight[WhatLevelDimensionSetting], 16)
-					LevelBlockStatisticsTable += "<table>"
-					LevelBlockStatisticsTable += "<tr><th colspan='2'>Normal level (layer 2 is background)</th></tr>"
+		//This prevents re-concatenating by clearing the output first
+		//to make it instead replace.
+			var CoordsToIndexOutput = ""
+		//Level width and height in units of blocks.
+			var LevelWidth = [
+				"200",
+				"200",
+				"1E0",
+				"1C0",
+				"1A0",
+				"180",
+				"170",
+				"160",
+				"150",
+				"140",
+				"130",
+				"120",
+				"110",
+				"100",
+				"0F0",
+				"0E0",
+				"0D0",
+				"0C0",
+				"0B0",
+				"0A0",
+				"090",
+				"080",
+				"070",
+				"060",
+				"050",
+				"040",
+				"030",
+				"020",
+				"010"
+			]
+			var LevelHeight = [
+				"01B",
+				"01C",
+				"01D",
+				"020",
+				"022",
+				"025",
+				"026",
+				"028",
+				"02A",
+				"02C",
+				"02F",
+				"031",
+				"034",
+				"038",
+				"03B",
+				"040",
+				"044",
+				"04A",
+				"051",
+				"059",
+				"063",
+				"070",
+				"080",
+				"095",
+				"0B3",
+				"0E0",
+				"12A",
+				"1C0",
+				"380"
+			]
+		//Global variables for most displays.
+			var WhatLevelDimensionSetting = parseInt(document.getElementById("LevelDimensionSettings").value, 16)
+			var NumberOfHscreensNormalLevel = Math.floor((parseInt(LevelWidth[WhatLevelDimensionSetting], 16))/16)
+			var NumberOfHscreensLayer2Level = Math.floor(NumberOfHscreensNormalLevel/2)
+			var TotalBlocksInNormalLevel = parseInt(LevelWidth[WhatLevelDimensionSetting], 16) * parseInt(LevelHeight[WhatLevelDimensionSetting], 16)
+			var BlocksPerScreenCol = parseInt(LevelHeight[WhatLevelDimensionSetting], 16) * 16
+			var TotalBlocksInLevelLayer2 = NumberOfHscreensLayer2Level*BlocksPerScreenCol
+			//There is a gap between the last byte of layer 1 and the first byte of layer 2 at the size of a screen column number of bytes if
+			//there is an odd number of screens divided by 2.
+				var LeftOverScreen = 0
+				if ((NumberOfHscreensNormalLevel % 2) != 0) {
+					LeftOverScreen = BlocksPerScreenCol
+				}
+			var Layer2DataStart = parseInt("c800", 16) + TotalBlocksInLevelLayer2 + LeftOverScreen
+		//Statistics table
+			var LevelBlockStatisticsTable = ""
+			//Total blocks:
+				LevelBlockStatisticsTable += "<table>"
+				LevelBlockStatisticsTable += "<tr><th colspan='2'>Normal level (layer 2 is background)</th></tr>"
+				LevelBlockStatisticsTable += "<tr>"
+				LevelBlockStatisticsTable += "<td>Total blocks in level:</td>" 
+				LevelBlockStatisticsTable += "<td><kbd>" + TotalBlocksInNormalLevel + " ($" + TotalBlocksInNormalLevel.toString(16) + ", index up to $" + (TotalBlocksInNormalLevel-1).toString(16) + ")</kbd></td>"
+				LevelBlockStatisticsTable += "</tr>"
+				LevelBlockStatisticsTable += "<tr>"
+				LevelBlockStatisticsTable += "<td>RAM address range (banks $7E/$7F or $40/$41):</td>" 
+				LevelBlockStatisticsTable += "<td><kbd>$c800 to $" + ((parseInt("c800", 16) + TotalBlocksInNormalLevel)-1).toString(16) + "</kbd></td>"
+				LevelBlockStatisticsTable += "</tr>"
+				LevelBlockStatisticsTable += "<tr>"
+				LevelBlockStatisticsTable += "<td>Valid X position range:</td>"
+				LevelBlockStatisticsTable += "<td><kbd>$0 to $" + (parseInt(LevelWidth[WhatLevelDimensionSetting], 16) -1).toString(16) + "</kbd></td>"
+				LevelBlockStatisticsTable += "</tr>"
+				LevelBlockStatisticsTable += "<tr>"
+				LevelBlockStatisticsTable += "<td>Valid Y position range:</td>"
+				LevelBlockStatisticsTable += "<td><kbd>$0 to $" + (parseInt(LevelHeight[WhatLevelDimensionSetting], 16) -1).toString(16) + "</kbd></td>"
+				LevelBlockStatisticsTable += "</tr>"
+			//Layer 2 statistics
+				LevelBlockStatisticsTable += "<tr><th colspan='2'>Layer 2 level</th></tr>"
+				
+				if (NumberOfHscreensLayer2Level != 0) {
 					LevelBlockStatisticsTable += "<tr>"
-					LevelBlockStatisticsTable += "<td>Total blocks in level:</td>" 
-					LevelBlockStatisticsTable += "<td><kbd>" + TotalBlocksInLevel + " ($" + TotalBlocksInLevel.toString(16) + "), index up to $" + (TotalBlocksInLevel-1).toString(16) + "</kbd></td>"
+					LevelBlockStatisticsTable += "<td>Number of screens wide:</td>"
+					LevelBlockStatisticsTable += "<td><kbd>" + NumberOfHscreensLayer2Level + " ($" + NumberOfHscreensLayer2Level.toString(16) + ")</kbd></td>"
 					LevelBlockStatisticsTable += "</tr>"
 					LevelBlockStatisticsTable += "<tr>"
-					LevelBlockStatisticsTable += "<td>RAM address range (banks $7E/$7F or $40/$41):</td>" 
-					LevelBlockStatisticsTable += "<td><kbd>$c800 to $" + ((51200 + TotalBlocksInLevel)-1).toString(16) + "</kbd></td>"
+					LevelBlockStatisticsTable += "<td>Total number of blocks in each of the 2 layers:</td>"
+					LevelBlockStatisticsTable += "<td><kbd>" + TotalBlocksInLevelLayer2 + " ($" + TotalBlocksInLevelLayer2.toString(16) + ", index up to $" + (TotalBlocksInLevelLayer2-1).toString(16) + ")</kbd></td>"
 					LevelBlockStatisticsTable += "</tr>"
 					LevelBlockStatisticsTable += "<tr>"
-					LevelBlockStatisticsTable += "<td>Valid X position range:</td>"
-					LevelBlockStatisticsTable += "<td><kbd>$0 to $" + (parseInt(LevelWidth[WhatLevelDimensionSetting], 16) -1).toString(16) + "</kbd></td>"
+					LevelBlockStatisticsTable += "<td>Layer 1 RAM address range (banks $7E/$7F or $40/$41):</td>"
+					LevelBlockStatisticsTable += "<td><kbd>$c800 to $" + ((parseInt("c800", 16) + TotalBlocksInLevelLayer2)-1).toString(16) + "</kbd></td>"
 					LevelBlockStatisticsTable += "</tr>"
 					LevelBlockStatisticsTable += "<tr>"
-					LevelBlockStatisticsTable += "<td>Valid Y position range:</td>"
-					LevelBlockStatisticsTable += "<td><kbd>$0 to $" + (parseInt(LevelHeight[WhatLevelDimensionSetting], 16) -1).toString(16) + "</kbd></td>"
+					LevelBlockStatisticsTable += "<td>Layer 2 RAM address range (banks $7E/$7F or $40/$41):</td>"
+					LevelBlockStatisticsTable += "<td><kbd>$" + Layer2DataStart.toString(16) + " to $" + ((Layer2DataStart + TotalBlocksInLevelLayer2)-1).toString(16) + "</kbd></td>"
 					LevelBlockStatisticsTable += "</tr>"
-				//Layer 2 statistics
-					LevelBlockStatisticsTable += "<tr><th colspan='2'>Layer 2 level</th></tr>"
-					var BlocksPerScreenCol = parseInt(LevelHeight[WhatLevelDimensionSetting], 16) * 16
-					var NumberOfHscreens = Math.floor(parseInt(LevelWidth[WhatLevelDimensionSetting], 16)/16)
-					var NumberOfHscreensLayer2 = Math.floor(NumberOfHscreens/2)
-					var TotalBlocksInLevelLayer2 = NumberOfHscreensLayer2*BlocksPerScreenCol
-					//There is a gap between the last byte of layer 1 and the first byte of layer 2 at the size of a screen column if
-					//there is an odd number of screens divided by 2.
-						var LeftOverScreen = 0
-						if ((NumberOfHscreens % 2) != 0) {
-							LeftOverScreen = BlocksPerScreenCol
-						}
-					var Layer2DataStart = 51200 + TotalBlocksInLevelLayer2 + LeftOverScreen
-					
-					if (NumberOfHscreensLayer2 != 0) {
-						LevelBlockStatisticsTable += "<tr>"
-						LevelBlockStatisticsTable += "<td>Number of screens wide:</td>"
-						LevelBlockStatisticsTable += "<td><kbd>" + NumberOfHscreensLayer2 + " ($" + NumberOfHscreensLayer2.toString(16) + ")</kbd></td>"
-						LevelBlockStatisticsTable += "</tr>"
-						LevelBlockStatisticsTable += "<tr>"
-						LevelBlockStatisticsTable += "<td>Total number of blocks in each of the 2 layers:</td>"
-						LevelBlockStatisticsTable += "<td><kbd>" + TotalBlocksInLevelLayer2 + " ($" + TotalBlocksInLevelLayer2.toString(16) + ", index up to $" + (TotalBlocksInLevelLayer2-1).toString(16) + ")</kbd></td>"
-						LevelBlockStatisticsTable += "</tr>"
-						LevelBlockStatisticsTable += "<tr>"
-						LevelBlockStatisticsTable += "<td>Layer 1 RAM address range (banks $7E/$7F or $40/$41):</td>"
-						LevelBlockStatisticsTable += "<td><kbd>$c800 to $" + ((51200 + TotalBlocksInLevelLayer2)-1).toString(16) + "</kbd></td>"
-						LevelBlockStatisticsTable += "</tr>"
-						LevelBlockStatisticsTable += "<tr>"
-						LevelBlockStatisticsTable += "<td>Layer 2 RAM address range (banks $7E/$7F or $40/$41):</td>"
-						LevelBlockStatisticsTable += "<td><kbd>$" + Layer2DataStart.toString(16) + " to $" + ((Layer2DataStart + TotalBlocksInLevelLayer2)-1).toString(16) + "</kbd></td>"
-						LevelBlockStatisticsTable += "</tr>"
-						LevelBlockStatisticsTable += "<tr>"
-						LevelBlockStatisticsTable += "<td>Valid X Position range:</td>"
-						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + ((NumberOfHscreensLayer2*16)-1).toString(16) + "</kbd></td>"
-						LevelBlockStatisticsTable += "</tr>"
-					} else {
-						LevelBlockStatisticsTable += "<tr><td colspan='2'>Level have a width of 0 means invalid. A completely black screen viewed on Lunar Magic.</td></tr>"
-					}
-					LevelBlockStatisticsTable += "</table>"
-					document.getElementById("LevelBlockStatistics").innerHTML  = LevelBlockStatisticsTable
-			//Correct values input
+					LevelBlockStatisticsTable += "<tr>"
+					LevelBlockStatisticsTable += "<td>Valid X Position range:</td>"
+					LevelBlockStatisticsTable += "<td><kbd>$0 to $" + ((NumberOfHscreensLayer2Level*16)-1).toString(16) + "</kbd></td>"
+					LevelBlockStatisticsTable += "</tr>"
+				} else {
+					LevelBlockStatisticsTable += "<tr><td colspan='2'>Level have a width of 0 means invalid. A completely black screen viewed on Lunar Magic.</td></tr>"
+				}
+				LevelBlockStatisticsTable += "</table>"
+				document.getElementById("LevelBlockStatistics").innerHTML  = LevelBlockStatisticsTable
+		//Coordinates to index
+			//Correct XY pos the user entered.
 				var BlockXPosition = parseInt(document.getElementById("BlockXPos").value, 16)
 				if (isNaN(BlockXPosition) == false) {
 					BlockXPosition = clamp(BlockXPosition, 0, 65535)
@@ -288,50 +288,50 @@ Level dimension:
 					BlockYPosition = clamp(BlockYPosition, 0, 65535)
 					document.getElementById("BlockYPos").value = BlockYPosition.toString(16)
 				}
-				
+			//Don't display a table with NaN in it.
 				var IsNumber = 0
 				if ((isNaN(BlockXPosition) == false) && (isNaN(BlockYPosition) == false)) {
 					IsNumber = 1
 				}
-				
+			//When the user enters X being a value past the rightmost block in a layer 2 level
+			//but not past the rightmost in normal levels.
 				var IsXPositionPointsBeyondHalfedWidthLevel = 0
-				if (BlockXPosition >= (NumberOfHscreensLayer2*16)) {
+				if ((BlockXPosition >= (NumberOfHscreensLayer2Level*16)) && (BlockXPosition < parseInt(LevelWidth[WhatLevelDimensionSetting], 16))) {
 					IsXPositionPointsBeyondHalfedWidthLevel = 1
 				}
-			//Display output of coords -> index
-				if (IsNumber != 0) {
-					//Check if position is outside of level:
+			if (IsNumber != 0) {
+				//Check if position is outside of level:
+					
+					var OffLevel = 0
+					if ((BlockXPosition >= parseInt(LevelWidth[WhatLevelDimensionSetting], 16))||(BlockYPosition >= parseInt(LevelHeight[WhatLevelDimensionSetting], 16))) {
+						OffLevel = 1
+					}
+				//Compute the index
+					if (OffLevel == 0) {
+						var ScreenColumnPassed = Math.floor(BlockXPosition/16)
 						
-						var OffLevel = 0
-						if ((BlockXPosition >= parseInt(LevelWidth[WhatLevelDimensionSetting], 16))||(BlockYPosition >= parseInt(LevelHeight[WhatLevelDimensionSetting], 16))) {
-							OffLevel = 1
+						var Index = (BlocksPerScreenCol*ScreenColumnPassed) + (BlockYPosition*16) + (BlockXPosition % 16)
+						
+						CoordsToIndexOutput += "<br><table>"
+						CoordsToIndexOutput += "<tr>"
+						CoordsToIndexOutput += "<td>Index:</td>"
+						CoordsToIndexOutput += "<td><kbd>$" + Index.toString(16) + "</kbd></td>"
+						CoordsToIndexOutput += "</tr>"
+						CoordsToIndexOutput += "<tr>"
+						CoordsToIndexOutput += "<td>RAM address location (in banks $7E/$7F or $40/$41):"
+						CoordsToIndexOutput += "<td><kbd>$" + (parseInt("c800", 16) + Index).toString(16) + " ($c800 + $" + Index.toString(16) + ")</kbd></td>"
+						CoordsToIndexOutput += "</tr>"
+						CoordsToIndexOutput += "<tr>"
+						CoordsToIndexOutput += "<td>Layer 2's RAM address location (in banks $7E/$7F or $40/$41):"
+						if (IsXPositionPointsBeyondHalfedWidthLevel == 0) {
+							CoordsToIndexOutput += "<td><kbd>$" + (Layer2DataStart + Index).toString(16) + " ($" + Layer2DataStart.toString(16) + " + $" + Index.toString(16) + ")</kbd></td>"
+						} else {
+							CoordsToIndexOutput += "<td><kbd>N/A (Only layer 1 level works)</kbd></td>"
 						}
-					//Compute the index
-						if (OffLevel == 0) {
-							var ScreenColumnPassed = Math.floor(BlockXPosition/16)
-							
-							var Index = (BlocksPerScreenCol*ScreenColumnPassed) + (BlockYPosition*16) + (BlockXPosition % 16)
-							
-							CoordsToIndexOutput += "<br><table>"
-							CoordsToIndexOutput += "<tr>"
-							CoordsToIndexOutput += "<td>Index:</td>"
-							CoordsToIndexOutput += "<td><kbd>$" + Index.toString(16) + "</kbd></td>"
-							CoordsToIndexOutput += "</tr>"
-							CoordsToIndexOutput += "<tr>"
-							CoordsToIndexOutput += "<td>RAM address location (in banks $7E/$7F or $40/$41):"
-							CoordsToIndexOutput += "<td><kbd>$" + (51200 + Index).toString(16) + " ($c800 + $" + Index.toString(16) + ")</kbd></td>"
-							CoordsToIndexOutput += "</tr>"
-							CoordsToIndexOutput += "<tr>"
-							CoordsToIndexOutput += "<td>Layer 2's RAM address location (in banks $7E/$7F or $40/$41):"
-							if (IsXPositionPointsBeyondHalfedWidthLevel == 0) {
-								CoordsToIndexOutput += "<td><kbd>$" + (Layer2DataStart + Index).toString(16) + " ($" + Layer2DataStart.toString(16) + " + $" + Index.toString(16) + ")</kbd></td>"
-							} else {
-								CoordsToIndexOutput += "<td><kbd>N/A (Only layer 1 level works)</kbd></td>"
-							}
-							CoordsToIndexOutput += "</tr>"
-							CoordsToIndexOutput += "</table>"
-						}
-				}
+						CoordsToIndexOutput += "</tr>"
+						CoordsToIndexOutput += "</table>"
+					}
+			}
 			//Display layer 2 territory
 				document.getElementById("InLayer2LevelOtherHalf").innerHTML = ""
 				if (IsXPositionPointsBeyondHalfedWidthLevel != 0) {
@@ -347,11 +347,10 @@ Level dimension:
 				//Output:
 					document.getElementById("CoordsToIndex").innerHTML = CoordsToIndexOutput
 				
-		//Handle Index -> Coords
+		//Index to coordinates
 			//This prevents re-concatenating by clearing the output first
 			//to make it instead replace.
 				var IndexToCoordsOutput = ""
-				document.getElementById("IndexToCoords").innerHTML = ""
 			//Correct index
 				var BlockIndexer = parseInt(document.getElementById("BlockIndex").value, 16)
 				if (isNaN(BlockIndexer) == false) {
@@ -359,12 +358,8 @@ Level dimension:
 					document.getElementById("BlockIndex").value = BlockIndexer.toString(16)
 					
 					//Check if index would point to beyond the last block in level
-						var TotalNumberOfBlocksInLevel = parseInt(LevelWidth[WhatLevelDimensionSetting], 16) * parseInt(LevelHeight[WhatLevelDimensionSetting], 16)
-						if (BlockIndexer < TotalNumberOfBlocksInLevel) {
+						if (BlockIndexer < TotalBlocksInNormalLevel) {
 							//Convert to coordinates
-								var WhatLevelDimensionSetting = parseInt(document.getElementById("LevelDimensionSettings").value, 10)
-								var BlocksPerScreenCol = parseInt(LevelHeight[WhatLevelDimensionSetting], 16) * 16
-								
 								var ScreenColumnPassed = Math.floor(BlockIndexer/BlocksPerScreenCol)*16
 								var BlockYPosition = Math.floor((BlockIndexer % BlocksPerScreenCol)/16)
 								var BlockXPosition = ScreenColumnPassed+(BlockIndexer % 16)
@@ -375,7 +370,7 @@ Level dimension:
 								}
 						} else {
 							//Indicate that index points to past the last block
-								IndexToCoordsOutput = "<font color='red'>Index points beyond the last block. Valid index is from $0 to $" + (TotalNumberOfBlocksInLevel-1).toString(16) + "</font>"
+								IndexToCoordsOutput = "<font color='red'>Index points beyond the last block. Valid index is from $0 to $" + (TotalBlocksInNormalLevel-1).toString(16) + "</font>"
 						}
 					//Output:
 						document.getElementById("IndexToCoords").innerHTML = IndexToCoordsOutput
