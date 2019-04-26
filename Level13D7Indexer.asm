@@ -124,6 +124,9 @@ endif
 ;Formula:
 ; Index = (RAM_13D7 * %XXXXX) + (%00yyyyyyyyyy0000 | %000000000000xxxx)
 ;
+;In formal writing:
+; Index = (BlocksPerScrnCol * floor(XPos/16)) + (YPos*16) + (XPos MOD 16)
+;
 
 GetLevelMap16IndexByMap16Position:
 	;Check if the given position is outside the level.
