@@ -1,12 +1,12 @@
 <h1>SMW's Level block format</h1>
-In SMW's levels, RAM address $C800 in banks $7E/$7F ($40/$41 in SA-1) contains all the block data of layer 1 and 2. They hold the map 16 numbers for every tile in the current level
-with the low bytes in bank $7E ($40 SA-1) and high bytes in bank $7F ($41 SA-1). The format of the blocks as follows:
+In SMW's levels, RAM address $C800 in banks $7E/$7F ($40/$41 in SA-1) contains all the block data of layer 1 and 2 (if the level is a layer 2 level). They hold the map 16 number/ID
+for every tile in the current level with the low bytes in bank $7E ($40 SA-1) and high bytes in bank $7F ($41 SA-1). The format of the blocks as follows:
 <h2>Horizontal levels</h2>
 <ol>
-<li>Within each screen column, each subsequent byte in memory starting at $C800 is the next block in level from left to right and then from top to bottom (row-major):<br>
+<li>Within each screen column, each subsequent byte in memory starting at $C800 is the next block in level from left to right and then next row from left to right again (row-major):<br>
 <img src="Readme_files/SMW_RowMajorBlocksPerScreen.png"></li>
-<li>Once the bottom of the level is reached, the next screen column is reached and repeats (column-major). Note that I mention screen <b>column</b>, meaning if there are multiple screens columns,
-it proceeds downwards to the screen <b>below it</b>, not across like screen exit being numbered in Lunar Magic:<br>
+<li>Once the <b>bottom</b> of the level is reached, the next screen column starting from the top-left and repeats the pattern. Note that this continues down the screen columns even if there
+are multiple rows of screen boundaries and not the next &ldquo;screen number&rdquo; displayed in Lunar Magic:<br>
 <img src="Readme_files/SMW_ColumnMajorScreenColumn.png">
 </li>
 </ol>
