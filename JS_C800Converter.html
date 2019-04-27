@@ -28,9 +28,10 @@ take the starting byte of layer 2 tiles and index from there.</li>
 </ul>
 <button type="button" onclick="Reset()">Reset</button>
 
-<body onload="Compute()">
+<body onload="PageLoad()">
 
-Level dimension: 
+<form>
+<input type="radio" name="VerticalOrHorizLevel" id="IDHorizontalLevel" onclick="Compute()" checked>Horizontal Level: 
 <select id="LevelDimensionSettings" onchange="Compute()">
 <option value="0">$00: Height=$01B tiles, MaxHScreens=$20</option>
 <option value="1">$01: Height=$01C tiles, MaxHScreens=$20</option>
@@ -61,7 +62,9 @@ Level dimension:
 <option value="1a">$1A: Height=$12A tiles, MaxHScreens=$03</option>
 <option value="1B">$1B: Height=$1C0 tiles, MaxHScreens=$02</option>
 <option value="1C">$1C: Height=$380 tiles, MaxHScreens=$01</option>
-</select>
+</select><br>
+<input type="radio" name="VerticalOrHorizLevel" id="IDVerticalLevel" onclick="Compute()">Vertical Level<br>
+</form>
 <br><br>
 <span id="LevelBlockStatistics"></span><br>
 
@@ -75,7 +78,12 @@ Level dimension:
 <kbd>Block index: $</kbd><input type="text" id="BlockIndex" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseBlockIndex()">+</button><button type="button" onclick="DecreaseBlockIndex()">-</button><br>
 <kbd><span id="IndexToCoords"></span></kbd>
 <script>
+	function PageLoad() {
+		Reset()
+		Compute()
+	}
 	function Reset() {
+		document.getElementById("IDHorizontalLevel").checked = true
 		document.getElementById("LevelDimensionSettings").value = 0
 		document.getElementById("BlockXPos").value = 0
 		document.getElementById("BlockYPos").value = 0
@@ -213,19 +221,41 @@ Level dimension:
 				"380"
 			]
 		//Global variables for most displays.
-			var WhatLevelDimensionSetting = parseInt(document.getElementById("LevelDimensionSettings").value, 16)
-			var NumberOfHscreensNormalLevel = Math.floor((parseInt(LevelWidth[WhatLevelDimensionSetting], 16))/16)
-			var NumberOfHscreensLayer2Level = Math.floor(NumberOfHscreensNormalLevel/2)
-			var TotalBlocksInNormalLevel = parseInt(LevelWidth[WhatLevelDimensionSetting], 16) * parseInt(LevelHeight[WhatLevelDimensionSetting], 16)
-			var BlocksPerScreenCol = parseInt(LevelHeight[WhatLevelDimensionSetting], 16) * 16
-			var TotalBlocksInLevelLayer2 = NumberOfHscreensLayer2Level*BlocksPerScreenCol
-			//There is a gap between the last byte of layer 1 and the first byte of layer 2 at the size of a screen column number of bytes if
-			//there is an odd number of screens divided by 2.
-				var LeftOverScreen = 0
-				if ((NumberOfHscreensNormalLevel % 2) != 0) {
-					LeftOverScreen = BlocksPerScreenCol
-				}
-			var Layer2DataStart = parseInt("c800", 16) + TotalBlocksInLevelLayer2 + LeftOverScreen
+			var LevelFormat = 0
+			if (document.getElementById("IDHorizontalLevel").checked == true) {
+				var WhatHorizLevelDimensionSetting = parseInt(document.getElementById("LevelDimensionSettings").value, 16)
+				var NumberOfHscreensNormalLevel = Math.floor((parseInt(LevelWidth[WhatHorizLevelDimensionSetting], 16))/16)
+				var MaxBlockXPosition = parseInt(LevelWidth[WhatHorizLevelDimensionSetting], 16) -1
+				var MaxBlockYPosition = parseInt(LevelHeight[WhatHorizLevelDimensionSetting], 16) -1
+				var NumberOfHscreensLayer2Level = Math.floor(NumberOfHscreensNormalLevel/2)
+				var MaxBlockXPositionLayer2 = (NumberOfHscreensLayer2Level*16)-1
+				var TotalBlocksInNormalLevel = parseInt(LevelWidth[WhatHorizLevelDimensionSetting], 16) * parseInt(LevelHeight[WhatHorizLevelDimensionSetting], 16)
+				var BlocksPerScreenCol = parseInt(LevelHeight[WhatHorizLevelDimensionSetting], 16) * 16
+				var TotalBlocksInLevelLayer2 = NumberOfHscreensLayer2Level*BlocksPerScreenCol
+				//There is a gap between the last byte of layer 1 and the first byte of layer 2 at the size of a screen column number of bytes if
+				//there is an odd number of screens divided by 2.
+					var LeftOverScreen = 0
+					if ((NumberOfHscreensNormalLevel % 2) != 0) {
+						LeftOverScreen = BlocksPerScreenCol
+					}
+				var Layer2DataStart = parseInt("c800", 16) + TotalBlocksInLevelLayer2 + LeftOverScreen
+			} else if (document.getElementById("IDVerticalLevel").checked == true) {
+				LevelFormat = 1
+				
+				var NumberOfVScreensNormalLevel = parseInt("1C", 16)
+				var MaxBlockXPosition = parseInt("1F", 16)
+				var MaxBlockYPosition = parseInt("1BF", 16)
+				var MaxBlockYPositionLayer2 = parseInt("DF", 16)
+				var NumberOfVScreensLayer2Level = parseInt("0E", 16)
+				var TotalBlocksInNormalLevel = 14336 //512 blocks per screen (16*32), times 28 screens
+				var TotalBlocksInLevelLayer2 = 7168
+				
+				var Layer2DataStart = parseInt("c800", 16) + TotalBlocksInLevelLayer2
+			}
+			var HalfedHorizontalLevelResultsWidthOfZero = 0
+			if ((LevelFormat == 0) && (NumberOfHscreensLayer2Level == 0)) {
+				HalfedHorizontalLevelResultsWidthOfZero = 1
+			}
 		//Statistics table
 			var LevelBlockStatisticsTable = ""
 			//Total blocks:
@@ -241,19 +271,24 @@ Level dimension:
 				LevelBlockStatisticsTable += "</tr>"
 				LevelBlockStatisticsTable += "<tr>"
 				LevelBlockStatisticsTable += "<td>Valid X position range:</td>"
-				LevelBlockStatisticsTable += "<td><kbd>$0 to $" + (parseInt(LevelWidth[WhatLevelDimensionSetting], 16) -1).toString(16) + "</kbd></td>"
+				LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockXPosition.toString(16) + "</kbd></td>"
 				LevelBlockStatisticsTable += "</tr>"
 				LevelBlockStatisticsTable += "<tr>"
 				LevelBlockStatisticsTable += "<td>Valid Y position range:</td>"
-				LevelBlockStatisticsTable += "<td><kbd>$0 to $" + (parseInt(LevelHeight[WhatLevelDimensionSetting], 16) -1).toString(16) + "</kbd></td>"
+				LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockYPosition.toString(16) + "</kbd></td>"
 				LevelBlockStatisticsTable += "</tr>"
 			//Layer 2 statistics
 				LevelBlockStatisticsTable += "<tr><th colspan='2'>Layer 2 level</th></tr>"
 				
-				if (NumberOfHscreensLayer2Level != 0) {
+				if (HalfedHorizontalLevelResultsWidthOfZero == 0) {
 					LevelBlockStatisticsTable += "<tr>"
-					LevelBlockStatisticsTable += "<td>Number of screens wide:</td>"
-					LevelBlockStatisticsTable += "<td><kbd>" + NumberOfHscreensLayer2Level + " ($" + NumberOfHscreensLayer2Level.toString(16) + ")</kbd></td>"
+					if (LevelFormat == 0) {
+						LevelBlockStatisticsTable += "<td>Number of screens wide:</td>"
+						LevelBlockStatisticsTable += "<td><kbd>" + NumberOfHscreensLayer2Level + " ($" + NumberOfHscreensLayer2Level.toString(16) + ")</kbd></td>"
+					} else {
+						LevelBlockStatisticsTable += "<td>Number of screens tall:</td>"
+						LevelBlockStatisticsTable += "<td><kbd>" + NumberOfVScreensLayer2Level + " ($" + NumberOfVScreensLayer2Level.toString(16) + ")</kbd></td>"
+					}
 					LevelBlockStatisticsTable += "</tr>"
 					LevelBlockStatisticsTable += "<tr>"
 					LevelBlockStatisticsTable += "<td>Total number of blocks in each of the 2 layers:</td>"
@@ -269,7 +304,19 @@ Level dimension:
 					LevelBlockStatisticsTable += "</tr>"
 					LevelBlockStatisticsTable += "<tr>"
 					LevelBlockStatisticsTable += "<td>Valid X Position range:</td>"
-					LevelBlockStatisticsTable += "<td><kbd>$0 to $" + ((NumberOfHscreensLayer2Level*16)-1).toString(16) + "</kbd></td>"
+					if (LevelFormat == 0) {
+						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockXPositionLayer2.toString(16) + "</kbd></td>"
+					} else {
+						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockXPosition.toString(16) + "</kbd></td>"
+					}
+					LevelBlockStatisticsTable += "</tr>"
+					LevelBlockStatisticsTable += "<tr>"
+					LevelBlockStatisticsTable += "<td>Valid Y Position range:</td>"
+					if (LevelFormat == 0) {
+						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockYPosition.toString(16) + "</kbd></td>"
+					} else {
+						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockYPositionLayer2.toString(16) + "</kbd></td>"
+					}
 					LevelBlockStatisticsTable += "</tr>"
 				} else {
 					LevelBlockStatisticsTable += "<tr><td colspan='2'>Level have a width of 0 means invalid. A completely black screen viewed on Lunar Magic.</td></tr>"
@@ -296,14 +343,14 @@ Level dimension:
 			//When the user enters X being a value past the rightmost block in a layer 2 level
 			//but not past the rightmost in normal levels.
 				var IsXPositionPointsBeyondHalfedWidthLevel = 0
-				if ((BlockXPosition >= (NumberOfHscreensLayer2Level*16)) && (BlockXPosition < parseInt(LevelWidth[WhatLevelDimensionSetting], 16))) {
+				if ((BlockXPosition >= (NumberOfHscreensLayer2Level*16)) && (BlockXPosition <= MaxBlockXPosition)) {
 					IsXPositionPointsBeyondHalfedWidthLevel = 1
 				}
 			if (IsNumber != 0) {
 				//Check if position is outside of level:
 					
 					var OffLevel = 0
-					if ((BlockXPosition >= parseInt(LevelWidth[WhatLevelDimensionSetting], 16))||(BlockYPosition >= parseInt(LevelHeight[WhatLevelDimensionSetting], 16))) {
+					if ((BlockXPosition > MaxBlockXPosition)||(BlockYPosition > MaxBlockYPosition)) {
 						OffLevel = 1
 					}
 				//Compute the index
@@ -338,11 +385,11 @@ Level dimension:
 					document.getElementById("InLayer2LevelOtherHalf").innerHTML = "<kbd><font color='orange'>Only valid for layer 1 level.</font></kbd>"
 				}
 			//Check if given position is outside the level boundaries
-				if (BlockXPosition >= parseInt(LevelWidth[WhatLevelDimensionSetting], 16)) {
-					CoordsToIndexOutput += "<font color='red'><kbd>Block X position is outside the level (X = $0 to X = $" + (parseInt(LevelWidth[WhatLevelDimensionSetting], 16) -1).toString(16) + " is valid).</kbd><br></font>"
+				if (BlockXPosition >= parseInt(LevelWidth[WhatHorizLevelDimensionSetting], 16)) {
+					CoordsToIndexOutput += "<font color='red'><kbd>Block X position is outside the level (X = $0 to X = $" + (parseInt(LevelWidth[WhatHorizLevelDimensionSetting], 16) -1).toString(16) + " is valid).</kbd><br></font>"
 				}
-				if (BlockYPosition >= parseInt(LevelHeight[WhatLevelDimensionSetting], 16)) {
-					CoordsToIndexOutput += "<font color='red'><kbd>Block Y position is outside the level (Y = $0 to Y = $" + (parseInt(LevelHeight[WhatLevelDimensionSetting], 16) -1).toString(16) + " is valid).</kbd><br></font>"
+				if (BlockYPosition >= parseInt(LevelHeight[WhatHorizLevelDimensionSetting], 16)) {
+					CoordsToIndexOutput += "<font color='red'><kbd>Block Y position is outside the level (Y = $0 to Y = $" + (parseInt(LevelHeight[WhatHorizLevelDimensionSetting], 16) -1).toString(16) + " is valid).</kbd><br></font>"
 				}
 				//Output:
 					document.getElementById("CoordsToIndex").innerHTML = CoordsToIndexOutput
