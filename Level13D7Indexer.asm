@@ -112,21 +112,29 @@ endif
 ;   order. This order is known as "Column-Major order".
 ;
 ;Input bit info:
-; $00-$01: %0000000XXXXXxxxx
+; $00-$01: %0000000XXXXXxxxx (%00000000000Xxxxx for vertical level)
 ;  Uppercase X: What screen column.
 ;  Lowercase x: What block within the row of 16 blocks.
-; $02-$03: %000000yyyyyyyyyy
+; $02-$03: %000000yyyyyyyyyy (%0000000YYYYYyyyy for vertical level)
 ;  Lowercase y: What row of 16x16 blocks. Note currently
 ;  as of LM3.03, the highest value for Y (bottommost block) is
-;  $037F (%0000001101111111).
+;  $037F (%0000001101111111) for horizontal levels, and $01BF
+;(%0000000110111111) for vertical levels.
 ;
+;Horizontal level:
+; Formula:
+;  Index = (RAM_13D7 * %XXXXX) + (%00yyyyyyyyyy0000 || %000000000000xxxx)
+;  In formal writing:
+;   Index = (BlocksPerScrnCol * floor(XPos/16)) + (YPos*16) + (XPos MOD 16)
+;Vertical level:
+; Formula:
+;  Index = ($0200 * %YYYYY) + (%X00000000 && $0100) + (%yyyy << 4) + (%xxxx)
+;  In formal writing:
+;   Index = 512 * floor(YPos/16) + (256 * floor(XPos/16)) + ((YPos MOD 16)*16) + (XPos MOD 16)
 ;
-;Formula:
-; Index = (RAM_13D7 * %XXXXX) + (%00yyyyyyyyyy0000 | %000000000000xxxx)
-;
-;In formal writing:
-; Index = (BlocksPerScrnCol * floor(XPos/16)) + (YPos*16) + (XPos MOD 16)
-;
+; || = OR boolean operation
+; && = AND boolean operation
+; << = leftshift boolean operation (<< 4 means shift bits left 4 times)
 
 GetLevelMap16IndexByMap16Position:
 	;Check if the given position is outside the level.
