@@ -7,6 +7,12 @@ for every tile in the current level with the low bytes in bank $7E ($40 SA-1) an
 <img src="Readme_files/SMW_RowMajorBlocksPerScreen.png"></li>
 <li>Once the <b>bottom</b> of the level is reached, the next screen column starting from the top-left and repeats the pattern. Note that this continues down the screen columns even if there
 are multiple rows of screen boundaries and not the next &ldquo;screen number&rdquo; displayed in Lunar Magic:<br>
-<img src="Readme_files/SMW_ColumnMajorScreenColumn.png">
-</li>
+<img src="Readme_files/SMW_ColumnMajorScreenColumn.png"></li>
+</ol>
+<h2>Vertical levels</h2>
+<ol>
+<li>Similar to horizontal levels, but does the row-major format within each half (or every subscreen boundary) of the screen:<br>
+<img src="Readme_files/SMW_VerticalLevelFormat.png"></li>
+<li>Once the last block of the screen boundary is reached, it repeats the whole process on the next screen.<br>
+<img src="Readme_files/SMW_VerticalLevelFormatByScreen.png"></li>
 </ol>
