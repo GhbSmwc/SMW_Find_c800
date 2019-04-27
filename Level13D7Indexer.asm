@@ -214,6 +214,10 @@ GetLevelMap16IndexByMap16Position:
 	CLC
 	RTL
 	
+	.Invalid
+	SEP #$21
+	RTL
+	
 	.VerticalLevel
 	;$00-$01: %00000000 000Xxxxx
 	;$02-$03: %0000000Y YYYYyyyy
@@ -226,12 +230,12 @@ GetLevelMap16IndexByMap16Position:
 	REP #$20
 	LDA $00					;\(1) X valid ranges from $0000 to $001F
 	CMP #$0020				;|
-	BCS .Invalid				;/
+	BCS .Invalid1				;/
 	LDA $02					;\Check if Y position is past the last screen of the level
 	LSR #4					;|%0000000YYYYYyyyy -> %00000000000YYYYY
 	SEP #$20				;|
 	CMP $5F					;|>Last screen + 1
-	BCS .Invalid				;/
+	BCS .Invalid1				;/
 	
 	REP #$20
 	LDA $00					;
@@ -256,7 +260,7 @@ GetLevelMap16IndexByMap16Position:
 	CLC
 	RTL
 	
-	.Invalid
+	.Invalid1
 	SEP #$21
 	RTL
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
