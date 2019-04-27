@@ -131,12 +131,21 @@ endif
 ;  Index = ($0200 * %YYYYY) + (%X00000000 && $0100) + (%yyyy << 4) + (%xxxx)
 ;  In formal writing:
 ;   Index = 512 * floor(YPos/16) + (256 * floor(XPos/16)) + ((YPos MOD 16)*16) + (XPos MOD 16)
+; Thankfully, each screen is a number power of 2 for the number of blocks per screen: 512 ($0200)
+; (which is 2^9), and so does its width and height (2^5 = 32 and 2^4 = 16) which means screen
+; unit handling is easier than horizontal levels. The bit format of the index is %YYYYYXyyyyxxxx
 ;
 ; || = OR boolean operation
 ; && = AND boolean operation
 ; << = leftshift boolean operation (<< 4 means shift bits left 4 times)
 
 GetLevelMap16IndexByMap16Position:
+	;Check level format
+	LDA $5B
+	LSR
+	BCS .VerticalLevel
+	
+	.HorizontalLevel
 	;Check if the given position is outside the level.
 	REP #$20
 	LDA $13D7|!addr				;\Check if Y position is past the bottom of the level.
@@ -205,9 +214,50 @@ GetLevelMap16IndexByMap16Position:
 	CLC
 	RTL
 	
-	.Invalid
+	.VerticalLevel
+	;$00-$01: %00000000 000Xxxxx
+	;$02-$03: %0000000Y YYYYyyyy
+	;Rearrange to:
+	;         %00YYYYYX yyyyxxxx
+	
+	
+	
+	;Check if the given position is outside the level.
+	REP #$20
+	LDA $00					;\(1) X valid ranges from $0000 to $001F
+	CMP #$0020				;|
+	BCS .Invalid				;/
+	LDA $02					;\Check if Y position is past the last screen of the level
+	LSR #4					;|%0000000YYYYYyyyy -> %00000000000YYYYY
+	SEP #$20				;|
+	CMP $5F					;|>Last screen + 1
+	BCS .Invalid				;/
+	
+	REP #$20
+	LDA $00					;
+	AND.w #%0000000000010000		;>(2) what halves of the screen
+	ASL #4					;>A: %00000000 000X0000 -> %0000000X 00000000
+	ORA $00					;>A: %0000000X 00000000 -> %0000000X 000-xxxx
+	AND.w #%0000000100001111		;>A: %0000000X 000-xxxx -> %0000000X 0000xxxx
+	STA $00					;>$00 now have all X position bits done.
+	
+	LDA $02					;>$02: %0000000Y YYYYyyyy
+	ASL #4					;>A:   %000YYYYY yyyy0000
+	SEP #$20				;>A:   %000YYYYY [yyyy0000]
+	ORA $00					;>A:   %yyyy0000 || %0000xxxx -> %yyyyxxxx
+	STA $00					;>$00 low bits Y position done.
+	REP #$20
+	LDA $02					;>$02: %0000000Y YYYYyyyy
+	AND.w #%0000000111110000		;>A:   %0000000Y YYYY0000
+	ASL #5					;>A:   %00YYYYY0 00000000
+	ORA $00					;>A:   %00YYYYY0 00000000 || %0000000X yyyyxxxx
+	STA $00					;>$00 is %00YYYYYX yyyyxxxx
 	SEP #$20
-	SEC
+	CLC
+	RTL
+	
+	.Invalid
+	SEP #$21
 	RTL
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Obtain block coordinate from $7EC800/$7FC800 indexing.
