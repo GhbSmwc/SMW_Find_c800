@@ -70,8 +70,8 @@ take the starting byte of layer 2 tiles and index from there.</li>
 
 <hr>
 <h1>Convert coordinate to $7EC800/$7FC800 indexing</h1>
-<kbd>X: $</kbd><input type="text" id="BlockXPos" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseXPos()">+</button><button type="button" onclick="DecreaseXPos()">-</button><span id="InLayer2LevelOtherHalf"></span><br>
-<kbd>Y: $</kbd><input type="text" id="BlockYPos" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseYPos()">+</button><button type="button" onclick="DecreaseYPos()">-</button><br>
+<kbd>X: $</kbd><input type="text" id="BlockXPos" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseXPos()">+</button><button type="button" onclick="DecreaseXPos()">-</button><span id="InLayer2HorizontalLevelOtherHalf"></span><br>
+<kbd>Y: $</kbd><input type="text" id="BlockYPos" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseYPos()">+</button><button type="button" onclick="DecreaseYPos()">-</button><span id="InLayer2VerticalLevelOtherHalf"></span><br>
 <span id="CoordsToIndex"></span>
 <hr>
 <h1>Convert $7EC800/$7FC800 index to coordinate</h1>
@@ -340,11 +340,17 @@ take the starting byte of layer 2 tiles and index from there.</li>
 				if ((isNaN(BlockXPosition) == false) && (isNaN(BlockYPosition) == false)) {
 					IsNumber = 1
 				}
-			//When the user enters X being a value past the rightmost block in a layer 2 level
-			//but not past the rightmost in normal levels.
-				var IsXPositionPointsBeyondHalfedWidthLevel = 0
-				if ((BlockXPosition >= (NumberOfHscreensLayer2Level*16)) && (BlockXPosition <= MaxBlockXPosition)) {
-					IsXPositionPointsBeyondHalfedWidthLevel = 1
+			//When the user enters a coordinate that is only available in horizontal levels but is within bounds
+			//of a normal level
+				var IsCoordinatePointsPastHalfedLevel = 0
+				if (LevelFormat == 0) {
+					if ((BlockXPosition >= (NumberOfHscreensLayer2Level*16)) && (BlockXPosition <= MaxBlockXPosition)) {
+						IsCoordinatePointsPastHalfedLevel = 1
+					}
+				} else {
+					if ((BlockYPosition >= (NumberOfVScreensLayer2Level*16)) && (BlockYPosition <= MaxBlockYPosition)) {
+						IsCoordinatePointsPastHalfedLevel = 1
+					}
 				}
 			if (IsNumber != 0) {
 				//Check if position is outside of level:
@@ -355,10 +361,14 @@ take the starting byte of layer 2 tiles and index from there.</li>
 					}
 				//Compute the index
 					if (OffLevel == 0) {
-						var ScreenColumnPassed = Math.floor(BlockXPosition/16)
-						
-						var Index = (BlocksPerScreenCol*ScreenColumnPassed) + (BlockYPosition*16) + (BlockXPosition % 16)
-						
+						if (LevelFormat == 0) {
+							//Horizontal level calculation
+							var ScreenColumnPassed = Math.floor(BlockXPosition/16)
+							var Index = (BlocksPerScreenCol*ScreenColumnPassed) + (BlockYPosition*16) + (BlockXPosition % 16)
+						} else {
+							//Vertical level index calculation
+							var Index = 512 * Math.floor(BlockYPosition/16) + (256 * Math.floor(BlockXPosition/16)) + ((BlockYPosition % 16)*16) + (BlockXPosition % 16)
+						}
 						CoordsToIndexOutput += "<br><table>"
 						CoordsToIndexOutput += "<tr>"
 						CoordsToIndexOutput += "<td>Index:</td>"
@@ -370,7 +380,7 @@ take the starting byte of layer 2 tiles and index from there.</li>
 						CoordsToIndexOutput += "</tr>"
 						CoordsToIndexOutput += "<tr>"
 						CoordsToIndexOutput += "<td>Layer 2's RAM address location (in banks $7E/$7F or $40/$41):"
-						if (IsXPositionPointsBeyondHalfedWidthLevel == 0) {
+						if (IsCoordinatePointsPastHalfedLevel == 0) {
 							CoordsToIndexOutput += "<td><kbd>$" + (Layer2DataStart + Index).toString(16) + " ($" + Layer2DataStart.toString(16) + " + $" + Index.toString(16) + ")</kbd></td>"
 						} else {
 							CoordsToIndexOutput += "<td><kbd>N/A (Only layer 1 level works)</kbd></td>"
@@ -379,17 +389,21 @@ take the starting byte of layer 2 tiles and index from there.</li>
 						CoordsToIndexOutput += "</table>"
 					}
 			}
-			//Display layer 2 territory
-				document.getElementById("InLayer2LevelOtherHalf").innerHTML = ""
-				if (IsXPositionPointsBeyondHalfedWidthLevel != 0) {
-					document.getElementById("InLayer2LevelOtherHalf").innerHTML = "<kbd><font color='orange'>Only valid for layer 1 level.</font></kbd>"
+			//Display text indicating a coordinate only works with layer 1 levels.
+				document.getElementById("InLayer2HorizontalLevelOtherHalf").innerHTML = ""
+				document.getElementById("InLayer2VerticalLevelOtherHalf").innerHTML = ""
+				if ((IsCoordinatePointsPastHalfedLevel != 0) && (LevelFormat == 0)) {
+					document.getElementById("InLayer2HorizontalLevelOtherHalf").innerHTML = "<kbd><font color='orange'>Only valid for layer 1 level.</font></kbd>"
+				}
+				if ((IsCoordinatePointsPastHalfedLevel != 0) && (LevelFormat != 0)) {
+					document.getElementById("InLayer2VerticalLevelOtherHalf").innerHTML = "<kbd><font color='orange'>Only valid for layer 1 level.</font></kbd>"
 				}
 			//Check if given position is outside the level boundaries
-				if (BlockXPosition >= parseInt(LevelWidth[WhatHorizLevelDimensionSetting], 16)) {
-					CoordsToIndexOutput += "<font color='red'><kbd>Block X position is outside the level (X = $0 to X = $" + (parseInt(LevelWidth[WhatHorizLevelDimensionSetting], 16) -1).toString(16) + " is valid).</kbd><br></font>"
+				if (BlockXPosition > MaxBlockXPosition) {
+					CoordsToIndexOutput += "<font color='red'><kbd>Block X position is outside the level (X = $0 to X = $" + MaxBlockXPosition.toString(16) + " is valid).</kbd><br></font>"
 				}
-				if (BlockYPosition >= parseInt(LevelHeight[WhatHorizLevelDimensionSetting], 16)) {
-					CoordsToIndexOutput += "<font color='red'><kbd>Block Y position is outside the level (Y = $0 to Y = $" + (parseInt(LevelHeight[WhatHorizLevelDimensionSetting], 16) -1).toString(16) + " is valid).</kbd><br></font>"
+				if (BlockYPosition > MaxBlockYPosition) {
+					CoordsToIndexOutput += "<font color='red'><kbd>Block Y position is outside the level (Y = $0 to Y = $" + MaxBlockYPosition.toString(16) + " is valid).</kbd><br></font>"
 				}
 				//Output:
 					document.getElementById("CoordsToIndex").innerHTML = CoordsToIndexOutput
