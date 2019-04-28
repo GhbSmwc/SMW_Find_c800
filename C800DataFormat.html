@@ -45,6 +45,22 @@ within a screen boundary.</li>
 <li><kbd>XPos = (floor((BlockIndex MOD 512)/256)*16) + (BlockIndex MOD 16)</kbd></li>
 <li><kbd>YPos = (floor(BlockIndex/512)*16) + (floor(BlockIndex/16) MOD 16)</kbd></li>
 </ul>
-
 </li>
+</ul>
+<h2>Other information</h2>
+<ul>
+<li>When using Layer 2 (or layer 3) levels, the width of the level in horizontal levels or the height in vertical levels is halved, rounded downwards to
+the nearest screen boundary. The other &ldquo;half&rdquo; (in quotes because it is not always exactly) of the $C800 table is used up by layer 2/3 in the
+same data format order pattern as layer 1.</li>
+<li>If there is an odd number of H-screens, such as &ldquo;<kbd>$06: Height=$026 tiles, MaxHScreens=$17</kbd>&rdquo; on a layer 2 horizontal level, there
+is a gap between the last byte of layer 1 and the first byte of layer 2 of a size equal to the number of blocks per screen column. For example of the mentioned setting:<br>
+<img src="Readme_files/GapBetweenLayer1And2.png"><br>
+I placed the blocks in an increasing map16 order, with layer 1 blocks on the bottom of the last screen and layer 2 on the first screen on the top so you can see
+it easier when viewed on a debugger. Looking at memory editor we can see there is an unused gap:<br>
+<img src="Readme_files/GapBetweenLayer1And2Dbg.png"><br>
+Notice the gap ranging from $7EE220 to $7EE47F (this also applies to its next bank, $7F (or $41 in SA-1)). This gap is 608 ($260 in hex) bytes long, this is also
+the number of blocks per screen column (16*38 = 608). This gap being the number of blocks per screen column bytes long always works when having any odd-number
+of H-screens for a layer 2 level. It's unknown why <a href="https://www.smwcentral.net/?p=profile&id=8251">Vitor Vilela</a>/<a href="https://www.smwcentral.net/?p=profile&id=9435">FuSoYa</a>
+they decided to position the layer 2 table in such a position, probably due to the rounding of the number of screens downwards to an integer as odd numbers isn't
+divisible by 2.</li>
 </ul>
