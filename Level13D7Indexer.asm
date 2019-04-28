@@ -363,7 +363,8 @@ GetMap16PositionByLevelMap16Index:
 	STA $00					;>$00-$01: %0000000X 0000xxxx ;/
 	AND.w #%0000000100000000		;>A:       %0000000X 00000000
 	LSR #4					;>A:       %00000000 000X0000
-	ORA $00					;>A:       %00000000 000Xxxxx
+	ORA $00					;>A:       %0000000X 000Xxxxx ;>Note the duplicated X position high bit
+	AND.w #%0000000000011111		;>A:       %0000000X 000Xxxxx ;>fix the high bit problem.
 	STA $00					;>$00-$01: %00000000 000Xxxxx ;>X pos done.
 	CLC
 	RTL
