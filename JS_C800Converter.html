@@ -91,44 +91,44 @@ take the starting byte of layer 2 tiles and index from there.</li>
 		Compute()
 	}
 	function IncreaseXPos() {
-		var BlockXPosition = parseInt(document.getElementById("BlockXPos").value, 16)
-		if (isNaN(BlockXPosition) == true) {
-			BlockXPosition = 0
+		var BlockXPositionInput = parseInt(document.getElementById("BlockXPos").value, 16)
+		if (isNaN(BlockXPositionInput) == true) {
+			BlockXPositionInput = 0
 		}
-		if (BlockXPosition < 65535)
-			BlockXPosition++
-		document.getElementById("BlockXPos").value = BlockXPosition.toString(16)
+		if (BlockXPositionInput < 65535)
+			BlockXPositionInput++
+		document.getElementById("BlockXPos").value = BlockXPositionInput.toString(16)
 		Compute()
 	}
 	function DecreaseXPos() {
-		var BlockXPosition = parseInt(document.getElementById("BlockXPos").value, 16)
-		if (isNaN(BlockXPosition) == true) {
-			BlockXPosition = 0
+		var BlockXPositionInput = parseInt(document.getElementById("BlockXPos").value, 16)
+		if (isNaN(BlockXPositionInput) == true) {
+			BlockXPositionInput = 0
 		}
-		if (BlockXPosition > 0)
-			BlockXPosition--
-		document.getElementById("BlockXPos").value = BlockXPosition.toString(16)
+		if (BlockXPositionInput > 0)
+			BlockXPositionInput--
+		document.getElementById("BlockXPos").value = BlockXPositionInput.toString(16)
 		Compute()
 	}
 	function IncreaseYPos() {
-		var BlockYPosition = parseInt(document.getElementById("BlockYPos").value, 16)
-		if (isNaN(BlockYPosition) == true) {
-			BlockYPosition = 0
+		var BlockYPositionInput = parseInt(document.getElementById("BlockYPos").value, 16)
+		if (isNaN(BlockYPositionInput) == true) {
+			BlockYPositionInput = 0
 		}
-		if (BlockYPosition < 65535)
-			BlockYPosition++
-		document.getElementById("BlockYPos").value = BlockYPosition.toString(16)
+		if (BlockYPositionInput < 65535)
+			BlockYPositionInput++
+		document.getElementById("BlockYPos").value = BlockYPositionInput.toString(16)
 		Compute()
 	}
 	function DecreaseYPos() {
-		var BlockYPosition = parseInt(document.getElementById("BlockYPos").value, 16)
-		if (isNaN(BlockYPosition) == true) {
-			BlockYPosition = 0
+		var BlockYPositionInput = parseInt(document.getElementById("BlockYPos").value, 16)
+		if (isNaN(BlockYPositionInput) == true) {
+			BlockYPositionInput = 0
 		}
-		if (BlockYPosition > 0) {
-			BlockYPosition--
+		if (BlockYPositionInput > 0) {
+			BlockYPositionInput--
 		}
-		document.getElementById("BlockYPos").value = BlockYPosition.toString(16)
+		document.getElementById("BlockYPos").value = BlockYPositionInput.toString(16)
 		Compute()
 	}
 	function IncreaseBlockIndex() {
@@ -332,30 +332,30 @@ take the starting byte of layer 2 tiles and index from there.</li>
 				document.getElementById("LevelBlockStatistics").innerHTML  = LevelBlockStatisticsTable
 		//Coordinates to index
 			//Correct XY pos the user entered.
-				var BlockXPosition = parseInt(document.getElementById("BlockXPos").value, 16)
-				if (isNaN(BlockXPosition) == false) {
-					BlockXPosition = clamp(BlockXPosition, 0, 65535)
-					document.getElementById("BlockXPos").value = BlockXPosition.toString(16)
+				var BlockXPositionInput = parseInt(document.getElementById("BlockXPos").value, 16)
+				if (isNaN(BlockXPositionInput) == false) {
+					BlockXPositionInput = clamp(BlockXPositionInput, 0, 65535)
+					document.getElementById("BlockXPos").value = BlockXPositionInput.toString(16)
 				}
-				var BlockYPosition = parseInt(document.getElementById("BlockYPos").value, 16)
-				if (isNaN(BlockYPosition) == false) {
-					BlockYPosition = clamp(BlockYPosition, 0, 65535)
-					document.getElementById("BlockYPos").value = BlockYPosition.toString(16)
+				var BlockYPositionInput = parseInt(document.getElementById("BlockYPos").value, 16)
+				if (isNaN(BlockYPositionInput) == false) {
+					BlockYPositionInput = clamp(BlockYPositionInput, 0, 65535)
+					document.getElementById("BlockYPos").value = BlockYPositionInput.toString(16)
 				}
 			//Don't display a table with NaN in it.
 				var IsNumber = 0
-				if ((isNaN(BlockXPosition) == false) && (isNaN(BlockYPosition) == false)) {
+				if ((isNaN(BlockXPositionInput) == false) && (isNaN(BlockYPositionInput) == false)) {
 					IsNumber = 1
 				}
 			//When the user enters a coordinate that is only available in horizontal levels but is within bounds
 			//of a normal level
 				var IsCoordinatePointsPastHalfedLevel = 0
 				if (LevelFormat == 0) {
-					if ((BlockXPosition >= (NumberOfHscreensLayer2Level*16)) && (BlockXPosition <= MaxBlockXPosition)) {
+					if ((BlockXPositionInput >= (NumberOfHscreensLayer2Level*16)) && (BlockXPositionInput <= MaxBlockXPosition)) {
 						IsCoordinatePointsPastHalfedLevel = 1
 					}
 				} else {
-					if ((BlockYPosition >= (NumberOfVScreensLayer2Level*16)) && (BlockYPosition <= MaxBlockYPosition)) {
+					if ((BlockYPositionInput >= (NumberOfVScreensLayer2Level*16)) && (BlockYPositionInput <= MaxBlockYPosition)) {
 						IsCoordinatePointsPastHalfedLevel = 1
 					}
 				}
@@ -363,18 +363,17 @@ take the starting byte of layer 2 tiles and index from there.</li>
 				//Check if position is outside of level:
 					
 					var OffLevel = 0
-					if ((BlockXPosition > MaxBlockXPosition)||(BlockYPosition > MaxBlockYPosition)) {
+					if ((BlockXPositionInput > MaxBlockXPosition)||(BlockYPositionInput > MaxBlockYPosition)) {
 						OffLevel = 1
 					}
 				//Compute the index
 					if (OffLevel == 0) {
 						if (LevelFormat == 0) {
 							//Horizontal level calculation
-							var ScreenColumnPassed = Math.floor(BlockXPosition/16)
-							var Index = (BlocksPerScreenCol*ScreenColumnPassed) + (BlockYPosition*16) + (BlockXPosition % 16)
+							var Index = (BlocksPerScreenCol*(Math.floor(BlockXPositionInput/16))) + (BlockYPositionInput*16) + (BlockXPositionInput % 16)
 						} else {
 							//Vertical level index calculation
-							var Index = (512 * Math.floor(BlockYPosition/16)) + (256 * Math.floor(BlockXPosition/16)) + ((BlockYPosition % 16)*16) + (BlockXPosition % 16)
+							var Index = (512 * Math.floor(BlockYPositionInput/16)) + (256 * Math.floor(BlockXPositionInput/16)) + ((BlockYPositionInput % 16)*16) + (BlockXPositionInput % 16)
 						}
 						CoordsToIndexOutput += "<br><table>"
 						CoordsToIndexOutput += "<tr>"
@@ -406,10 +405,10 @@ take the starting byte of layer 2 tiles and index from there.</li>
 					document.getElementById("InLayer2VerticalLevelOtherHalf").innerHTML = "<kbd><font color='orange'>Only valid for layer 1 level.</font></kbd>"
 				}
 			//Check if given position is outside the level boundaries
-				if (BlockXPosition > MaxBlockXPosition) {
+				if (BlockXPositionInput > MaxBlockXPosition) {
 					CoordsToIndexOutput += "<font color='red'><kbd>Block X position is outside the level (X = $0 to X = $" + MaxBlockXPosition.toString(16) + " is valid).</kbd><br></font>"
 				}
-				if (BlockYPosition > MaxBlockYPosition) {
+				if (BlockYPositionInput > MaxBlockYPosition) {
 					CoordsToIndexOutput += "<font color='red'><kbd>Block Y position is outside the level (Y = $0 to Y = $" + MaxBlockYPosition.toString(16) + " is valid).</kbd><br></font>"
 				}
 				//Output:
@@ -429,9 +428,8 @@ take the starting byte of layer 2 tiles and index from there.</li>
 						if (BlockIndexInput < TotalBlocksInNormalLevel) {
 							//Convert to coordinates
 								if (LevelFormat == 0) {
-									ScreenColumnPassed = Math.floor(BlockIndexInput/BlocksPerScreenCol)*16
 									var BlockYPositionOutput = Math.floor((BlockIndexInput % BlocksPerScreenCol)/16)
-									var BlockXPositionOutput = ScreenColumnPassed+(BlockIndexInput % 16)
+									var BlockXPositionOutput = (Math.floor(BlockIndexInput/BlocksPerScreenCol)*16)+(BlockIndexInput % 16)
 								} else {
 									//(Math.floor(BlockIndexInput/512)*16) is every screen being passed, causing increments of 16 of the Y position.
 									// There are 512 blocks per screen.
