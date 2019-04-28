@@ -222,7 +222,7 @@ GetLevelMap16IndexByMap16Position:
 	;$00-$01: %00000000 000Xxxxx
 	;$02-$03: %0000000Y YYYYyyyy
 	;Rearrange to:
-	;         %00YYYYYX yyyyxxxx
+	;$00-$01: %00YYYYYX yyyyxxxx
 	
 	
 	
@@ -275,16 +275,30 @@ GetLevelMap16IndexByMap16Position:
 ;; -Carry: Set if index is invalid.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Computation as follows:
-;ScreenColumnPassed = floor(Index/RAM_13D7)			;>Number of screen column passed (%00000000000XXXXX)
-;PartialScreenColumn = Index MOD RAM_13D7			;>the screen column after the last screen column passed (%00yyyyyyyyyyxxxx)
-;BlockYPos = floor(PartialScreenColumn/16)			;>Y position (%00yyyyyyyyyyxxxx -> %000000yyyyyyyyyy)
-;BlockXPosWithinColumn = (PartialScreenColumn Mod 16)		;>X position within a screen column (%00yyyyyyyyyyxxxx -> %000000000000xxxx)
-;BlockXPos = (ScreenColumnPassed*16) + BlockXPosWithinColumn	;>X Position (%0000000XXXXXxxxx)
+;Horizontal level:
+; ScreenColumnPassed = floor(Index/RAM_13D7)			;>Number of screen column passed (%00000000000XXXXX)
+; PartialScreenColumn = Index MOD RAM_13D7			;>the screen column after the last screen column passed (%00yyyyyyyyyyxxxx)
+; BlockYPos = floor(PartialScreenColumn/16)			;>Y position (%00yyyyyyyyyyxxxx -> %000000yyyyyyyyyy)
+; BlockXPosWithinColumn = (PartialScreenColumn Mod 16)		;>X position within a screen column (%00yyyyyyyyyyxxxx -> %000000000000xxxx)
+; BlockXPos = (ScreenColumnPassed*16) + BlockXPosWithinColumn	;>X Position (%0000000XXXXXxxxx)
+;Vertical level:
+; YPos = (floor(Index/512)*16) + (floor(Index/16) % 16)
+; XPos = (floor((Index % 512)/256)*16) + (Index % 16)
+;
+; In boolean bitwise operation, you simply rearrange the group
+; of bits due to the width and height as well as the number of
+; blocks per screen are powers of 2.
 GetMap16PositionByLevelMap16Index:
 	REP #$20
 	LDA $00
 	CMP #$3800
 	BCS .Invalid
+	SEP #$20
+	LDA $5B
+	LSR
+	REP #$20
+	BCS .VerticalLevel
+
 	if !sa1 == 0
 		LDA $13D7|!addr			;\Index divide by number of blocks per screen column
 		STA $02				;|
@@ -327,8 +341,31 @@ GetMap16PositionByLevelMap16Index:
 	RTL
 	
 	.Invalid
-	SEP #$20
-	SEC
+	SEP #$21
+	RTL
+;Rearrange this:
+; $00-$01: %00YYYYYX yyyyxxxx
+;to:
+; $00-$01: %00000000 000Xxxxx
+; $02-$03: %0000000Y YYYYyyyy
+	.VerticalLevel
+	LDA $00					;>$00-$01: %00YYYYYX yyyyxxxx
+	AND.w #%0000000011110000		;>A:       %00000000 yyyy0000
+	LSR #4					;>A:       %00000000 0000yyyy
+	STA $02					;>$02-$03: %00000000 0000yyyy
+	LDA $00					;>$00-$01: %00YYYYYX yyyyxxxx
+	AND.w #%0011111000000000		;>A:       %00YYYYY0 00000000
+	LSR #5					;>A:       %0000000Y YYYY0000
+	ORA $02					;>A:       %0000000Y YYYYyyyy
+	STA $02					;>$02-$03: %0000000Y YYYYyyyy ;>Y pos done.
+	LDA $00					;>$00-$01: %00YYYYYX yyyyxxxx ;\Make room to place the high bit X position
+	AND.w #%0000000100001111		;>A:       %0000000X 0000xxxx ;|next to the low 4 bits of X position.
+	STA $00					;>$00-$01: %0000000X 0000xxxx ;/
+	AND.w #%0000000100000000		;>A:       %0000000X 00000000
+	LSR #4					;>A:       %00000000 000X0000
+	ORA $00					;>A:       %00000000 000Xxxxx
+	STA $00					;>$00-$01: %00000000 000Xxxxx ;>X pos done.
+	CLC
 	RTL
 if !sa1 == 0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
