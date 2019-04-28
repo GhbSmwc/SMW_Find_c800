@@ -438,11 +438,17 @@ take the starting byte of layer 2 tiles and index from there.</li>
 									//(Math.floor(BlockIndexInput/16) % 16) is the Y position within a screen, it is first divided by 16 since each line
 									// is 16 blocks, then modulo by 16 (wrapping range $00-$0F because the screen is also 16 blocks tall)
 										var BlockYPositionOutput = (Math.floor(BlockIndexInput/512)*16) + (Math.floor(BlockIndexInput/16) % 16)
-										var BlockXPositionOutput = (BlockIndexInput % 16)
+									//(Math.floor((BlockIndexInput % 512)/256)*16) will be either $00 or $10 depending if the X position is on the left
+									// or right half of the screen boundary.
+										var BlockXPositionOutput = (Math.floor((BlockIndexInput % 512)/256)*16) + (BlockIndexInput % 16)
 								}
 								IndexToCoordsOutput += "Position: ($" + BlockXPositionOutput.toString(16) + ", $" + BlockYPositionOutput.toString(16) + ")<br>"
 								if (BlockIndexInput >= TotalBlocksInLevelLayer2) {
-									IndexToCoordsOutput += "<font color='orange'>If level is layer 2, this index is invalid (layer 2 valid index up to $" + (TotalBlocksInLevelLayer2-1).toString(16) + ").</font>"
+									if (HalfedHorizontalLevelResultsWidthOfZero == 0) {
+										IndexToCoordsOutput += "<font color='orange'>If level is layer 2, this index is invalid (layer 2 valid index up to $" + (TotalBlocksInLevelLayer2-1).toString(16) + ").</font>"
+									} else {
+										IndexToCoordsOutput += "<font color='orange'>Layer 2 does not work here.</font>"
+									}
 								}
 						} else {
 							//Indicate that index points to past the last block
