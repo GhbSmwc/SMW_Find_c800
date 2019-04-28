@@ -123,21 +123,14 @@ endif
 ;
 ;Horizontal level:
 ; Formula:
-;  Index = (RAM_13D7 * %XXXXX) + (%00yyyyyyyyyy0000 || %000000000000xxxx)
-;  In formal writing:
-;   Index = (BlocksPerScrnCol * floor(XPos/16)) + (YPos*16) + (XPos MOD 16)
+;  Index = (BlocksPerScrnCol * floor(XPos/16)) + (YPos*16) + (XPos MOD 16).
 ;Vertical level:
 ; Formula:
-;  Index = ($0200 * %YYYYY) + (%X00000000 && $0100) + (%yyyy << 4) + (%xxxx)
-;  In formal writing:
-;   Index = 512 * floor(YPos/16) + (256 * floor(XPos/16)) + ((YPos MOD 16)*16) + (XPos MOD 16)
+;  Index = (512 * floor(YPos/16)) + (256 * floor(XPos/16)) + ((YPos MOD 16)*16) + (XPos MOD 16)
+;
 ; Thankfully, each screen is a number power of 2 for the number of blocks per screen: 512 ($0200)
 ; (which is 2^9), and so does its width and height (2^5 = 32 and 2^4 = 16) which means screen
 ; unit handling is easier than horizontal levels. The bit format of the index is %YYYYYXyyyyxxxx
-;
-; || = OR boolean operation
-; && = AND boolean operation
-; << = leftshift boolean operation (<< 4 means shift bits left 4 times)
 
 GetLevelMap16IndexByMap16Position:
 	;Check level format
@@ -276,14 +269,15 @@ GetLevelMap16IndexByMap16Position:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Computation as follows:
 ;Horizontal level:
-; ScreenColumnPassed = floor(Index/RAM_13D7)			;>Number of screen column passed (%00000000000XXXXX)
-; PartialScreenColumn = Index MOD RAM_13D7			;>the screen column after the last screen column passed (%00yyyyyyyyyyxxxx)
-; BlockYPos = floor(PartialScreenColumn/16)			;>Y position (%00yyyyyyyyyyxxxx -> %000000yyyyyyyyyy)
-; BlockXPosWithinColumn = (PartialScreenColumn Mod 16)		;>X position within a screen column (%00yyyyyyyyyyxxxx -> %000000000000xxxx)
-; BlockXPos = (ScreenColumnPassed*16) + BlockXPosWithinColumn	;>X Position (%0000000XXXXXxxxx)
+; XPos = (floor(BlockIndex/BlocksPerScreenCol)*16) + (Index MOD 16)
+; YPos = floor((BlockIndex MOD BlocksPerScreenCol)/16)
+;
+; BlocksPerScreenCol is basically RAM $13D7, it not only holds the
+; height of the level in pixels, it also holds the number of
+; blocks per screen column.
 ;Vertical level:
-; YPos = (floor(Index/512)*16) + (floor(Index/16) % 16)
-; XPos = (floor((Index % 512)/256)*16) + (Index % 16)
+; XPos = (floor((BlockIndex MOD 512)/256)*16) + (BlockIndex MOD 16)
+; YPos = (floor(BlockIndex/512)*16) + (floor(BlockIndex/16) MOD 16)
 ;
 ; In boolean bitwise operation, you simply rearrange the group
 ; of bits due to the width and height as well as the number of
