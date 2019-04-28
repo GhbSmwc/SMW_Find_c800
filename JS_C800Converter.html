@@ -374,7 +374,7 @@ take the starting byte of layer 2 tiles and index from there.</li>
 							var Index = (BlocksPerScreenCol*ScreenColumnPassed) + (BlockYPosition*16) + (BlockXPosition % 16)
 						} else {
 							//Vertical level index calculation
-							var Index = 512 * Math.floor(BlockYPosition/16) + (256 * Math.floor(BlockXPosition/16)) + ((BlockYPosition % 16)*16) + (BlockXPosition % 16)
+							var Index = (512 * Math.floor(BlockYPosition/16)) + (256 * Math.floor(BlockXPosition/16)) + ((BlockYPosition % 16)*16) + (BlockXPosition % 16)
 						}
 						CoordsToIndexOutput += "<br><table>"
 						CoordsToIndexOutput += "<tr>"

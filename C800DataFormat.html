@@ -9,6 +9,20 @@ for every tile in the current level with the low bytes in bank $7E ($40 SA-1) an
 are multiple rows of screen boundaries and not the next &ldquo;screen number&rdquo; displayed in Lunar Magic:<br>
 <img src="Readme_files/SMW_ColumnMajorScreenColumn.png"></li>
 </ol>
+<h3>Calculating the coordinates and reverse.</h3>
+<img src="Readme_files/ComputationHorizLevel.png">
+<ol>
+<li>Formula to calculate to find the index is <kbd>Index = (BlocksPerScrnCol * floor(XPos/16)) + (YPos*16) + (XPos MOD 16)</kbd>.</li>
+<li>Formula to calculate to find the coordinates is:
+<ul>
+<li><kbd>XPos = (floor(BlockIndex/BlocksPerScreenCol)*16) + (Index MOD 16)</kbd></li>
+<li><kbd>YPos = floor((BlockIndex MOD BlocksPerScreenCol)/16)</kbd></li>
+</ul>
+
+<kbd>BlocksPerScreenCol</kbd> Is simply RAM address $13D7. This not only contains the level height in pixels, it is also the number of blocks
+per screen column.
+</li>
+</ol>
 <h2>Vertical levels</h2>
 <ol>
 <li>Similar to horizontal levels, but does the row-major format within each half (or every subscreen boundary) of the screen:<br>
@@ -16,3 +30,21 @@ are multiple rows of screen boundaries and not the next &ldquo;screen number&rdq
 <li>Once the last block of the screen boundary is reached, it repeats the whole process on the next screen.<br>
 <img src="Readme_files/SMW_VerticalLevelFormatByScreen.png"></li>
 </ol>
+<h3>Calculating the coordinates and reverse.</h3>
+<img src="Readme_files/ComputationVertLevel.png">
+<ol>
+<li>Similar to horizontal levels, but because there are no dimension settings for vertical levels, the task is much easier, and even more so thanks
+to the fact that each screen's width and height and the number of blocks are all powers of 2, making easy use of bitwise operations. In fact, the index
+in binary is <kbd>%00YYYYYXyyyyxxxx</kbd>, where uppercase X and Y represents what screen boundary and what halves (X = 0 for left and 1 for right)
+within a screen boundary.</li>
+</ol>
+<ul>
+<li>Formula to calculate to find the index is <kbd>Index = (512 * floor(YPos/16)) + (256 * floor(XPos/16)) + ((YPos MOD 16)*16) + (XPos MOD 16)</kbd></li>
+<li>To get the coordinates:
+<ul>
+<li><kbd>XPos = (floor((BlockIndex MOD 512)/256)*16) + (BlockIndex MOD 16)</kbd></li>
+<li><kbd>YPos = (floor(BlockIndex/512)*16) + (floor(BlockIndex/16) MOD 16)</kbd></li>
+</ul>
+
+</li>
+</ul>
