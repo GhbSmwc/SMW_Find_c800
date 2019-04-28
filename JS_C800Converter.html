@@ -132,25 +132,25 @@ take the starting byte of layer 2 tiles and index from there.</li>
 		Compute()
 	}
 	function IncreaseBlockIndex() {
-		var BlockIndexer = parseInt(document.getElementById("BlockIndex").value, 16)
-		if (isNaN(BlockIndexer) == true) {
-			BlockIndexer = 0
+		var BlockIndexInput = parseInt(document.getElementById("BlockIndex").value, 16)
+		if (isNaN(BlockIndexInput) == true) {
+			BlockIndexInput = 0
 		}
-		if (BlockIndexer < 14335) {
-			BlockIndexer++
+		if (BlockIndexInput < 14335) {
+			BlockIndexInput++
 		}
-		document.getElementById("BlockIndex").value = BlockIndexer.toString(16)
+		document.getElementById("BlockIndex").value = BlockIndexInput.toString(16)
 		Compute()
 	}
 	function DecreaseBlockIndex() {
-		var BlockIndexer = parseInt(document.getElementById("BlockIndex").value, 16)
-		if (isNaN(BlockIndexer) == true) {
-			BlockIndexer = 0
+		var BlockIndexInput = parseInt(document.getElementById("BlockIndex").value, 16)
+		if (isNaN(BlockIndexInput) == true) {
+			BlockIndexInput = 0
 		}
-		if (BlockIndexer > 0) {
-			BlockIndexer--
+		if (BlockIndexInput > 0) {
+			BlockIndexInput--
 		}
-		document.getElementById("BlockIndex").value = BlockIndexer.toString(16)
+		document.getElementById("BlockIndex").value = BlockIndexInput.toString(16)
 		Compute()
 	}
 	function Compute() {
@@ -252,6 +252,13 @@ take the starting byte of layer 2 tiles and index from there.</li>
 				
 				var Layer2DataStart = parseInt("c800", 16) + TotalBlocksInLevelLayer2
 			}
+		//Disable drop-down list of what horizontal level dimension setting when vertical level is set to.
+			if (LevelFormat == 0) {
+				document.getElementById("LevelDimensionSettings").disabled = false
+			} else {
+				document.getElementById("LevelDimensionSettings").disabled = true
+			}
+		//Horizontal level with 1 screen wide on a layer 2 level is invalid.
 			var HalfedHorizontalLevelResultsWidthOfZero = 0
 			if ((LevelFormat == 0) && (NumberOfHscreensLayer2Level == 0)) {
 				HalfedHorizontalLevelResultsWidthOfZero = 1
@@ -413,20 +420,28 @@ take the starting byte of layer 2 tiles and index from there.</li>
 			//to make it instead replace.
 				var IndexToCoordsOutput = ""
 			//Correct index
-				var BlockIndexer = parseInt(document.getElementById("BlockIndex").value, 16)
-				if (isNaN(BlockIndexer) == false) {
-					BlockIndexer = clamp(BlockIndexer, 0, 14335)
-					document.getElementById("BlockIndex").value = BlockIndexer.toString(16)
+				var BlockIndexInput = parseInt(document.getElementById("BlockIndex").value, 16)
+				if (isNaN(BlockIndexInput) == false) {
+					BlockIndexInput = clamp(BlockIndexInput, 0, 14335)
+					document.getElementById("BlockIndex").value = BlockIndexInput.toString(16)
 					
 					//Check if index would point to beyond the last block in level
-						if (BlockIndexer < TotalBlocksInNormalLevel) {
+						if (BlockIndexInput < TotalBlocksInNormalLevel) {
 							//Convert to coordinates
-								var ScreenColumnPassed = Math.floor(BlockIndexer/BlocksPerScreenCol)*16
-								var BlockYPosition = Math.floor((BlockIndexer % BlocksPerScreenCol)/16)
-								var BlockXPosition = ScreenColumnPassed+(BlockIndexer % 16)
-								
-								IndexToCoordsOutput += "Position: ($" + BlockXPosition.toString(16) + ", $" + BlockYPosition.toString(16) + ")<br>"
-								if (BlockIndexer >= TotalBlocksInLevelLayer2) {
+								if (LevelFormat == 0) {
+									ScreenColumnPassed = Math.floor(BlockIndexInput/BlocksPerScreenCol)*16
+									var BlockYPositionOutput = Math.floor((BlockIndexInput % BlocksPerScreenCol)/16)
+									var BlockXPositionOutput = ScreenColumnPassed+(BlockIndexInput % 16)
+								} else {
+									//(Math.floor(BlockIndexInput/512)*16) is every screen being passed, causing increments of 16 of the Y position.
+									// There are 512 blocks per screen.
+									//(Math.floor(BlockIndexInput/16) % 16) is the Y position within a screen, it is first divided by 16 since each line
+									// is 16 blocks, then modulo by 16 (wrapping range $00-$0F because the screen is also 16 blocks tall)
+										var BlockYPositionOutput = (Math.floor(BlockIndexInput/512)*16) + (Math.floor(BlockIndexInput/16) % 16)
+										var BlockXPositionOutput = (BlockIndexInput % 16)
+								}
+								IndexToCoordsOutput += "Position: ($" + BlockXPositionOutput.toString(16) + ", $" + BlockYPositionOutput.toString(16) + ")<br>"
+								if (BlockIndexInput >= TotalBlocksInLevelLayer2) {
 									IndexToCoordsOutput += "<font color='orange'>If level is layer 2, this index is invalid (layer 2 valid index up to $" + (TotalBlocksInLevelLayer2-1).toString(16) + ").</font>"
 								}
 						} else {
