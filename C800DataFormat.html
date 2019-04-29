@@ -63,4 +63,8 @@ the number of blocks per screen column (16*38 = 608). This gap being the number 
 of H-screens for a layer 2 level. It's unknown why <a href="https://www.smwcentral.net/?p=profile&id=8251">Vitor Vilela</a>/<a href="https://www.smwcentral.net/?p=profile&id=9435">FuSoYa</a>
 they decided to position the layer 2 table in such a position, probably due to the rounding of the number of screens downwards to an integer as odd numbers isn't
 divisible by 2.</li>
+<li>Writing to $C800 table <b>does</b> change the map16 number like you would with GPS's <kbd>change_map16</kbd> routine, however, the graphics will not be updated until
+it is refreshed by level loading (during the screen fades to the level) or when re-entering the screen after scrolled offscreen far enough. This is to prevent
+V-blank overflow by updating the graphics only when necessary at the moment the block is changed via routine (instead of writing to V-RAM's tilemap and checking every block
+every frame). Thankfully, with UberasmTool, you can use the <kbd>load:</kbd> label feature so you can write to $C800 before the game process the block numbers to display their graphics.</li>
 </ul>
