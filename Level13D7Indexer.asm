@@ -293,6 +293,7 @@ GetMap16PositionByLevelMap16Index:
 	REP #$20
 	BCS .VerticalLevel
 
+	.HorizontalLevel
 	if !sa1 == 0
 		LDA $13D7|!addr			;\Index divide by number of blocks per screen column
 		STA $02				;|
@@ -330,7 +331,13 @@ GetMap16PositionByLevelMap16Index:
 		ORA $00				;>A: (... + BlockXPosWithinColumn)
 		STA $00				;>(ScreenColumnPassed*16) + BlockXPosWithinColumn (%0000000XXXXX0000 + %00000000000XXXXX)
 	endif
+	LDA $00					;\Screen column the block coordinate is on
+	LSR #4					;/
 	SEP #$20
+	CMP $5E					;>If past the last screen, mark as invalid.
+	BCS .Invalid
+	
+	.Valid
 	CLC				;>Mark that this is a valid coordinate.
 	RTL
 	
@@ -360,7 +367,12 @@ GetMap16PositionByLevelMap16Index:
 	ORA $00					;>A:       %0000000X 000Xxxxx ;>Note the duplicated X position high bit
 	AND.w #%0000000000011111		;>A:       %0000000X 000Xxxxx ;>fix the high bit problem.
 	STA $00					;>$00-$01: %00000000 000Xxxxx ;>X pos done.
-	CLC
+	
+	LDA $02
+	LSR #4
+	SEP #$20
+	CMP $5F
+	BCS .Invalid
 	RTL
 if !sa1 == 0
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
