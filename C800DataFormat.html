@@ -1,12 +1,69 @@
+<html>
+	<head>
+		<style>
+			html {
+			background-color: white;
+			color: black;
+			font-family: sans-serif;
+			}
+			
+			table, th, td {
+			border: 1px solid black;
+			border-collapse: collapse;
+			}
+			
+			span.NoLineBreak {
+				white-space: nowrap;
+			}
+		</style>
+	</head>
+<body>
+
 <h1>SMW's Level block format</h1>
-In SMW's levels, RAM address $C800 in banks $7E/$7F ($40/$41 in SA-1) contains all the block data of layer 1 and 2 (if the level is a layer 2 level). They hold the map 16 number/ID
-for every tile in the current level with the low bytes in bank $7E ($40 SA-1) and high bytes in bank $7F ($41 SA-1). The format of the blocks as follows:
+In SMW's levels, RAM address <kbd>$C800</kbd> in banks <kbd>$7E</kbd>/<kbd>$7F</kbd> (<kbd>$40</kbd>/<kbd>$41</kbd> in SA-1) contains all the block data of layer 1 and 2
+(if the level is a layer 2 level). They hold the map 16 number/ID for every tile in the current level with the low bytes in bank <kbd>$7E</kbd> (<kbd>$40</kbd> SA-1)
+and high bytes in bank <kbd>$7F</kbd> (<kbd>$41</kbd> SA-1). The format of the blocks as follows:
+<h2>Byte format</h2>
+Because map16 numbers are 16-bit numbers (in the original SMW, they're technically 9-bits as page 0 and 1 are only used, but have to have another full byte due to being a table and that a byte
+is the smallest addressable unit of memory), they have their low and high bytes stored separately in bank <kbd>$7E</kbd> (<kbd>$40</kbd> for SA-1) for the low byte and bank <kbd>$7F</kbd>
+(<kbd>$41</kbd> in SA-1) for the high byte. For example, if the first block stored in memory (top-left block on any level format) is <kbd>$<font color="red">01</font><font color="blue">30</font></kbd>
+(cement block), then <kbd>$7EC800 ($40C800)</kbd> would have a single byte saying <kbd>$<font color="blue">30</font></kbd> and <kbd>$7FC800 ($41C800)</kbd>'s byte saying <kbd>$<font color="red">01</font></kbd>.<br><br>
+Each next byte in both tables means each next block in the level:<br><br>
+
+<table>
+<tr>
+<td></th>
+<th>+0 (<kbd>$C800</kbd>)</th>
+<th>+1 (<kbd>$C801</kbd>)</th>
+<th>+2 (<kbd>$C802</kbd>)</th>
+<th>+3 (<kbd>$C803</kbd>)</th>
+<th>...</th>
+</tr>
+<tr>
+<td>Bank <kbd>$7E</kbd>/<kbd>$40</kbd></td>
+<td>&lt;FirstBlock_LowByte&gt;</td>
+<td>&lt;SecondBlock_LowByte&gt;</td>
+<td>&lt;ThirdBlock_LowByte&gt;</td>
+<td>&lt;FourthBlock_LowByte&gt;</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Bank <kbd>$7F</kbd>/<kbd>$41</kbd></td>
+<td>&lt;FirstBlock_HighByte&gt;</td>
+<td>&lt;SecondBlock_HighByte&gt;</td>
+<td>&lt;ThirdBlock_HighByte&gt;</td>
+<td>&lt;FourthBlock_HighByte&gt;</td>
+<td>...</td>
+</tr>
+
+</table>
+
 <h2>Horizontal levels</h2>
 <ol>
-<li>Within each screen column, each subsequent byte in memory starting at $C800 is the next block in level from left to right and then next row from left to right again (row-major):<br>
+<li>Within each screen column, each subsequent byte in memory starting at <kbd>$C800</kbd> is the next block in level from left to right and then next row from left to right again (row-major):<br>
 <img src="Readme_files/SMW_RowMajorBlocksPerScreen.png"></li>
 <li>Once the <b>bottom</b> of the level is reached, the next screen column starting from the top-left and repeats the pattern. Note that this continues down the screen columns even if there
-are multiple rows of screen boundaries and not the next &ldquo;screen number&rdquo; displayed in Lunar Magic:<br>
+are multiple rows of screen boundaries and not the next &ldquo;screen number&rdquo; shown in Lunar Magic:<br>
 <img src="Readme_files/SMW_ColumnMajorScreenColumn.png"></li>
 </ol>
 <h3>Calculating the coordinates and reverse.</h3>
@@ -58,13 +115,14 @@ is a gap between the last byte of layer 1 and the first byte of layer 2 of a siz
 I placed the blocks in an increasing map16 order, with layer 1 blocks on the bottom of the last screen and layer 2 on the first screen on the top so you can see
 it easier when viewed on a debugger. Looking at memory editor we can see there is an unused gap:<br>
 <img src="Readme_files/GapBetweenLayer1And2Dbg.png"><br>
-Notice the gap ranging from $7EE220 to $7EE47F (this also applies to its next bank, $7F (or $41 in SA-1)). This gap is 608 ($260 in hex) bytes long, this is also
+Notice the gap ranging from <kbd>$7EE220</kbd> to <kbd>$7EE47F</kbd> (this also applies to its next bank, $7F (or $41 in SA-1)). This gap is 608 ($260 in hex) bytes long, this is also
 the number of blocks per screen column (16*38 = 608). This gap being the number of blocks per screen column bytes long always works when having any odd-number
 of H-screens for a layer 2 level. It's unknown why <a href="https://www.smwcentral.net/?p=profile&id=8251">Vitor Vilela</a>/<a href="https://www.smwcentral.net/?p=profile&id=9435">FuSoYa</a>
-they decided to position the layer 2 table in such a position, probably due to the rounding of the number of screens downwards to an integer as odd numbers isn't
+they decided to position the layer 2 data table in such a position, probably due to the rounding of the number of screens downwards to an integer as odd numbers isn't
 divisible by 2.</li>
-<li>Writing to $C800 table <b>does</b> change the map16 number like you would with GPS's <kbd>change_map16</kbd> routine, however, the graphics will not be updated until
-it is refreshed by level loading (during the screen fades to the level) or when re-entering the screen after scrolled offscreen far enough. This is to prevent
-V-blank overflow by updating the graphics only when necessary at the moment the block is changed via routine (instead of writing to V-RAM's tilemap and checking every block
-every frame). Thankfully, with UberasmTool, you can use the <kbd>load:</kbd> label feature so you can write to $C800 before the game process the block numbers to display their graphics.</li>
+<li>If you write to the <kbd>$C800</kbd> table, it <b>does</b> change the map16 number like you would with GPS's <kbd>change_map16</kbd> routine, however, the graphics will not be updated until
+it is refreshed by level loading (during the screen fades to the level) or when re-entering the player's screen after scrolled offscreen far enough. This is to prevent
+V-blank overflow by updating the graphics only when necessary at the moment the block is changed during a map16 change routine (instead of writing to V-RAM's
+tilemap and checking every block every frame). Thankfully, with UberasmTool, you can use the <kbd>load:</kbd> label feature so you can write to <kbd>$C800</kbd> table before
+the game process the block numbers to display their graphics. You can also safely change blocks during level mode after its loaded if you change the blocks that are outside the screen.</li>
 </ul>
