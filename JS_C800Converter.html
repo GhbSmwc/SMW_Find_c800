@@ -35,7 +35,7 @@ take the starting byte of layer 2 tiles and index from there.</li>
 <body onload="PageLoad()">
 
 <form>
-<input type="radio" name="VerticalOrHorizLevel" id="IDHorizontalLevel" onclick="Compute()" checked>Horizontal Level: 
+<input type="radio" name="VerticalOrHorizLevel" id="IDHorizontalLevel" onclick="Compute()" checked><label for="IDHorizontalLevel">Horizontal Level: 
 <select id="LevelDimensionSettings" onchange="Compute()">
 <option value="0">$00: Height=$01B tiles, MaxHScreens=$20</option>
 <option value="1">$01: Height=$01C tiles, MaxHScreens=$20</option>
@@ -66,8 +66,8 @@ take the starting byte of layer 2 tiles and index from there.</li>
 <option value="1a">$1A: Height=$12A tiles, MaxHScreens=$03</option>
 <option value="1B">$1B: Height=$1C0 tiles, MaxHScreens=$02</option>
 <option value="1C">$1C: Height=$380 tiles, MaxHScreens=$01</option>
-</select><br>
-<input type="radio" name="VerticalOrHorizLevel" id="IDVerticalLevel" onclick="Compute()">Vertical Level<br>
+</select></label><br>
+<input type="radio" name="VerticalOrHorizLevel" id="IDVerticalLevel" onclick="Compute()"><label for="IDVerticalLevel">Vertical Level</label><br>
 </form>
 <br><br>
 <span id="LevelBlockStatistics"></span><br>
