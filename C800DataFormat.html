@@ -60,7 +60,7 @@ Each next byte in both tables means each next block in the level:<br><br>
 
 <h2>Horizontal levels</h2>
 <ol>
-<li>Within each screen column, each subsequent byte in memory starting at <kbd>$C800</kbd> is the next block in level from left to right and then next row from left to right again (row-major):<br>
+<li>Within each screen column, each subsequent byte in memory starting at <kbd>$C800</kbd> is the next block in level from left to right and then the next row downwards from left to right again (row-major):<br>
 <img src="Readme_files/SMW_RowMajorBlocksPerScreen.png"></li>
 <li>Once the <b>bottom</b> of the level is reached, the next screen column starting from the top-left and repeats the pattern. Note that this continues down the screen columns even if there
 are multiple rows of screen boundaries and not the next &ldquo;screen number&rdquo; shown in Lunar Magic:<br>
@@ -76,7 +76,7 @@ are multiple rows of screen boundaries and not the next &ldquo;screen number&rdq
 <li><kbd>YPos = floor((BlockIndex MOD BlocksPerScreenCol)/16)</kbd></li>
 </ul>
 
-<kbd>BlocksPerScreenCol</kbd> Is simply RAM address $13D7. This not only contains the level height in pixels, it is also the number of blocks
+<kbd>BlocksPerScreenCol</kbd> Is simply RAM address <kbd>$13D7</kbd> (if in a SA-1 ROM, that is <kbd>$13D7|!addr</kbd> &rightarrow; <kbd>$73D7</kbd>). This not only contains the level height in pixels, it is also the number of blocks
 per screen column.
 </li>
 </ol>
@@ -115,7 +115,7 @@ is a gap between the last byte of layer 1 and the first byte of layer 2 of a siz
 I placed the blocks in an increasing map16 order, with layer 1 blocks on the bottom of the last screen and layer 2 on the first screen on the top so you can see
 it easier when viewed on a debugger. Looking at memory editor we can see there is an unused gap:<br>
 <img src="Readme_files/GapBetweenLayer1And2Dbg.png"><br>
-Notice the gap ranging from <kbd>$7EE220</kbd> to <kbd>$7EE47F</kbd> (this also applies to its next bank, $7F (or $41 in SA-1)). This gap is 608 ($260 in hex) bytes long, this is also
+Notice the gap ranging from <kbd>$7EE220</kbd> to <kbd>$7EE47F</kbd> (this also applies to the other bank, as their data position corresponds)). This gap is 608 ($260 in hex) bytes long, this is also
 the number of blocks per screen column (16*38 = 608). This gap being the number of blocks per screen column bytes long always works when having any odd-number
 of H-screens for a layer 2 level. It's unknown why <a href="https://www.smwcentral.net/?p=profile&id=8251">Vitor Vilela</a>/<a href="https://www.smwcentral.net/?p=profile&id=9435">FuSoYa</a>
 they decided to position the layer 2 data table in such a position, probably due to the rounding of the number of screens downwards to an integer as odd numbers isn't
@@ -126,3 +126,5 @@ V-blank overflow by updating the graphics only when necessary at the moment the 
 tilemap and checking every block every frame). Thankfully, with UberasmTool, you can use the <kbd>load:</kbd> label feature so you can write to <kbd>$C800</kbd> table before
 the game process the block numbers to display their graphics. You can also safely change blocks during level mode after its loaded if you change the blocks that are outside the screen.</li>
 </ul>
+<h2>Final notes</h2>
+<a href="JS_C800Converter.html">I've included an HTML file</a> that uses javascript to compute the index and position much easier without pasting it in the calculator and manuelly setting up the variables.
