@@ -459,9 +459,12 @@ take the starting byte of layer 2 tiles and index from there.</li>
 							//Indicate that index points to past the last block
 								IndexToCoordsOutput = "<font color='red'>Index points beyond the last block. Valid index is from $0 to $" + (TotalBlocksInNormalLevel-1).toString(16) + ".</font>"
 						}
-					//Output:
-						document.getElementById("IndexToCoords").innerHTML = IndexToCoordsOutput
+				} else {
+					IndexToCoordsOutput = ""
 				}
+				
+				//Output:
+					document.getElementById("IndexToCoords").innerHTML = IndexToCoordsOutput
 	}
 
 
