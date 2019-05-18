@@ -62,8 +62,9 @@ Each next byte in both tables means each next block in the level:<br><br>
 <ol>
 <li>Within each screen column, each subsequent byte in memory starting at <kbd>$C800</kbd> is the next block in level from left to right and then the next row downwards from left to right again (row-major):<br>
 <img src="Readme_files/SMW_RowMajorBlocksPerScreen.png"></li>
-<li>Once the <b>bottom</b> of the level is reached, the next screen column starting from the top-left and repeats the pattern. Note that this continues down the screen columns even if there
-are multiple rows of screen boundaries and not the next &ldquo;screen number&rdquo; shown in Lunar Magic:<br>
+<li>Once the <b>bottom</b> of the level is reached, the next screen column starting from the top-left and repeats the pattern. Note that the order the screen boundaries the blocks are stored is from top to bottom on each screen boundary,
+then the next column left to right (column-major). Meaning after the last block within a screen boundary, the next block is on another screen boundary <b>below</b> it when there is multiple rows of screen boundaries (at least level dimension setting <kbd>$0D</kbd>).
+The screen block-order is not ordered the same as the &ldquo;screen number&rdquo; shown in Lunar Magic:<br>
 <img src="Readme_files/SMW_ColumnMajorScreenColumn.png"></li>
 </ol>
 <h3>Calculating the coordinates and reverse.</h3>
@@ -112,19 +113,19 @@ same data format order pattern as layer 1.</li>
 <li>If there is an odd number of H-screens, such as &ldquo;<kbd>$06: Height=$026 tiles, MaxHScreens=$17</kbd>&rdquo; on a layer 2 horizontal level, there
 is a gap between the last byte of layer 1 and the first byte of layer 2 of a size equal to the number of blocks per screen column. For example of the mentioned setting:<br>
 <img src="Readme_files/GapBetweenLayer1And2.png"><br>
-I placed the blocks in an increasing map16 order, with layer 1 blocks on the bottom of the last screen and layer 2 on the first screen on the top so you can see
+I placed the blocks in an increasing map16 number order, with layer 1 blocks on the bottom of the last screen and layer 2 on the top of the first screen so you can see
 it easier when viewed on a debugger. Looking at memory editor we can see there is an unused gap:<br>
 <img src="Readme_files/GapBetweenLayer1And2Dbg.png"><br>
-Notice the gap ranging from <kbd>$7EE220</kbd> to <kbd>$7EE47F</kbd> (this also applies to the other bank, as their data position corresponds)). This gap is 608 ($260 in hex) bytes long, this is also
+Notice the gap ranging from <kbd>$7EE220</kbd> to <kbd>$7EE47F</kbd> (this also applies to the other bank, as their data position corresponds). This gap is 608 ($260 in hex) bytes long, this is also
 the number of blocks per screen column (16*38 = 608). This gap being the number of blocks per screen column bytes long always works when having any odd-number
 of H-screens for a layer 2 level. It's unknown why <a href="https://www.smwcentral.net/?p=profile&id=8251">Vitor Vilela</a>/<a href="https://www.smwcentral.net/?p=profile&id=9435">FuSoYa</a>
-they decided to position the layer 2 data table in such a position, probably due to the rounding of the number of screens downwards to an integer as odd numbers isn't
+to position the layer 2 data table in such a position, probably due to the rounding of the number of screens downwards to an integer as odd numbers isn't
 divisible by 2.</li>
 <li>If you write to the <kbd>$C800</kbd> table, it <b>does</b> change the map16 number like you would with GPS's <kbd>change_map16</kbd> routine, however, the graphics will not be updated until
-it is refreshed by level loading (during the screen fades to the level) or when re-entering the player's screen after scrolled offscreen far enough. This is to prevent
+it is refreshed by level loading (during the screen fades to the level) or when re-entering the player's screen after being scrolled offscreen far enough. This is to prevent
 V-blank overflow by updating the graphics only when necessary at the moment the block is changed during a map16 change routine (instead of writing to V-RAM's
 tilemap and checking every block every frame). Thankfully, with UberasmTool, you can use the <kbd>load:</kbd> label feature so you can write to <kbd>$C800</kbd> table before
-the game process the block numbers to display their graphics. You can also safely change blocks during level mode after its loaded if you change the blocks that are outside the screen.</li>
+the game process the block numbers to display their graphics. You can also safely change the blocks after the level is done loading if the blocks you're changing is outside the screen.</li>
 </ul>
 <h2>Final notes</h2>
 <a href="JS_C800Converter.html">I've included an HTML file</a> that uses javascript to compute the index and position much easier without pasting it in the calculator and manuelly setting up the variables.
