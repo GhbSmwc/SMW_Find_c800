@@ -60,7 +60,8 @@ endif
 ;;coordinates.
 ;;
 ;;Input:
-;; -$00 to $01: X position, in units of blocks
+;; -$00 to $01: X position, in units of full blocks (increments by
+;;  one means a full 16x16 block, unlike $9A-$9B, which are pixels).
 ;; -$02 to $03: Same as above but for Y position
 ;;Output:
 ;; -$00-$01: The index of the blocks.
@@ -239,8 +240,9 @@ GetLevelMap16IndexByMap16Position:
 ;; -$00 to $01: The index of $7EC800/$7FC800. Index above $37FF is
 ;;  invalid.
 ;;Output:
-;; -$00 to $01: X position (in units of blocks).
-;; -$02 to $03: Y position, same as above.
+;; -$00 to $01: X position (in units of blocks, each increment
+;;  means a full block).
+;; -$02 to $03: Y position, same as above but vertical position.
 ;; -Carry: Set if index is invalid or would be at a location
 ;;  outside the level boundary.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
