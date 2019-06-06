@@ -30,9 +30,9 @@ This is also useful for debugging when dealing with multiple blocks to be change
 <img src="Readme_files/LM_BlockCoordDisplay.png"><br>
 However, before &ldquo;<kbd>Version 3.03 April 1, 2019</kbd>&rdquo;, the coordinates are displayed in <b>decimal</b> instead of hex.</li>
 <li>Protip: you can use ENTER when selecting the button (by after clicking it or TAB, not highlighting) for a rapid press for the +/- buttons.</li>
-<li>For layer 2 levels, the data layout is a repeat of layer 1's data, meaning the format is  the same &ldquo;row-major&rdquo; per screen column,
-then &ldquo;column-major&rdquo; for every screen column pattern as layer 1. You can get the layer 2 tile position by treating as if its layer 1, then
-take the starting byte of layer 2 tiles and index from there.</li>
+<li>For layer 2 levels, the data layout of layer 2 blocks is the same as layer 1's format, meaning that in horizontal levels, layer 2 keeps the row-major
+of 16 blocks, then goes downwards until the bottom of the level, then the next screen column and repeats. This also applies to vertical levels too. You can get the layer
+2 tile position by treating as if its layer 1, then take the starting byte of layer 2 tiles and index from there.</li>
 </ul>
 <button type="button" onclick="Reset()">Reset</button>
 
