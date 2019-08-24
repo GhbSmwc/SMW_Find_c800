@@ -126,6 +126,16 @@ it is refreshed by level loading (during the screen fades to the level) or when 
 V-blank overflow by updating the graphics only when necessary at the moment the block is changed during a map16 change routine (instead of writing to V-RAM's
 tilemap and checking every block every frame). Thankfully, with UberasmTool, you can use the <kbd>load:</kbd> label feature so you can write to <kbd>$C800</kbd> table before
 the game process the block numbers to display their graphics. You can also safely change the blocks after the level is done loading if the blocks you're changing is outside the screen.</li>
+<li>The rightmost boundary for horizontal levels and the bottommost boundary for vertical levels the routines uses to determine if the given coordinate is beyond that boundary is NOT always
+the rightmost/bottommost edge that LM would allow placing stuff there, rather RAM address $5E (horizontal levels) and $5F (vertical level), these specify the width and height of the level in number
+of screens (and where the screen stops scrolling rightwards or downwards). This boundary can be a lower number than the full width and height of the level. For example: A horizontal level with
+a setting of <kbd>$04: Height=$022 tiles, MaxHScreens=$1A</kbd> with $5E set to $02 (screens 0 and 1 are accessible in-game), if you give a coordinate that is beyond screen column 1 (the
+position the screen stops scrolling rightwards), would flag this as &ldquo;out of bounds&rdquo;, despite being block X position is at or lower than $19F (the rightmost X position possible
+to be placed in the level in LM). Therefore, this &ldquo;out of bounds&rdquo; detection for the rightmost or bottomost uses the border where the screen ends at, not where the level's full
+dimension ends at. This is set by LM's &ldquo;Number of Screens&rdquo; in &ldquo;Change Properties in Header&rdquo; dialog (don't forget to uncheck the &ldquo;Auto-Set Number of Screens&rdquo; in the
+&ldquo;General Options&rdquo; if you need to change that).<br><br>
+
+</li>
 </ul>
 <h2>Final notes</h2>
 <a href="JS_C800Converter.html">I've included an HTML file</a> that uses javascript to compute the index and position much easier without pasting it in the calculator and manually setting up the variables.
