@@ -103,8 +103,9 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		if (isNaN(BlockXPositionInput) == true) {
 			BlockXPositionInput = 0
 		}
-		if (BlockXPositionInput < 65535)
+		if (BlockXPositionInput < 65535) {
 			BlockXPositionInput++
+		}
 		document.getElementById("BlockXPos").value = BlockXPositionInput.toString(16)
 		Compute()
 	}
@@ -113,8 +114,9 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		if (isNaN(BlockXPositionInput) == true) {
 			BlockXPositionInput = 0
 		}
-		if (BlockXPositionInput > 0)
+		if (BlockXPositionInput > 0) {
 			BlockXPositionInput--
+		}
 		document.getElementById("BlockXPos").value = BlockXPositionInput.toString(16)
 		Compute()
 	}
