@@ -106,7 +106,7 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		if (BlockXPositionInput < 65535) {
 			BlockXPositionInput++
 		}
-		document.getElementById("BlockXPos").value = BlockXPositionInput.toString(16)
+		document.getElementById("BlockXPos").value = BlockXPositionInput.toString(16).toUpperCase()
 		Compute()
 	}
 	function DecreaseXPos() {
@@ -117,7 +117,7 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		if (BlockXPositionInput > 0) {
 			BlockXPositionInput--
 		}
-		document.getElementById("BlockXPos").value = BlockXPositionInput.toString(16)
+		document.getElementById("BlockXPos").value = BlockXPositionInput.toString(16).toUpperCase()
 		Compute()
 	}
 	function IncreaseYPos() {
@@ -127,7 +127,7 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		}
 		if (BlockYPositionInput < 65535)
 			BlockYPositionInput++
-		document.getElementById("BlockYPos").value = BlockYPositionInput.toString(16)
+		document.getElementById("BlockYPos").value = BlockYPositionInput.toString(16).toUpperCase()
 		Compute()
 	}
 	function DecreaseYPos() {
@@ -138,7 +138,7 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		if (BlockYPositionInput > 0) {
 			BlockYPositionInput--
 		}
-		document.getElementById("BlockYPos").value = BlockYPositionInput.toString(16)
+		document.getElementById("BlockYPos").value = BlockYPositionInput.toString(16).toUpperCase()
 		Compute()
 	}
 	function IncreaseBlockIndex() {
@@ -149,7 +149,7 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		if (BlockIndexInput < 14335) {
 			BlockIndexInput++
 		}
-		document.getElementById("BlockIndex").value = BlockIndexInput.toString(16)
+		document.getElementById("BlockIndex").value = BlockIndexInput.toString(16).toUpperCase()
 		Compute()
 	}
 	function DecreaseBlockIndex() {
@@ -160,7 +160,7 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		if (BlockIndexInput > 0) {
 			BlockIndexInput--
 		}
-		document.getElementById("BlockIndex").value = BlockIndexInput.toString(16)
+		document.getElementById("BlockIndex").value = BlockIndexInput.toString(16).toUpperCase()
 		Compute()
 	}
 	function Compute() {
@@ -248,7 +248,7 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 					if ((NumberOfHscreensNormalLevel % 2) != 0) {
 						LeftOverScreen = BlocksPerScreenCol
 					}
-				var Layer2DataStart = parseInt("c800", 16) + TotalBlocksInLevelLayer2 + LeftOverScreen
+				var Layer2DataStart = parseInt("C800", 16) + TotalBlocksInLevelLayer2 + LeftOverScreen
 			} else if (document.getElementById("IDVerticalLevel").checked == true) {
 				LevelFormat = 1
 				
@@ -260,7 +260,7 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 				var TotalBlocksInNormalLevel = 14336 //512 blocks per screen (16*32), times 28 screens
 				var TotalBlocksInLevelLayer2 = 7168
 				
-				var Layer2DataStart = parseInt("c800", 16) + TotalBlocksInLevelLayer2
+				var Layer2DataStart = parseInt("C800", 16) + TotalBlocksInLevelLayer2
 			}
 		//Disable drop-down list of what horizontal level dimension setting when vertical level is set to.
 			if (LevelFormat == 0) {
@@ -280,19 +280,19 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 				LevelBlockStatisticsTable += "<tr><th colspan='2'>Normal level (layer 2 is background)</th></tr>"
 				LevelBlockStatisticsTable += "<tr>"
 				LevelBlockStatisticsTable += "<td>Total blocks in level:</td>" 
-				LevelBlockStatisticsTable += "<td><kbd>" + TotalBlocksInNormalLevel + " ($" + TotalBlocksInNormalLevel.toString(16) + ", index up to $" + (TotalBlocksInNormalLevel-1).toString(16) + ")</kbd></td>"
+				LevelBlockStatisticsTable += "<td><kbd>" + TotalBlocksInNormalLevel + " ($" + TotalBlocksInNormalLevel.toString(16).toUpperCase() + ", index up to $" + (TotalBlocksInNormalLevel-1).toString(16).toUpperCase() + ")</kbd></td>"
 				LevelBlockStatisticsTable += "</tr>"
 				LevelBlockStatisticsTable += "<tr>"
 				LevelBlockStatisticsTable += "<td>RAM address range (banks $7E/$7F or $40/$41):</td>" 
-				LevelBlockStatisticsTable += "<td><kbd>$c800 to $" + ((parseInt("c800", 16) + TotalBlocksInNormalLevel)-1).toString(16) + "</kbd></td>"
+				LevelBlockStatisticsTable += "<td><kbd>$C800 to $" + ((parseInt("C800", 16) + TotalBlocksInNormalLevel)-1).toString(16).toUpperCase() + "</kbd></td>"
 				LevelBlockStatisticsTable += "</tr>"
 				LevelBlockStatisticsTable += "<tr>"
 				LevelBlockStatisticsTable += "<td>Valid X position range:</td>"
-				LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockXPosition.toString(16) + "</kbd></td>"
+				LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockXPosition.toString(16).toUpperCase() + "</kbd></td>"
 				LevelBlockStatisticsTable += "</tr>"
 				LevelBlockStatisticsTable += "<tr>"
 				LevelBlockStatisticsTable += "<td>Valid Y position range:</td>"
-				LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockYPosition.toString(16) + "</kbd></td>"
+				LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockYPosition.toString(16).toUpperCase() + "</kbd></td>"
 				LevelBlockStatisticsTable += "</tr>"
 			//Layer 2 statistics
 				LevelBlockStatisticsTable += "<tr><th colspan='2'>Layer 2 level</th></tr>"
@@ -301,38 +301,38 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 					LevelBlockStatisticsTable += "<tr>"
 					if (LevelFormat == 0) {
 						LevelBlockStatisticsTable += "<td>Number of screens wide:</td>"
-						LevelBlockStatisticsTable += "<td><kbd>" + NumberOfHscreensLayer2Level + " ($" + NumberOfHscreensLayer2Level.toString(16) + ")</kbd></td>"
+						LevelBlockStatisticsTable += "<td><kbd>" + NumberOfHscreensLayer2Level + " ($" + NumberOfHscreensLayer2Level.toString(16).toUpperCase() + ")</kbd></td>"
 					} else {
 						LevelBlockStatisticsTable += "<td>Number of screens tall:</td>"
-						LevelBlockStatisticsTable += "<td><kbd>" + NumberOfVScreensLayer2Level + " ($" + NumberOfVScreensLayer2Level.toString(16) + ")</kbd></td>"
+						LevelBlockStatisticsTable += "<td><kbd>" + NumberOfVScreensLayer2Level + " ($" + NumberOfVScreensLayer2Level.toString(16).toUpperCase() + ")</kbd></td>"
 					}
 					LevelBlockStatisticsTable += "</tr>"
 					LevelBlockStatisticsTable += "<tr>"
 					LevelBlockStatisticsTable += "<td>Total number of blocks in each of the 2 layers:</td>"
-					LevelBlockStatisticsTable += "<td><kbd>" + TotalBlocksInLevelLayer2 + " ($" + TotalBlocksInLevelLayer2.toString(16) + ", index up to $" + (TotalBlocksInLevelLayer2-1).toString(16) + ")</kbd></td>"
+					LevelBlockStatisticsTable += "<td><kbd>" + TotalBlocksInLevelLayer2 + " ($" + TotalBlocksInLevelLayer2.toString(16).toUpperCase() + ", index up to $" + (TotalBlocksInLevelLayer2-1).toString(16).toUpperCase() + ")</kbd></td>"
 					LevelBlockStatisticsTable += "</tr>"
 					LevelBlockStatisticsTable += "<tr>"
 					LevelBlockStatisticsTable += "<td>Layer 1 RAM address range (banks $7E/$7F or $40/$41):</td>"
-					LevelBlockStatisticsTable += "<td><kbd>$c800 to $" + ((parseInt("c800", 16) + TotalBlocksInLevelLayer2)-1).toString(16) + "</kbd></td>"
+					LevelBlockStatisticsTable += "<td><kbd>$C800 to $" + ((parseInt("C800", 16) + TotalBlocksInLevelLayer2)-1).toString(16).toUpperCase() + "</kbd></td>"
 					LevelBlockStatisticsTable += "</tr>"
 					LevelBlockStatisticsTable += "<tr>"
 					LevelBlockStatisticsTable += "<td>Layer 2 RAM address range (banks $7E/$7F or $40/$41):</td>"
-					LevelBlockStatisticsTable += "<td><kbd>$" + Layer2DataStart.toString(16) + " to $" + ((Layer2DataStart + TotalBlocksInLevelLayer2)-1).toString(16) + "</kbd></td>"
+					LevelBlockStatisticsTable += "<td><kbd>$" + Layer2DataStart.toString(16).toUpperCase() + " to $" + ((Layer2DataStart + TotalBlocksInLevelLayer2)-1).toString(16).toUpperCase() + "</kbd></td>"
 					LevelBlockStatisticsTable += "</tr>"
 					LevelBlockStatisticsTable += "<tr>"
 					LevelBlockStatisticsTable += "<td>Valid X Position range:</td>"
 					if (LevelFormat == 0) {
-						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockXPositionLayer2.toString(16) + "</kbd></td>"
+						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockXPositionLayer2.toString(16).toUpperCase() + "</kbd></td>"
 					} else {
-						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockXPosition.toString(16) + "</kbd></td>"
+						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockXPosition.toString(16).toUpperCase() + "</kbd></td>"
 					}
 					LevelBlockStatisticsTable += "</tr>"
 					LevelBlockStatisticsTable += "<tr>"
 					LevelBlockStatisticsTable += "<td>Valid Y Position range:</td>"
 					if (LevelFormat == 0) {
-						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockYPosition.toString(16) + "</kbd></td>"
+						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockYPosition.toString(16).toUpperCase() + "</kbd></td>"
 					} else {
-						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockYPositionLayer2.toString(16) + "</kbd></td>"
+						LevelBlockStatisticsTable += "<td><kbd>$0 to $" + MaxBlockYPositionLayer2.toString(16).toUpperCase() + "</kbd></td>"
 					}
 					LevelBlockStatisticsTable += "</tr>"
 				} else {
@@ -345,12 +345,12 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 				var BlockXPositionInput = parseInt(document.getElementById("BlockXPos").value, 16)
 				if (isNaN(BlockXPositionInput) == false) {
 					BlockXPositionInput = clamp(BlockXPositionInput, 0, 65535)
-					document.getElementById("BlockXPos").value = BlockXPositionInput.toString(16)
+					document.getElementById("BlockXPos").value = BlockXPositionInput.toString(16).toUpperCase()
 				}
 				var BlockYPositionInput = parseInt(document.getElementById("BlockYPos").value, 16)
 				if (isNaN(BlockYPositionInput) == false) {
 					BlockYPositionInput = clamp(BlockYPositionInput, 0, 65535)
-					document.getElementById("BlockYPos").value = BlockYPositionInput.toString(16)
+					document.getElementById("BlockYPos").value = BlockYPositionInput.toString(16).toUpperCase()
 				}
 			//Don't display a table with NaN in it.
 				var IsNumber = 0
@@ -388,16 +388,16 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 						CoordsToIndexOutput += "<br><table>"
 						CoordsToIndexOutput += "<tr>"
 						CoordsToIndexOutput += "<td>Index:</td>"
-						CoordsToIndexOutput += "<td><kbd>$" + Index.toString(16) + "</kbd></td>"
+						CoordsToIndexOutput += "<td><kbd>$" + Index.toString(16).toUpperCase() + "</kbd></td>"
 						CoordsToIndexOutput += "</tr>"
 						CoordsToIndexOutput += "<tr>"
 						CoordsToIndexOutput += "<td>RAM address location (in banks $7E/$7F or $40/$41):"
-						CoordsToIndexOutput += "<td><kbd>$" + (parseInt("c800", 16) + Index).toString(16) + " ($c800 + $" + Index.toString(16) + ")</kbd></td>"
+						CoordsToIndexOutput += "<td><kbd>$" + (parseInt("C800", 16) + Index).toString(16).toUpperCase() + " ($C800 + $" + Index.toString(16).toUpperCase() + ")</kbd></td>"
 						CoordsToIndexOutput += "</tr>"
 						CoordsToIndexOutput += "<tr>"
 						CoordsToIndexOutput += "<td>Layer 2's RAM address location (in banks $7E/$7F or $40/$41):"
 						if (IsCoordinatePointsPastHalfedLevel == 0) {
-							CoordsToIndexOutput += "<td><kbd>$" + (Layer2DataStart + Index).toString(16) + " ($" + Layer2DataStart.toString(16) + " + $" + Index.toString(16) + ")</kbd></td>"
+							CoordsToIndexOutput += "<td><kbd>$" + (Layer2DataStart + Index).toString(16).toUpperCase() + " ($" + Layer2DataStart.toString(16).toUpperCase() + " + $" + Index.toString(16).toUpperCase() + ")</kbd></td>"
 						} else {
 							CoordsToIndexOutput += "<td><kbd>N/A (Only layer 1 level works)</kbd></td>"
 						}
@@ -416,10 +416,10 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 				}
 			//Check if given position is outside the level boundaries
 				if (BlockXPositionInput > MaxBlockXPosition) {
-					CoordsToIndexOutput += "<font color='red'><kbd>Block X position is outside the level (X = $0 to X = $" + MaxBlockXPosition.toString(16) + " is valid).</kbd><br></font>"
+					CoordsToIndexOutput += "<font color='red'><kbd>Block X position is outside the level (X = $0 to X = $" + MaxBlockXPosition.toString(16).toUpperCase() + " is valid).</kbd><br></font>"
 				}
 				if (BlockYPositionInput > MaxBlockYPosition) {
-					CoordsToIndexOutput += "<font color='red'><kbd>Block Y position is outside the level (Y = $0 to Y = $" + MaxBlockYPosition.toString(16) + " is valid).</kbd><br></font>"
+					CoordsToIndexOutput += "<font color='red'><kbd>Block Y position is outside the level (Y = $0 to Y = $" + MaxBlockYPosition.toString(16).toUpperCase() + " is valid).</kbd><br></font>"
 				}
 				//Output:
 					document.getElementById("CoordsToIndex").innerHTML = CoordsToIndexOutput
@@ -432,7 +432,7 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 				var BlockIndexInput = parseInt(document.getElementById("BlockIndex").value, 16)
 				if (isNaN(BlockIndexInput) == false) {
 					BlockIndexInput = clamp(BlockIndexInput, 0, 14335)
-					document.getElementById("BlockIndex").value = BlockIndexInput.toString(16)
+					document.getElementById("BlockIndex").value = BlockIndexInput.toString(16).toUpperCase()
 					
 					//Check if index would point to beyond the last block in level
 						if (BlockIndexInput < TotalBlocksInNormalLevel) {
@@ -450,17 +450,17 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 									// or right half of the screen boundary.
 										var BlockXPositionOutput = (Math.floor((BlockIndexInput % 512)/256)*16) + (BlockIndexInput % 16)
 								}
-								IndexToCoordsOutput += "Position: ($" + BlockXPositionOutput.toString(16) + ", $" + BlockYPositionOutput.toString(16) + ")<br>"
+								IndexToCoordsOutput += "Position: ($" + BlockXPositionOutput.toString(16).toUpperCase() + ", $" + BlockYPositionOutput.toString(16).toUpperCase() + ")<br>"
 								if (BlockIndexInput >= TotalBlocksInLevelLayer2) {
 									if (HalfedHorizontalLevelResultsWidthOfZero == 0) {
-										IndexToCoordsOutput += "<font color='orange'>If level is layer 2, this index is invalid (layer 2 valid index up to $" + (TotalBlocksInLevelLayer2-1).toString(16) + ").</font>"
+										IndexToCoordsOutput += "<font color='orange'>If level is layer 2, this index is invalid (layer 2 valid index up to $" + (TotalBlocksInLevelLayer2-1).toString(16).toUpperCase() + ").</font>"
 									} else {
 										IndexToCoordsOutput += "<font color='orange'>Layer 2 does not work here.</font>"
 									}
 								}
 						} else {
 							//Indicate that index points to past the last block
-								IndexToCoordsOutput = "<font color='red'>Index points beyond the last block. Valid index is from $0 to $" + (TotalBlocksInNormalLevel-1).toString(16) + ".</font>"
+								IndexToCoordsOutput = "<font color='red'>Index points beyond the last block. Valid index is from $0 to $" + (TotalBlocksInNormalLevel-1).toString(16).toUpperCase() + ".</font>"
 						}
 				} else {
 					IndexToCoordsOutput = ""
