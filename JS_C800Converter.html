@@ -103,10 +103,8 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		if (isNaN(BlockXPositionInput) == true) {
 			BlockXPositionInput = 0
 		}
-		if (BlockXPositionInput < 65535) {
-			BlockXPositionInput++
-		}
-		document.getElementById("BlockXPos").value = BlockXPositionInput.toString(16).toUpperCase()
+		BlockXPositionInput++
+		document.getElementById("BlockXPos").value = clamp(BlockXPositionInput, 0, parseInt("FFFF", 16)).toString(16).toUpperCase()
 		Compute()
 	}
 	function DecreaseXPos() {
@@ -114,10 +112,8 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		if (isNaN(BlockXPositionInput) == true) {
 			BlockXPositionInput = 0
 		}
-		if (BlockXPositionInput > 0) {
-			BlockXPositionInput--
-		}
-		document.getElementById("BlockXPos").value = BlockXPositionInput.toString(16).toUpperCase()
+		BlockXPositionInput--
+		document.getElementById("BlockXPos").value = clamp(BlockXPositionInput, 0, parseInt("FFFF", 16)).toString(16).toUpperCase()
 		Compute()
 	}
 	function IncreaseYPos() {
@@ -125,9 +121,8 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		if (isNaN(BlockYPositionInput) == true) {
 			BlockYPositionInput = 0
 		}
-		if (BlockYPositionInput < 65535)
-			BlockYPositionInput++
-		document.getElementById("BlockYPos").value = BlockYPositionInput.toString(16).toUpperCase()
+		BlockYPositionInput++
+		document.getElementById("BlockYPos").value = clamp(BlockYPositionInput, 0, parseInt("FFFF", 16)).toString(16).toUpperCase()
 		Compute()
 	}
 	function DecreaseYPos() {
@@ -135,10 +130,8 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		if (isNaN(BlockYPositionInput) == true) {
 			BlockYPositionInput = 0
 		}
-		if (BlockYPositionInput > 0) {
-			BlockYPositionInput--
-		}
-		document.getElementById("BlockYPos").value = BlockYPositionInput.toString(16).toUpperCase()
+		BlockYPositionInput--
+		document.getElementById("BlockYPos").value = clamp(BlockYPositionInput, 0, parseInt("FFFF", 16)).toString(16).toUpperCase()
 		Compute()
 	}
 	function IncreaseBlockIndex() {
@@ -146,10 +139,8 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		if (isNaN(BlockIndexInput) == true) {
 			BlockIndexInput = 0
 		}
-		if (BlockIndexInput < 14335) {
-			BlockIndexInput++
-		}
-		document.getElementById("BlockIndex").value = BlockIndexInput.toString(16).toUpperCase()
+		BlockIndexInput++
+		document.getElementById("BlockIndex").value = clamp(BlockIndexInput, 0, parseInt("FFFF", 16)).toString(16).toUpperCase()
 		Compute()
 	}
 	function DecreaseBlockIndex() {
@@ -157,10 +148,8 @@ of 16 blocks, then goes downwards until the bottom of the level, then the next s
 		if (isNaN(BlockIndexInput) == true) {
 			BlockIndexInput = 0
 		}
-		if (BlockIndexInput > 0) {
-			BlockIndexInput--
-		}
-		document.getElementById("BlockIndex").value = BlockIndexInput.toString(16).toUpperCase()
+		BlockIndexInput--
+		document.getElementById("BlockIndex").value = clamp(BlockIndexInput, 0, parseInt("FFFF", 16)).toString(16).toUpperCase()
 		Compute()
 	}
 	function Compute() {
