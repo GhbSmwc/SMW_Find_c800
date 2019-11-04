@@ -25,14 +25,18 @@ block would be without resorting to trial-and-error by testing the routine just 
 This is also useful for debugging when dealing with multiple blocks to be changed.
 <h2>Notes</h2>
 <ul>
-<li>Coordinates here are in units of blocks, not pixels (to move 1 block over, increments by $1, not $10).</li>
+<li>Coordinates here are in units of blocks, not pixels, to convert from pixel-based movement (like most sprite positions) to block coordinates, divide
+its coordinates by $10 and round down (or right-shift 4 times; <kbd>LSR #4</kbd>). You may need to take its coordinates, add/subtract by some value, then
+<kbd>LSR #4</kbd> due to the &ldquo;position point&rdquo; of something may not be &ldquo;centered&rdquo;.</li>
+<ul><li>As always, X increases as you go right, and Y increases as you go down, along with the coordinates starting at $00 on the top-left of the stage:<br>
+<img src="Readme_files/BlockCoordinateSystem.png"></li></ul>
 <li>Lunar Magic displays the block coordinate in the level on the status bar on the bottom-left corner of the window when hovering a mouse within the level boundaries:<br>
 <img src="Readme_files/LM_BlockCoordDisplay.png"><br>
 However, before &ldquo;<kbd>Version 3.03 April 1, 2019</kbd>&rdquo;, the coordinates are displayed in <b>decimal</b> instead of hex.</li>
 <li>Protip: you can use ENTER when selecting the button (by after clicking it or TAB, not highlighting) for a rapid press for the +/- buttons.</li>
 <li>For layer 2 levels, the data layout of layer 2 blocks is the same as layer 1's format, meaning that in horizontal levels, layer 2 keeps the row-major
-of 16 blocks, then goes downwards until the bottom of the level, then the next screen column and repeats. This also applies to vertical levels too. You can get the layer
-2 tile position by treating as if its layer 1, then take the starting byte of layer 2 tiles and index from there.</li>
+of 16 blocks, then goes downwards until the bottom of the level, then the next screen column and repeats. The L1 and L2 similarities also applies to vertical
+levels too. You can get the layer 2 tile position by treating as if its layer 1, then take the starting byte of layer 2 tiles and index from there.</li>
 </ul>
 <button type="button" onclick="Reset()">Reset</button>
 

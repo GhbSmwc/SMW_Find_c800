@@ -1,4 +1,10 @@
-;This is an ASM file containing 2 routines that converts between block coordinate to index and vice versa.
+;Routines include:
+;-GetLevelMap16IndexByMap16Position
+;-GetMap16PositionByLevelMap16Index
+;-MathMul16_16
+;-MathDiv
+;-IndexLevelDimension
+;
 ;This is mainly useful for:
 ;-Block generation during level load via UberasmTool. For example: remember that a locked gate is unlocked
 ; stores its block index (2 bytes) instead of coordinates (4 bytes total), which means storing what block
