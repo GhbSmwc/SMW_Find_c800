@@ -27,7 +27,7 @@ This is also useful for debugging when dealing with multiple blocks to be change
 <ul>
 <li>Coordinates here are in units of blocks, not pixels, to convert from pixel-based movement (like most sprite positions) to block coordinates, divide
 its coordinates by $10 and round down (or right-shift 4 times; <kbd>LSR #4</kbd>). You may need to take its coordinates, add/subtract by some value, then
-<kbd>LSR #4</kbd> due to the &ldquo;position point&rdquo; of something may not be &ldquo;centered&rdquo;.</li>
+<kbd>LSR #4</kbd> due to the &ldquo;position point&rdquo; (or &ldquo;origin&rdquo;) of something may not be &ldquo;centered&rdquo;.</li>
 <ul><li>As always, X increases as you go right, and Y increases as you go down, along with the coordinates starting at $00 on the top-left of the stage:<br>
 <img src="Readme_files/BlockCoordinateSystem.png"></li></ul>
 <li>Lunar Magic displays the block coordinate in the level on the status bar on the bottom-left corner of the window when hovering a mouse within the level boundaries:<br>
@@ -82,12 +82,12 @@ levels too. You can get the layer 2 tile position by treating as if its layer 1,
 
 <hr>
 <h1>Convert coordinate to $7EC800/$7FC800 indexing</h1>
-<kbd>X: $</kbd><input type="text" id="BlockXPos" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseXPos()">+</button><button type="button" onclick="DecreaseXPos()">-</button><span id="InLayer2HorizontalLevelOtherHalf"></span><br>
-<kbd>Y: $</kbd><input type="text" id="BlockYPos" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseYPos()">+</button><button type="button" onclick="DecreaseYPos()">-</button><span id="InLayer2VerticalLevelOtherHalf"></span><br>
+<kbd>X: $</kbd><input type="text" id="BlockXPos" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseDecreaseInput(1, 'BlockXPos')">+</button><button type="button" onclick="IncreaseDecreaseInput(-1, 'BlockXPos')">-</button><span id="InLayer2HorizontalLevelOtherHalf"></span><br>
+<kbd>Y: $</kbd><input type="text" id="BlockYPos" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseDecreaseInput(1, 'BlockYPos')">+</button><button type="button" onclick="IncreaseDecreaseInput(-1, 'BlockYPos')">-</button><span id="InLayer2VerticalLevelOtherHalf"></span><br>
 <span id="CoordsToIndex"></span>
 <hr>
 <h1>Convert $7EC800/$7FC800 index to coordinate</h1>
-<kbd>Block index: $</kbd><input type="text" id="BlockIndex" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseBlockIndex()">+</button><button type="button" onclick="DecreaseBlockIndex()">-</button><br>
+<kbd>Block index: $</kbd><input type="text" id="BlockIndex" value ="0" maxlength="4" onchange="Compute()"><button type="button" onclick="IncreaseDecreaseInput(1, 'BlockIndex')">+</button><button type="button" onclick="IncreaseDecreaseInput(-1, 'BlockIndex')">-</button><br>
 <kbd><span id="IndexToCoords"></span></kbd>
 <script>
 	function PageLoad() {
@@ -102,58 +102,8 @@ levels too. You can get the layer 2 tile position by treating as if its layer 1,
 		document.getElementById("BlockIndex").value = 0
 		Compute()
 	}
-	function IncreaseXPos() {
-		var BlockXPositionInput = parseInt(document.getElementById("BlockXPos").value, 16)
-		if (isNaN(BlockXPositionInput) == true) {
-			BlockXPositionInput = 0
-		}
-		BlockXPositionInput++
-		document.getElementById("BlockXPos").value = clamp(BlockXPositionInput, 0, parseInt("FFFF", 16)).toString(16).toUpperCase()
-		Compute()
-	}
-	function DecreaseXPos() {
-		var BlockXPositionInput = parseInt(document.getElementById("BlockXPos").value, 16)
-		if (isNaN(BlockXPositionInput) == true) {
-			BlockXPositionInput = 0
-		}
-		BlockXPositionInput--
-		document.getElementById("BlockXPos").value = clamp(BlockXPositionInput, 0, parseInt("FFFF", 16)).toString(16).toUpperCase()
-		Compute()
-	}
-	function IncreaseYPos() {
-		var BlockYPositionInput = parseInt(document.getElementById("BlockYPos").value, 16)
-		if (isNaN(BlockYPositionInput) == true) {
-			BlockYPositionInput = 0
-		}
-		BlockYPositionInput++
-		document.getElementById("BlockYPos").value = clamp(BlockYPositionInput, 0, parseInt("FFFF", 16)).toString(16).toUpperCase()
-		Compute()
-	}
-	function DecreaseYPos() {
-		var BlockYPositionInput = parseInt(document.getElementById("BlockYPos").value, 16)
-		if (isNaN(BlockYPositionInput) == true) {
-			BlockYPositionInput = 0
-		}
-		BlockYPositionInput--
-		document.getElementById("BlockYPos").value = clamp(BlockYPositionInput, 0, parseInt("FFFF", 16)).toString(16).toUpperCase()
-		Compute()
-	}
-	function IncreaseBlockIndex() {
-		var BlockIndexInput = parseInt(document.getElementById("BlockIndex").value, 16)
-		if (isNaN(BlockIndexInput) == true) {
-			BlockIndexInput = 0
-		}
-		BlockIndexInput++
-		document.getElementById("BlockIndex").value = clamp(BlockIndexInput, 0, parseInt("FFFF", 16)).toString(16).toUpperCase()
-		Compute()
-	}
-	function DecreaseBlockIndex() {
-		var BlockIndexInput = parseInt(document.getElementById("BlockIndex").value, 16)
-		if (isNaN(BlockIndexInput) == true) {
-			BlockIndexInput = 0
-		}
-		BlockIndexInput--
-		document.getElementById("BlockIndex").value = clamp(BlockIndexInput, 0, parseInt("FFFF", 16)).toString(16).toUpperCase()
+	function IncreaseDecreaseInput(ChangeBy, WhatInput) {
+		document.getElementById(WhatInput).value = clamp((parseInt(document.getElementById(WhatInput).value, 16) + parseInt(ChangeBy, 10)), 0, parseInt("FFFF", 16)).toString(16).toUpperCase()
 		Compute()
 	}
 	function Compute() {
