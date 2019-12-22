@@ -1,3 +1,22 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Macros
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+function GetC800IndexHorizLvl(RAM13D7, XPos, YPos) = (RAM13D7*(XPos/16))+(YPos*16)+(XPos%16)
+function GetC800IndexVertiLvl(XPos, YPos) = (512*(YPos/16))+(256*(XPos/16))+((YPos%16)*16)+(XPos%16)
+;Make sure you have [math round on] to prevent unexpected rounded numbers.
+;Horizontal level example:
+; LDA #$30
+; STA.l $7EC800+GetC800IndexHorizLvl($01B0, $01, $01)
+; LDA #$01
+; STA.l $7FC800+GetC800IndexHorizLvl($01B0, $01, $01)
+;Vertical level example:
+; LDA #$30
+; STA.l $7EC800+GetC800IndexVertiLvl($01, $01)
+; LDA #$01
+; STA.l $7FC800+GetC800IndexVertiLvl($01, $01)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Routines
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Routines include:
 ;-GetLevelMap16IndexByMap16Position
 ;-GetMap16PositionByLevelMap16Index
