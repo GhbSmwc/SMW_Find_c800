@@ -597,7 +597,7 @@ Write2DArrayC800:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Write a horizontal line of blocks into $C800 (does not work with layer 2 blocks if layer 2 level).
 ;
-; !Scratchram_WriteArrayC800 usage range: $00 to +$10
+; !Scratchram_WriteArrayC800 usage range: 00 to +10
 ;
 ; -!Scratchram_WriteArrayC800+00 to !Scratchram_WriteArrayC800+02: Table location containing low bytes
 ; -!Scratchram_WriteArrayC800+03 to !Scratchram_WriteArrayC800+05: Table location containing high bytes
