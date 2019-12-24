@@ -15,6 +15,17 @@ function GetC800IndexVertiLvl(XPos, YPos) = (512*(YPos/16))+(256*(XPos/16))+((YP
 ; LDA #$01
 ; STA.l $7FC800+GetC800IndexVertiLvl($01, $01)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Defines
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ if !sa1 == 0
+  !Scratchram_WriteArrayC800 = $7F844A
+ else
+  !Scratchram_WriteArrayC800 = $400198
+ endif
+ ;^[15 bytes] To be used in a routine [WriteArrayC800]
+ ; due to a subroutine used within a subroutine have a conflicting scratch RAM
+ ; and was necessary to keep track of the positioning of the tile during a loop.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Routines
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Routines include:
@@ -22,6 +33,7 @@ function GetC800IndexVertiLvl(XPos, YPos) = (512*(YPos/16))+(256*(XPos/16))+((YP
 ;-GetMap16PositionByLevelMap16Index
 ;-MathMul16_16
 ;-MathDiv
+;-WriteArrayC800
 ;-IndexLevelDimension
 ;
 ;This is mainly useful for:
@@ -442,7 +454,144 @@ MathDiv:	REP #$20
 		SEP #$20
 		RTL
 endif
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Write a 2D array of blocks into $C800.
+;
+;Input:
+ ; -!Scratchram_WriteArrayC800+00 to !Scratchram_WriteArrayC800+02: Table location containing low bytes
+ ; -!Scratchram_WriteArrayC800+03 to !Scratchram_WriteArrayC800+05: Table location containing high bytes
+ ; -!Scratchram_WriteArrayC800+06:                                  Number of blocks, minus 1, to transfer the 2D array table.
+ ; -!Scratchram_WriteArrayC800+07:                                  Number of blocks wide, minus 1, to transfer the 2D array table.
+ ; -!Scratchram_WriteArrayC800+08 to !Scratchram_WriteArrayC800+09: Block array X position to place in $C800 table.
+ ; -!Scratchram_WriteArrayC800+10 to !Scratchram_WriteArrayC800+11: Block array Y position to place in $C800 table.
+ ;
+ ;Overwritten:
+ ; -!Scratchram_WriteArrayC800+12:                                  Number of blocks left as the loop processes each line (copied from +07).
+ ; -!Scratchram_WriteArrayC800+13 to !Scratchram_WriteArrayC800+14: X position during a loop, initially copied from (+08)
+ ;
+ ;Example:
+ ; load:
+ ;  LDA.b #Table0     : STA !Scratchram_WriteArrayC800+00	;\Table location
+ ;  LDA.b #Table0>>8  : STA !Scratchram_WriteArrayC800+01	;|
+ ;  LDA.b #Table0>>16 : STA !Scratchram_WriteArrayC800+02	;|
+ ;  LDA.b #Table1     : STA !Scratchram_WriteArrayC800+03	;|
+ ;  LDA.b #Table1>>8  : STA !Scratchram_WriteArrayC800+04	;|
+ ;  LDA.b #Table1>>16 : STA !Scratchram_WriteArrayC800+05	;/
+ ;  
+ ;  LDA.b #(Table0_end-Table0)-1				;\Table size, minus 1
+ ;  STA !Scratchram_WriteArrayC800+06			;/
+ ;  LDA.b #(Table0_endOfRow-Table0)-1			;\How many items in each row, minus 1
+ ;  STA !Scratchram_WriteArrayC800+07			;/
+ ;  
+ ;  REP #$20						;\Position
+ ;  LDA #$001E						;|
+ ;  STA !Scratchram_WriteArrayC800+08			;|
+ ;  LDA #$0010						;|
+ ;  STA !Scratchram_WriteArrayC800+10			;|
+ ;  SEP #$20						;/
+ ;  JSL WriteBlockArrayToC800_WriteArrayC800
+ ;  RTL
+ ;  Table0:
+ ;  Make sure you have the rows and column dispayed here as text
+ ;  all equal out, else blocks will dis-align.
+ ;  db $00,$01,$02
+ ;  .endOfRow ;This label used for find how many items each row.
+ ;  db $10,$11,$12
+ ;  db $20,$21,$22
+ ;  .end
+ ;  Table1:
+ ;  db $00,$00,$00
+ ;  db $00,$00,$00
+ ;  db $00,$00,$00
+ ;  .end
+ ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+WriteArrayC800:
+	LDA !Scratchram_WriteArrayC800+7		;\Line counter backup
+	STA !Scratchram_WriteArrayC800+12		;/
+	REP #$20
+	LDA !Scratchram_WriteArrayC800+08		;\Tracking X position
+	STA !Scratchram_WriteArrayC800+13		;/
+	SEP #$20
+	REP #$10					;>16-bit XY (due to X needed to be 16-bit for the C800 indexing)
+	LDY #$0000					;>Y = what item in table.
+	
+	.Loop
+	LDA !Scratchram_WriteArrayC800+00 : STA $00	;\Transfer table address to $00 (low byte).
+	LDA !Scratchram_WriteArrayC800+01 : STA $01	;|
+	LDA !Scratchram_WriteArrayC800+02 : STA $02	;/
+	LDA [$00],y					;>Load an item from 2D table
+	PHY						;>Push Y, what byte was selected in table
+	PHA						;>Push A, what byte value in table.
+	REP #$20					;\>16-bit A
+	LDA !Scratchram_WriteArrayC800+13		;|Write tile (low byte)
+	STA $00						;|
+	LDA !Scratchram_WriteArrayC800+10		;|
+	STA $02						;|
+	SEP #$30					;|>8-bit AXY
+	JSL GetLevelMap16IndexByMap16Position		;|
+	REP #$10					;|>16-bit XY
+	LDX $00						;|>X = block index
+	PLA						;|>Restore A, what byte value in table
+	BCS +						;|>Failsafe (don't write blocks outside of level)
+	if !sa1 == 0
+		STA $7EC800,x				;|
+	else
+		STA $40C800,x				;/
+	endif
+	LDA !Scratchram_WriteArrayC800+03 : STA $00	;\Transfer table address to $00 (high byte).
+	LDA !Scratchram_WriteArrayC800+04 : STA $01	;|
+	LDA !Scratchram_WriteArrayC800+05 : STA $02	;/
+	+
+	PLY						;>Restore Y (what item in table).
+	BCS ..Next					;>Failsafe (don't write blocks outside of level)
+	LDA [$00],y					;\Wright high byte
+	if !sa1 == 0
+		STA $7FC800,x				;|
+	else
+		STA $41C800,x				;/
+	endif
+	
+	..Next
+	INY
+	LDA !Scratchram_WriteArrayC800+12		;\Decrement number of blocks in the current line to process
+	SEC						;|
+	SBC #$01					;|
+	STA !Scratchram_WriteArrayC800+12		;/
+	;BPL ...HorizontalLineIncomplete		;>Once 0 -> $FF, newline, otherwise continue on the line.
+	BCS ...HorizontalLineIncomplete
+	
+	...HorizontalLineComplete
+	;Next line, go back to the left and down a line
+	LDA !Scratchram_WriteArrayC800+07		;\Reset the "line of blocks left"
+	STA !Scratchram_WriteArrayC800+12		;/
+	REP #$20
+	LDA !Scratchram_WriteArrayC800+08		;\Reset X position
+	STA !Scratchram_WriteArrayC800+13		;/
+	LDA !Scratchram_WriteArrayC800+10		;\Move down a line
+	INC						;|
+	STA !Scratchram_WriteArrayC800+10		;/
+	SEP #$20
+	BRA ...NextBlockInTable
+	
+	...HorizontalLineIncomplete
+	;Continue onwards on the line.
+	REP #$20
+	LDA !Scratchram_WriteArrayC800+13		;\Move over to the right
+	INC						;|
+	STA !Scratchram_WriteArrayC800+13		;/
+	SEP #$20
+	
+	...NextBlockInTable
+	LDA !Scratchram_WriteArrayC800+06		;\Decrease number of blocks left
+	SEC						;|
+	SBC #$01					;|>Used SEB : SBC instead of BPL/BMI
+	STA !Scratchram_WriteArrayC800+06		;/so you can use up to 255 indexes (256-array)
+	;BPL .Loop					;>Loop till all blocks in table are all copied.
+	BCC +
+	JMP .Loop
+	+
+	RTL
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;Index what horizontal level dimension currently set by LM that the
 ;;player is in.

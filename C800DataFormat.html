@@ -124,16 +124,24 @@ divisible by 2.</li>
 <li>If you write to the <kbd>$C800</kbd> table, it <b>does</b> change the map16 number like you would with GPS's <kbd>change_map16</kbd> routine, however, the graphics will not be updated until
 it is refreshed by level loading (during the screen fades to the level) or when re-entering the player's screen after being scrolled offscreen far enough. This is to prevent
 V-blank overflow by updating the graphics only when necessary at the moment the block is changed during a map16 change routine (instead of writing to V-RAM's
-tilemap and checking every block every frame). Thankfully, with UberasmTool, you can use the <kbd>load:</kbd> label feature so you can write to <kbd>$C800</kbd> table before
-the game process the block numbers to display their graphics. You can also safely change the blocks after the level is done loading if the blocks you're changing is outside the screen.</li>
+tilemap and checking every block every frame). You can avoid this graphical glitch by:
+<ul>
+<li>Changing the blocks during UberasmTool's level <kbd>load:</kbd> feature. Note: This executes at the time after the level is cleared (writing all tiles $0025 via
+<kbd>$0582C8</kbd> and <kbd>$05833A</kbd>) and before any LM-placed blocks (all objects and direct map16 tiles), therefore avoid placing any tiles using LM on the spot
+you are going to write your block using uberasm tool's <kbd>load:</kbd>.</li>
+<li>Changing the blocks that are offscreen, beyond the &ldquo;loading seam&rdquo; (a column or row of blocks at the edge of the screen that loads the appropriate graphics to the tilemap).</li>
+<li>Have the block it is changing from and to uses the exact same graphic, so the graphics are unnoticeable. Rarely ever you would need this, purposes like if sprites are &ldquo;pseudo-solid&rdquo; by writing
+the blocks they lie on a solid invisible tile instead of using a routine that message boxes, red ? light switch, and invisible solid sprite block (sprite <kbd>#$6D</kbd>) uses, that prevents the player from going through
+the sprite.</li>
+</ul></li>
 <li>The rightmost boundary for horizontal levels and the bottommost boundary for vertical levels the routines uses to determine if the given coordinate is beyond that boundary is NOT always
-the rightmost/bottommost edge that LM would allow placing stuff there, rather RAM address $5E (horizontal levels) and $5F (vertical level), these specify the width and height of the level in number
-of screens (and where the screen stops scrolling rightwards or downwards). This boundary can be a lower number than the full width and height of the level. For example: A horizontal level with
-a setting of <kbd>$04: Height=$022 tiles, MaxHScreens=$1A</kbd> with $5E set to $02 (screens 0 and 1 are accessible in-game), if you give a coordinate that is beyond screen column 1 (the
-position the screen stops scrolling rightwards), would flag this as &ldquo;out of bounds&rdquo;, despite being block X position is at or lower than $19F (the rightmost X position possible
-to be placed in the level in LM). Therefore, this &ldquo;out of bounds&rdquo; detection for the rightmost or bottomost uses the border where the screen ends at, not where the level's full
-dimension ends at. This is set by LM's &ldquo;Number of Screens&rdquo; in &ldquo;Change Properties in Header&rdquo; dialog (don't forget to uncheck the &ldquo;Auto-Set Number of Screens&rdquo; in the
-&ldquo;General Options&rdquo; if you need to change that).<br><br>
+the rightmost/bottommost edge that LM would allow placing stuff there, rather RAM address <kbd>$5E</kbd> (horizontal levels) and <kbd>$5F</kbd> (vertical level), these specify the width and
+height of the level in number of screens (and where the screen stops scrolling rightwards or downwards). This boundary can be a lower number than the full width and height of the level.
+For example: A horizontal level with a setting of <kbd>$04: Height=$022 tiles, MaxHScreens=$1A</kbd> with $5E set to $02 (screens 0 and 1 are accessible in-game), if you give a coordinate
+that is beyond screen column 1 (the position the screen stops scrolling rightwards), would flag this as &ldquo;out of bounds&rdquo;, despite being block X position is at or lower than $19F
+(the rightmost X position possible to be placed in the level in LM). Therefore, this &ldquo;out of bounds&rdquo; detection for the rightmost or bottomost uses the border where the screen ends
+at, not where the level's full dimension ends at. This is set by LM's &ldquo;Number of Screens&rdquo; in &ldquo;Change Properties in Header&rdquo; dialog (don't forget to uncheck the
+&ldquo;Auto-Set Number of Screens&rdquo; in the &ldquo;General Options&rdquo; if you need to change that).<br><br>
 
 </li>
 </ul>
