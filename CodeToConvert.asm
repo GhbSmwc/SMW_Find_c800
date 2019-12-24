@@ -457,7 +457,7 @@ endif
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Write a 2D array of blocks into $C800 (does not work with layer 2 blocks if layer 2 level).
 ;
-; !Scratchram_WriteArrayC800 usage range: $00 to +$11
+; !Scratchram_WriteArrayC800 usage range: 00 to +14
 ;
 ;Input:
 ; -!Scratchram_WriteArrayC800+00 to !Scratchram_WriteArrayC800+02: Table location containing low bytes
