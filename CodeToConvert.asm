@@ -608,6 +608,59 @@ WriteArrayC800:
 ;;             ...
 ;;             Returns $FE should no setting be found (can be used as
 ;;             a failsafe detection for invalid level dimension).
+;;
+;;Protip: If you are searching where the layer 2 data starts at,
+;;Cheatsheet provided (example):
+;; FindLayer2Data:
+;;  ;Y = What index from the top-left starting block.
+;;  JSL IndexLevelDimension
+;;  CPX #$38                      ;\Setting $1C is 1 screen wide, and a layer 2 level of that
+;;  BCS .Invalid                  ;/is a black screen in LM.
+;;  REP #$20
+;;  LDA Layer2DataStartTable,x    ;\$00 = the starting location of layer 2.
+;;  STA $00                       ;/
+;;  SEP #$20
+;;  if !sa1 == 0
+;;   LDA $7E : STA $02
+;;  else
+;;   LDA $40 : STA $02
+;;  endif
+;;  LDA [$00],y  ;>Note that there is no [$xx],x, only [$xx,x]. A now contains the low byte.
+;;  ;[...]       ;>Do stuff involving low byte
+;;  INC $02      ;>switch to high byte
+;;  LDA [$00]    ;>A now contains the high byte
+;;  ;[...]       ;>Do stuff involving high byte
+;;  .Invalid
+;;  RTL
+;;  Layer2DataStartTable:
+;;  dw $E300  ;>Setting $00 (Index value: $00)
+;;  dw $E400  ;>Setting $01 (Index value: $02)
+;;  dw $E330  ;>Setting $02 (Index value: $04)
+;;  dw $E400  ;>Setting $03 (Index value: $06)
+;;  dw $E3A0  ;>Setting $04 (Index value: $08)
+;;  dw $E3C0  ;>Setting $05 (Index value: $0A)
+;;  dw $E480  ;>Setting $06 (Index value: $0C)
+;;  dw $E380  ;>Setting $07 (Index value: $0E)
+;;  dw $E4E0  ;>Setting $08 (Index value: $10)
+;;  dw $E380  ;>Setting $09 (Index value: $12)
+;;  dw $E560  ;>Setting $0A (Index value: $14)
+;;  dw $E390  ;>Setting $0B (Index value: $16)
+;;  dw $E540  ;>Setting $0C (Index value: $18)
+;;  dw $E400  ;>Setting $0D (Index value: $1A)
+;;  dw $E580  ;>Setting $0E (Index value: $1C)
+;;  dw $E400  ;>Setting $0F (Index value: $1E)
+;;  dw $E5C0  ;>Setting $10 (Index value: $20)
+;;  dw $E3C0  ;>Setting $11 (Index value: $22)
+;;  dw $E660  ;>Setting $12 (Index value: $24)
+;;  dw $E3D0  ;>Setting $13 (Index value: $26)
+;;  dw $E6F0  ;>Setting $14 (Index value: $28)
+;;  dw $E400  ;>Setting $15 (Index value: $2A)
+;;  dw $E800  ;>Setting $16 (Index value: $2C)
+;;  dw $E3F0  ;>Setting $17 (Index value: $2E)
+;;  dw $E990  ;>Setting $18 (Index value: $30)
+;;  dw $E400  ;>Setting $19 (Index value: $32)
+;;  dw $ED40  ;>Setting $1A (Index value: $34)
+;;  dw $E400  ;>Setting $1B (Index value: $36)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	IndexLevelDimension:
 	REP #$20
