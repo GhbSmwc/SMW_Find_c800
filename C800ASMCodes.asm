@@ -729,7 +729,7 @@ WriteVertiLineArrayC800:
 ;;player is in.
 ;;
 ;;Output:
-;; X (8-bit) = The index number (increments of 2 for every item setting),
+;; X (8-bit) = The index number, times 2 (Index = $01 means X = $02).
 ;;             corresponding to what setting in LM's
 ;;             "Change Properties in Header" -> "Horizontal Level mode"'s
 ;;             drop-down box. Some examples:
