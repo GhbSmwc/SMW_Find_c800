@@ -145,8 +145,8 @@ at, not where the level's full dimension ends at. This is set by LM's &ldquo;Num
 
 <li><p>Thankfully, during block interaction (including during custom block code), <kbd>$98</kbd>-<kbd>$9B</kbd> (scratch RAM <kbd>$0A</kbd>-<kbd>$0D</kbd> for sprites after executing <kbd>$019138</kbd>) while processing layer 2,
 their XY positions are relative to the top-left of layer 2, not the level, so this means that if you touch the top-left block on layer 2, regardless of the layer 2 positioning ((<kbd>$1E</kbd> or
-<kbd>$1466</kbd>), (<kbd>$20</kbd> or <kbd>$1468</kbd>)), collision point will read as (<kbd>$000*</kbd>, <kbd>$000*</kbd>). This means you simply take the coordinates as if they're layer 1, use the routine
-to convert to <kbd>$C800</kbd> indexing, and then load where the byte starts for layer 2. The list of layer 2 address follows:
+<kbd>$1466</kbd>), (<kbd>$20</kbd> or <kbd>$1468</kbd>)), collision point will read as (<kbd>$000*</kbd>, <kbd>$000*</kbd>). This means you first check <kbd>$1933</kbd>, simply take the coordinates (if in pixels, divide by 16; <kbd>LSR #4</kbd>) as if
+they're layer 1, use the routine to convert to <kbd>$C800</kbd> indexing, and then load where the byte starts for layer 2. The list of layer 2 address follows:
 <ul>
 <li>Setting <kbd>$00</kbd>: <kbd>$E300</kbd></li>
 <li>Setting <kbd>$01</kbd>: <kbd>$E400</kbd></li>
