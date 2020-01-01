@@ -107,10 +107,10 @@ within a screen boundary.</li>
 </ul>
 <h2>Other information</h2>
 <ul>
-<li>When using Layer 2 (or layer 3) levels, the width of the level in horizontal levels or the height in vertical levels is halved, rounded downwards to
+<li><p>When using Layer 2 (or layer 3) levels, the width of the level in horizontal levels or the height in vertical levels is halved, rounded downwards to
 the nearest screen boundary. The other &ldquo;half&rdquo; (in quotes because it is not always exactly) of the $C800 table is used up by layer 2/3 in the
-same data format order pattern as layer 1.</li>
-<li>If there is an odd number of H-screens, such as &ldquo;<kbd>$06: Height=$026 tiles, MaxHScreens=$17</kbd>&rdquo; on a layer 2 horizontal level, there
+same data format order pattern as layer 1.</p></li>
+<li><p>If there is an odd number of H-screens, such as &ldquo;<kbd>$06: Height=$026 tiles, MaxHScreens=$17</kbd>&rdquo; on a layer 2 horizontal level, there
 is a gap between the last byte of layer 1 and the first byte of layer 2 of a size equal to the number of blocks per screen column. For example of the mentioned setting:<br>
 <img src="Readme_files/GapBetweenLayer1And2.png"><br>
 I placed the blocks in an increasing map16 number order, with layer 1 blocks on the bottom of the last screen and layer 2 on the top of the first screen so you can see
@@ -120,8 +120,8 @@ Notice the gap ranging from <kbd>$7EE220</kbd> to <kbd>$7EE47F</kbd> (this also 
 the number of blocks per screen column (16*38 = 608). This gap being the number of blocks per screen column bytes long always works when having any odd-number
 of H-screens for a layer 2 level. It's unknown why <a href="https://www.smwcentral.net/?p=profile&id=8251">Vitor Vilela</a>/<a href="https://www.smwcentral.net/?p=profile&id=9435">FuSoYa</a>
 to position the layer 2 data table in such a position, probably due to the rounding of the number of screens downwards to an integer as odd numbers isn't
-divisible by 2.</li>
-<li>If you write to the <kbd>$C800</kbd> table, it <b>does</b> change the map16 number like you would with GPS's <kbd>change_map16</kbd> routine, however, the graphics will not be updated until
+divisible by 2.</p></li>
+<li><p>If you write to the <kbd>$C800</kbd> table, it <b>does</b> change the map16 number like you would with GPS's <kbd>change_map16</kbd> routine, however, the graphics will not be updated until
 it is refreshed by level loading (during the screen fades to the level) or when re-entering the player's screen after being scrolled offscreen far enough. This is to prevent
 V-blank overflow by updating the graphics only when necessary at the moment the block is changed during a map16 change routine (instead of writing to V-RAM's
 tilemap and checking every block every frame). You can avoid this graphical glitch by:
@@ -133,17 +133,50 @@ you are going to write your block using uberasm tool's <kbd>load:</kbd>.</li>
 <li>Have the block it is changing from and to uses the exact same graphic, so the graphics are unnoticeable. Rarely ever you would need this, purposes like if sprites are &ldquo;pseudo-solid&rdquo; by writing
 the blocks they lie on a solid invisible tile instead of using a routine that message boxes, red ? light switch, and invisible solid sprite block (sprite <kbd>#$6D</kbd>) uses, that prevents the player from going through
 the sprite.</li>
-</ul></li>
-<li>The rightmost boundary for horizontal levels and the bottommost boundary for vertical levels the routines uses to determine if the given coordinate is beyond that boundary is NOT always
+</ul></p></li>
+<li><p>The rightmost boundary for horizontal levels and the bottommost boundary for vertical levels the routines uses to determine if the given coordinate is beyond that boundary is NOT always
 the rightmost/bottommost edge that LM would allow placing stuff there, rather RAM address <kbd>$5E</kbd> (horizontal levels) and <kbd>$5F</kbd> (vertical level), these specify the width and
 height of the level in number of screens (and where the screen stops scrolling rightwards or downwards). This boundary can be a lower number than the full width and height of the level.
 For example: A horizontal level with a setting of <kbd>$04: Height=$022 tiles, MaxHScreens=$1A</kbd> with $5E set to $02 (screens 0 and 1 are accessible in-game), if you give a coordinate
 that is beyond screen column 1 (the position the screen stops scrolling rightwards), would flag this as &ldquo;out of bounds&rdquo;, despite being block X position is at or lower than $19F
 (the rightmost X position possible to be placed in the level in LM). Therefore, this &ldquo;out of bounds&rdquo; detection for the rightmost or bottomost uses the border where the screen ends
 at, not where the level's full dimension ends at. This is set by LM's &ldquo;Number of Screens&rdquo; in &ldquo;Change Properties in Header&rdquo; dialog (don't forget to uncheck the
-&ldquo;Auto-Set Number of Screens&rdquo; in the &ldquo;General Options&rdquo; if you need to change that).<br><br>
+&ldquo;Auto-Set Number of Screens&rdquo; in the &ldquo;General Options&rdquo; if you need to change that).</p></li>
 
-</li>
+<li><p>Thankfully, during block interaction (including during custom block code), <kbd>$98</kbd>-<kbd>$9B</kbd> (scratch RAM <kbd>$0A</kbd>-<kbd>$0D</kbd> for sprites after executing <kbd>$019138</kbd>) while processing layer 2,
+their XY positions are relative to the top-left of layer 2, not the level, so this means that if you touch the top-left block on layer 2, regardless of the layer 2 positioning ((<kbd>$1E</kbd> or
+<kbd>$1466</kbd>), (<kbd>$20</kbd> or <kbd>$1468</kbd>)), collision point will read as (<kbd>$000*</kbd>, <kbd>$000*</kbd>). This means you simply take the coordinates as if they're layer 1, use the routine
+to convert to <kbd>$C800</kbd> indexing, and then load where the byte starts for layer 2. The list of layer 2 address follows:
+<ul>
+<li>Setting <kbd>$00</kbd>: <kbd>$E300</kbd></li>
+<li>Setting <kbd>$01</kbd>: <kbd>$E400</kbd></li>
+<li>Setting <kbd>$02</kbd>: <kbd>$E330</kbd></li>
+<li>Setting <kbd>$03</kbd>: <kbd>$E400</kbd></li>
+<li>Setting <kbd>$04</kbd>: <kbd>$E3A0</kbd></li>
+<li>Setting <kbd>$05</kbd>: <kbd>$E3C0</kbd></li>
+<li>Setting <kbd>$06</kbd>: <kbd>$E480</kbd></li>
+<li>Setting <kbd>$07</kbd>: <kbd>$E380</kbd></li>
+<li>Setting <kbd>$08</kbd>: <kbd>$E4E0</kbd></li>
+<li>Setting <kbd>$09</kbd>: <kbd>$E380</kbd></li>
+<li>Setting <kbd>$0A</kbd>: <kbd>$E560</kbd></li>
+<li>Setting <kbd>$0B</kbd>: <kbd>$E390</kbd></li>
+<li>Setting <kbd>$0C</kbd>: <kbd>$E540</kbd></li>
+<li>Setting <kbd>$0D</kbd>: <kbd>$E400</kbd></li>
+<li>Setting <kbd>$0E</kbd>: <kbd>$E580</kbd></li>
+<li>Setting <kbd>$0F</kbd>: <kbd>$E400</kbd></li>
+<li>Setting <kbd>$10</kbd>: <kbd>$E5C0</kbd></li>
+<li>Setting <kbd>$11</kbd>: <kbd>$E3C0</kbd></li>
+<li>Setting <kbd>$12</kbd>: <kbd>$E660</kbd></li>
+<li>Setting <kbd>$13</kbd>: <kbd>$E3D0</kbd></li>
+<li>Setting <kbd>$14</kbd>: <kbd>$E6F0</kbd></li>
+<li>Setting <kbd>$15</kbd>: <kbd>$E400</kbd></li>
+<li>Setting <kbd>$16</kbd>: <kbd>$E800</kbd></li>
+<li>Setting <kbd>$17</kbd>: <kbd>$E3F0</kbd></li>
+<li>Setting <kbd>$18</kbd>: <kbd>$E990</kbd></li>
+<li>Setting <kbd>$19</kbd>: <kbd>$E400</kbd></li>
+<li>Setting <kbd>$1A</kbd>: <kbd>$ED40</kbd></li>
+<li>Setting <kbd>$1B</kbd>: <kbd>$E400</kbd></li>
+</ul></p></li>
 </ul>
 <h2>Final notes</h2>
 <a href="JS_C800Converter.html">I've included an HTML file</a> that uses javascript to compute the index and position much easier without pasting it in the calculator and manually setting up the variables.
