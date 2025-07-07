@@ -1,0 +1,327 @@
+<html>
+	<head>
+		<style>
+			html {
+			background-color: #101010;
+			color: rgb(221, 221, 221);
+			font-family: sans-serif;
+			}
+			
+			table, th, td {
+			border: 1px solid white;
+			border-collapse: collapse;
+			}
+			
+			span.NoLineBreak {
+				white-space: nowrap;
+			}
+			
+			abbr{cursor: help;}
+			img.img-hor {
+				-moz-transform: scaleX(-1);
+				-o-transform: scaleX(-1);
+				-webkit-transform: scaleX(-1);
+				transform: scaleX(-1);
+				filter: FlipH;
+				-ms-filter: "FlipH";
+			}
+			
+			input[type=text], input[type=number], td.Statistics {
+				font-family: monospace;
+			}
+		</style>
+	</head>
+<body>
+See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how the blocks are formatted
+<table>
+	<tr>
+		<td colspan="2">
+			<div>
+				<div><label><input type="radio" name="LevelTypeHorizVert" id="LevelTypeHorizVert_Horiz" checked>Horizontal level</label>:
+					<select id="HorizontalLevelTypes" style="font-family: monospace;" onchange="CalculateStatistics()">
+						<option>$00: Height=$01B tiles, MaxHScreens=$20</option>
+						<option>$01: Height=$01C tiles, MaxHScreens=$20</option>
+						<option>$02: Height=$01D tiles, MaxHScreens=$1E</option>
+						<option>$03: Height=$020 tiles, MaxHScreens=$1C</option>
+						<option>$04: Height=$022 tiles, MaxHScreens=$1A</option>
+						<option>$05: Height=$025 tiles, MaxHScreens=$18</option>
+						<option>$06: Height=$026 tiles, MaxHScreens=$17</option>
+						<option>$07: Height=$028 tiles, MaxHScreens=$16</option>
+						<option>$08: Height=$02A tiles, MaxHScreens=$15</option>
+						<option>$09: Height=$02C tiles, MaxHScreens=$14</option>
+						<option>$0A: Height=$02F tiles, MaxHScreens=$13</option>
+						<option>$0B: Height=$031 tiles, MaxHScreens=$12</option>
+						<option>$0C: Height=$034 tiles, MaxHScreens=$11</option>
+						<option>$0D: Height=$038 tiles, MaxHScreens=$10</option>
+						<option>$0E: Height=$03B tiles, MaxHScreens=$0F</option>
+						<option>$0F: Height=$040 tiles, MaxHScreens=$0E</option>
+						<option>$10: Height=$044 tiles, MaxHScreens=$0D</option>
+						<option>$11: Height=$04A tiles, MaxHScreens=$0C</option>
+						<option>$12: Height=$051 tiles, MaxHScreens=$0B</option>
+						<option>$13: Height=$059 tiles, MaxHScreens=$0A</option>
+						<option>$14: Height=$063 tiles, MaxHScreens=$09</option>
+						<option>$15: Height=$070 tiles, MaxHScreens=$08</option>
+						<option>$16: Height=$080 tiles, MaxHScreens=$07</option>
+						<option>$17: Height=$095 tiles, MaxHScreens=$06</option>
+						<option>$18: Height=$0B3 tiles, MaxHScreens=$05</option>
+						<option>$19: Height=$0E0 tiles, MaxHScreens=$04</option>
+						<option>$1A: Height=$12A tiles, MaxHScreens=$03</option>
+						<option>$1B: Height=$1C0 tiles, MaxHScreens=$02</option>
+						<option>$1C: Height=$380 tiles, MaxHScreens=$01</option>
+					</select>
+				</div>
+				<div><label><input type="radio" name="LevelTypeHorizVert" id="LevelTypeHorizVert_Vert">Vertical level</label></div>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<table>
+				<tr><th colspan="2">Normal level (layer 2 is background)</th></tr>
+				<tr><td>Total blocks in level:</td><td class="Statistics" id="Statistic_TotalBlocksInLevel">13824 ($3600, index up to $35FF)</td></tr>
+				<tr><td><kbd>$XXC800</kbd> RAM used:</td><td class="Statistics">$C800~$<span id="Statistic_RAMEndingByte">FDFF</span></td></tr>
+				<tr><td>XY valid ranges:</td>
+					<td class="Statistics">
+						<div>X: <span id="Statistic_RightmostXPos">00000~00511 ($0000~$01FF)</span></div>
+						<div>Y: <span id="Statistic_BottommostYPos">00026~00511 ($0000~$001A)</span></div>
+					</td>
+				</tr>
+				<tr><th colspan="2">Layer 2 level</th></tr>
+				<tr><td>Max number of screens wide:</td><td class="Statistics" id="Statistic_Layer2_MaxScreensWide">16 ($10)</td></tr>
+				<tr><td>Number of blocks in each layer:</td><td class="Statistics" id="Statistic_NumbOfBlocksEachLayer">6912 ($1B00, index up to $1AFF)</td></tr>
+				<tr>
+					<td><kbd>$XXC800</kbd> RAM used:</td>
+					<td class="Statistics">
+						<div>Layer 1: $C800~<span id="Statistics_Layer2Level_Layer1_RAMEndingByte">$E2FF</span></div>
+						<div>Layer 2: <span id="Statistics_Layer2Level_Layer2_RAMStartingByte">$E300</span>~<span id="Statistics_Layer2Level_Layer2_RAMEndingByte">$FDFF</span></div>
+					</td>
+				</tr>
+				<tr>
+					<td>XY valid ranges:</td>
+					<td class="Statistics">
+						<div>X: $0000~$<span id="Statistic_RightmostXPos_Layer2">00FF</span></div>
+						<div>Y: $0000~$<span id="Statistic_BottommostYPos_Layer2">001A</span></div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<h2>Convert XY coordinates to index</h2><br>
+			<div>X: <input type="number" value="0" id="BlockCoordinate_X_Dec">($<input type="text" value="0000" id="BlockCoordinate_X_Hex" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber()">)</div>
+			<div>Y: <input type="number" value="0" id="BlockCoordinate_Y_Dec">($<input type="text" value="0000" id="BlockCoordinate_Y_Hex" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber()">)</div>
+		</td>
+		<td>
+			<h2>Convert Index to XY coords</h2><br>
+			<div>Index: <input type="text" value="0000" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber()"></div>
+		</td>
+	</tr>
+</table>
+
+<script>
+	[...document.querySelectorAll("[name=LevelTypeHorizVert]")].forEach(Element => {
+		Element.addEventListener("change", NoHorizontalTypesIfVerticalSelected)
+	});
+	[...document.querySelectorAll("input[type=number]")].forEach(Element => {
+		Element.addEventListener("change", CorrectInputNumber)
+	});
+	
+	UpDownArrowKeysIncrement()
+	//These makes input text act like a number input, pressing UP/DOWN on the arrow keys to increment/decrement it, but with any radixes.
+	//In order for this to apply, have these on the number input:
+	//- Make sure the class contains "AnyRadixNumberInput"
+	//- Specify what radix it is, have the custom attribute [data-input_number_radix="x"] where x
+	//  is a radix number that can be any number 2-36. Examples include: 2 = binary, 10 = decimal (default), 16 = hexadecimal.
+	//To get this to apply, use this:
+	// window.onload = function(){ //Upon loading, apply the function to execute when the up/down arrow keys are pressed.
+	//  UpDownArrowKeysIncrement()
+	// }
+	// This function requires these functions:
+	// - ParseBigIntValue
+		function UpDownArrowKeysIncrement() {
+			let FocusedElement = document.activeElement;
+			if(FocusedElement.addEventListener ) {
+				FocusedElement.addEventListener('keydown',this.keyHandler,false);
+			} else if(FocusedElement.attachEvent ) {
+				FocusedElement.attachEvent('onkeydown',this.keyHandler);
+			}
+		}
+	function keyHandler(e) {
+		if (((e.code == "ArrowUp")||e.code == "ArrowDown")&&((/(^|\s.*?)AnyRadixNumberInput($|\s.*?)/).test(document.activeElement.className))) {
+			let target;
+			//Handle radix.
+				let Radix = 10
+				if ((/^\d+$/).test(document.activeElement.dataset.input_number_radix)) {
+					Radix = parseInt(document.activeElement.dataset.input_number_radix)
+				}
+			let InputNumber = ParseBigIntValue(document.activeElement.value, Radix) //This gets the number
+			if (!e) e = window.event;
+			if (e.target) target = e.target;
+			else if (e.srcElement) target = e.srcElement;
+			
+			if(e.code == "ArrowUp") {
+				InputNumber++
+				e.preventDefault()	//Prevents the caret (blinking text cursor) from being placed at the beginning of the line.
+			} else if(e.code == "ArrowDown") {
+				InputNumber--
+			}
+			document.activeElement.value = InputNumber.toString(Radix).toUpperCase()
+			document.activeElement.setSelectionRange(document.activeElement.value.length, document.activeElement.value.length)
+			document.activeElement.onchange()
+		}
+	}
+	function MultiRadixInputs() {
+		//This function is for having multiple inputs each having the same number with different radixes that are linked together if one of them changes.
+		//For this to apply:
+		// - Recommended to use the onchange event to include the effect
+		// - Each linked input shall have an unique id
+		// - Make sure they have [data-input_number_radix="x"] to specify the radix, else it defaults to 10
+		// - Make sure they have [data-list_of_input_radixes_ids_to_update="x"] where X is a space-separated list containing a list of element ids
+		//   to update them to show the same number (but with different radix). Make sure that list does not include the ID of itself element, only others.
+		// This function requires these functions:
+		// - ParseBigIntValue
+		let DefaultRadixEventTarget = 10
+		if (/^\d+$/.test(event.target.dataset.input_number_radix)) {
+			DefaultRadixEventTarget = parseInt(event.target.dataset.input_number_radix)
+		}
+		event.target.value = ParseBigIntValue(event.target.value, DefaultRadixEventTarget).toString(DefaultRadixEventTarget).toUpperCase() //this makes it so that it corrects the input of itself the user entered.
+		let ListOfIds = event.target.dataset.list_of_input_radixes_ids_to_update.match(/[A-Za-z0-9_]+/g)
+		for (let Index = 0; Index < ListOfIds.length; Index++) {
+			let DefaultRadixListOfIds = 10
+			if (/^\d+$/.test(document.getElementById(ListOfIds[Index]).dataset.input_number_radix)) {
+				DefaultRadixListOfIds = parseInt(document.getElementById(ListOfIds[Index]).dataset.input_number_radix)
+			}
+			document.getElementById(ListOfIds[Index]).value = ParseBigIntValue(event.target.value, DefaultRadixEventTarget).toString(DefaultRadixListOfIds).toUpperCase()
+		}
+	}
+	function NoHorizontalTypesIfVerticalSelected() {
+		document.getElementById("HorizontalLevelTypes").disabled = !document.getElementById("LevelTypeHorizVert_Horiz").checked
+		CalculateStatistics()
+	}
+	function CorrectInputNumber() {
+		let InputNumber = 0n
+		if (event.target.type == "number") {
+			InputNumber = ParseBigIntValue(event.target.value, 10)
+		} else {
+			InputNumber = ParseBigIntValue(event.target.value, 16)
+		}
+		InputNumber = BigintClamp(InputNumber, 0n, 65535n)
+		let ListOfInputsEachRadix = [...event.target.parentNode.childNodes].filter(Element => Element.tagName == "INPUT")
+		
+		ListOfInputsEachRadix.forEach(Element => {
+			if (Element.type == "number") {
+				Element.value = InputNumber.toString(10)
+			} else {
+				Element.value = InputNumber.toString(Number(Element.dataset.input_number_radix)).toUpperCase().padStart(4, "0")
+			}
+		})
+	}
+	function BigintClamp(num, min, max) {
+		//Restrict a number within a specified range, bigInt edition.
+			return num <= min ? min : num >= max ? max : num;
+	}
+	function CalculateStatistics() {
+		let Statistic_Value_TotalBlocksInLevel = 0n
+		let Statistic_Value_RAMEndingByte = 0n
+		let Statistic_Value_RightmostXPos = 0n
+		let Statistic_Value_BottommostYPos = 0n
+		
+		if (document.getElementById("LevelTypeHorizVert_Horiz").checked) {
+			//Horizontal level
+			let HorizontalLevelTypeIndex = document.getElementById("HorizontalLevelTypes").selectedIndex;
+			let HorizontalLevelTypes = [
+				{Height: "0x001B", MaxHScreens: "0x20"},
+				{Height: "0x001C", MaxHScreens: "0x20"},
+				{Height: "0x001D", MaxHScreens: "0x1E"},
+				{Height: "0x0020", MaxHScreens: "0x1C"},
+				{Height: "0x0022", MaxHScreens: "0x1A"},
+				{Height: "0x0025", MaxHScreens: "0x18"},
+				{Height: "0x0026", MaxHScreens: "0x17"},
+				{Height: "0x0028", MaxHScreens: "0x16"},
+				{Height: "0x002A", MaxHScreens: "0x15"},
+				{Height: "0x002C", MaxHScreens: "0x14"},
+				{Height: "0x002F", MaxHScreens: "0x13"},
+				{Height: "0x0031", MaxHScreens: "0x12"},
+				{Height: "0x0034", MaxHScreens: "0x11"},
+				{Height: "0x0038", MaxHScreens: "0x10"},
+				{Height: "0x003B", MaxHScreens: "0x0F"},
+				{Height: "0x0040", MaxHScreens: "0x0E"},
+				{Height: "0x0044", MaxHScreens: "0x0D"},
+				{Height: "0x004A", MaxHScreens: "0x0C"},
+				{Height: "0x0051", MaxHScreens: "0x0B"},
+				{Height: "0x0059", MaxHScreens: "0x0A"},
+				{Height: "0x0063", MaxHScreens: "0x09"},
+				{Height: "0x0070", MaxHScreens: "0x08"},
+				{Height: "0x0080", MaxHScreens: "0x07"},
+				{Height: "0x0095", MaxHScreens: "0x06"},
+				{Height: "0x00B3", MaxHScreens: "0x05"},
+				{Height: "0x00E0", MaxHScreens: "0x04"},
+				{Height: "0x012A", MaxHScreens: "0x03"},
+				{Height: "0x01C0", MaxHScreens: "0x02"},
+				{Height: "0x0380", MaxHScreens: "0x01"}
+			].map(LevelDimensionSetting => {
+				return {
+					Height: BigInt(LevelDimensionSetting.Height),
+					MaxHScreens: BigInt(LevelDimensionSetting.MaxHScreens),
+				}
+			})
+			let CurrentHorizontalLevelSetting = HorizontalLevelTypes[HorizontalLevelTypeIndex]
+			
+			Statistic_Value_TotalBlocksInLevel = CurrentHorizontalLevelSetting.Height*16n*CurrentHorizontalLevelSetting.MaxHScreens
+			Statistic_Value_RAMEndingByte = BigInt("0xC800") + Statistic_Value_TotalBlocksInLevel-1n
+			Statistic_Value_RightmostXPos = (CurrentHorizontalLevelSetting.MaxHScreens*16n)-1n
+			Statistic_Value_BottommostYPos = CurrentHorizontalLevelSetting.Height-1n
+		} else {
+			//Vertical level
+		}
+		document.getElementById("Statistic_TotalBlocksInLevel").textContent = Statistic_Value_TotalBlocksInLevel.toString(10) + " ($" + Statistic_Value_TotalBlocksInLevel.toString(16).toUpperCase().padStart(4, "0") + ", index up to $" + (Statistic_Value_TotalBlocksInLevel-1n).toString(16).toUpperCase().padStart(4, "0") + ")"
+		document.getElementById("Statistic_RAMEndingByte").textContent = Statistic_Value_RAMEndingByte.toString(16).toUpperCase().padStart(4, "0")
+		document.getElementById("Statistic_RightmostXPos").textContent = "00000~" + Statistic_Value_RightmostXPos.toString(10).padStart(5, "0") + " ($0000~$" + Statistic_Value_RightmostXPos.toString(16).toUpperCase().padStart(4, "0") + ")"
+		document.getElementById("Statistic_BottommostYPos").textContent = "00000~" + Statistic_Value_BottommostYPos.toString(10).padStart(5, "0") + " ($0000~$" + Statistic_Value_BottommostYPos.toString(16).toUpperCase().padStart(4, "0") + ")"
+	}
+
+	function CorrectHexBigIntValue(String) {
+		//This converts the user's input hex string (negative numbers not allowed)
+		//to BigInt.
+			if ((/^([0-9]|[A-F]|[a-f])+$/).test(String) == false) {
+				String = 0n
+			}
+			return CanConvertHexStringToBigInt = BigInt("0x" + String)
+	}
+	function ParseBigIntValue(string, radix) {
+		//Acts more closely to parseInt, unlike other methods (other functions, like CorrectBinBigIntValue)
+		//this works with bigInt.
+		let Output = 0n
+		let NegativeNumber = 1n
+		if ((/^-/).test(string)) {
+			NegativeNumber = -1n
+		}
+		let DigitPart = string.substring((string.search(/[0-9a-zA-Z]/)))
+		switch (radix) {
+			//decimal
+				default:
+				if ((/^-?\d+$/).test(string)) {
+					Output = BigInt(string)
+				}
+				break
+			//Hexadecimal
+				case 16:
+				case "0x":
+				case "0X":
+				if ((/^-?[0-9A-Fa-f]+$/).test(string)) {
+					Output = BigInt("0x" + DigitPart) * NegativeNumber
+				}
+				break
+			//Binary
+				case 2:
+				case "0b":
+				case "0B":
+				if ((/^-?[01]+$/).test(string)) {
+					Output = BigInt("0b" + DigitPart) * NegativeNumber
+				}
+		
+		}
+		return Output
+	}
+</script>
