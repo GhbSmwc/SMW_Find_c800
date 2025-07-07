@@ -120,6 +120,11 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 </table>
 
 <script>
+	const Setting_PadLength_Decimal_XPos = 3;
+	const Setting_PadLength_Decimal_YPos = 3;
+	const Setting_PadLength_Hex_XPos = 3;
+	const Setting_PadLength_Hex_YPos = 3;
+
 	[...document.querySelectorAll("[name=LevelTypeHorizVert]")].forEach(Element => {
 		Element.addEventListener("change", NoHorizontalTypesIfVerticalSelected)
 	});
@@ -277,8 +282,8 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		}
 		document.getElementById("Statistic_TotalBlocksInLevel").textContent = Statistic_Value_TotalBlocksInLevel.toString(10) + " ($" + Statistic_Value_TotalBlocksInLevel.toString(16).toUpperCase().padStart(4, "0") + ", index up to $" + (Statistic_Value_TotalBlocksInLevel-1n).toString(16).toUpperCase().padStart(4, "0") + ")"
 		document.getElementById("Statistic_RAMEndingByte").textContent = Statistic_Value_RAMEndingByte.toString(16).toUpperCase().padStart(4, "0")
-		document.getElementById("Statistic_RightmostXPos").textContent = "00000~" + Statistic_Value_RightmostXPos.toString(10).padStart(5, "0") + " ($0000~$" + Statistic_Value_RightmostXPos.toString(16).toUpperCase().padStart(4, "0") + ")"
-		document.getElementById("Statistic_BottommostYPos").textContent = "00000~" + Statistic_Value_BottommostYPos.toString(10).padStart(5, "0") + " ($0000~$" + Statistic_Value_BottommostYPos.toString(16).toUpperCase().padStart(4, "0") + ")"
+		document.getElementById("Statistic_RightmostXPos").textContent = ("0").padStart(Setting_PadLength_Decimal_XPos, "0") + "~" + Statistic_Value_RightmostXPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_XPos, "0") + "~$" + Statistic_Value_RightmostXPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")"
+		document.getElementById("Statistic_BottommostYPos").textContent = ("0").padStart(Setting_PadLength_Decimal_YPos, "0") + "~" + Statistic_Value_BottommostYPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_YPos, "0") +"~$" + Statistic_Value_BottommostYPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
 	}
 
 	function CorrectHexBigIntValue(String) {
