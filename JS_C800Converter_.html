@@ -31,7 +31,7 @@
 			}
 		</style>
 	</head>
-<body>
+<body style="max-width: 1000px; margin: auto; padding: 15px">
 See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how the blocks are formatted
 <table>
 	<tr>
@@ -76,34 +76,45 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 	</tr>
 	<tr>
 		<td colspan="2">
-			<table>
-				<tr><th colspan="2">Normal level (layer 2 is background)</th></tr>
-				<tr><td>Total blocks in level:</td><td class="Statistics" id="Statistic_TotalBlocksInLevel">13824 ($3600, index up to $35FF)</td></tr>
-				<tr><td><kbd>$XXC800</kbd> RAM used:</td><td class="Statistics">$C800~$<span id="Statistic_RAMEndingByte">FDFF</span></td></tr>
-				<tr><td>XY valid ranges:</td>
-					<td class="Statistics">
-						<div>X: <span id="Statistic_RightmostXPos">00000~00511 ($0000~$01FF)</span></div>
-						<div>Y: <span id="Statistic_BottommostYPos">00026~00511 ($0000~$001A)</span></div>
-					</td>
-				</tr>
-				<tr><th colspan="2">Layer 2 level</th></tr>
-				<tr><td>Max number of screens wide:</td><td class="Statistics" id="Statistic_Layer2_MaxScreensWide">16 ($10)</td></tr>
-				<tr><td>Number of blocks in each layer:</td><td class="Statistics" id="Statistic_NumbOfBlocksEachLayer">6912 ($1B00, index up to $1AFF)</td></tr>
-				<tr>
-					<td><kbd>$XXC800</kbd> RAM used:</td>
-					<td class="Statistics">
-						<div>Layer 1: $C800~<span id="Statistics_Layer2Level_Layer1_RAMEndingByte">$E2FF</span></div>
-						<div>Layer 2: <span id="Statistics_Layer2Level_Layer2_RAMStartingByte">$E300</span>~<span id="Statistics_Layer2Level_Layer2_RAMEndingByte">$FDFF</span></div>
-					</td>
-				</tr>
-				<tr>
-					<td>XY valid ranges:</td>
-					<td class="Statistics">
-						<div>X: $0000~$<span id="Statistic_RightmostXPos_Layer2">00FF</span></div>
-						<div>Y: $0000~$<span id="Statistic_BottommostYPos_Layer2">001A</span></div>
-					</td>
-				</tr>
-			</table>
+				<table>
+					<tr><th colspan="2">Normal level (layer 2 is background)</th><th>Graphical memory usage range</th></tr>
+					<tr>
+						<td>Total blocks in level:</td>
+						<td class="Statistics" id="Statistic_TotalBlocksInLevel">13824 ($3600, index up to $35FF)</td>
+						<td rowspan="9">
+							<div style="overflow: auto; resize: vertical; min-width: 500px; min-height: 500px; height: 500px; border: 1px solid white;">
+								<svg style="width: 500px; height: 400px; border: 1px solid white;" id="GraphicalC800Map">
+									<text stroke="#ffffff" font-weight="lighter" text-anchor="left" alignment-baseline="hanging" font-family="monospace" x="100" y="0">Layer 1 level</text>
+									<text stroke="#ffffff" font-weight="lighter" text-anchor="left" alignment-baseline="hanging" font-family="monospace" x="300" y="0">Layer 2 level</text>
+								</svg>
+							</div>
+						</td>
+					</tr>
+					<tr><td><kbd>$XXC800</kbd> RAM used:</td><td class="Statistics">$C800~$<span id="Statistic_RAMEndingByte">FDFF</span></td></tr>
+					<tr><td>XY valid ranges:</td>
+						<td class="Statistics">
+							<div>X: <span id="Statistic_RightmostXPos">00000~00511 ($0000~$01FF)</span></div>
+							<div>Y: <span id="Statistic_BottommostYPos">00026~00511 ($0000~$001A)</span></div>
+						</td>
+					</tr>
+					<tr><th colspan="2">Layer 2 level</th></tr>
+					<tr><td>Max number of screens wide:</td><td class="Statistics" id="Statistic_Layer2_MaxScreensWide">16 ($10)</td></tr>
+					<tr><td>Number of blocks in each layer:</td><td class="Statistics" id="Statistic_NumbOfBlocksEachLayer">6912 ($1B00, index up to $1AFF)</td></tr>
+					<tr>
+						<td><kbd>$XXC800</kbd> RAM used:</td>
+						<td class="Statistics">
+							<div>Layer 1: $C800~<span id="Statistics_Layer2Level_Layer1_RAMEndingByte">$E2FF</span></div>
+							<div>Layer 2: <span id="Statistics_Layer2Level_Layer2_RAMStartingByte">$E300</span>~<span id="Statistics_Layer2Level_Layer2_RAMEndingByte">$FDFF</span></div>
+						</td>
+					</tr>
+					<tr>
+						<td>XY valid ranges:</td>
+						<td class="Statistics">
+							<div>X: $0000~$<span id="Statistic_RightmostXPos_Layer2">00FF</span></div>
+							<div>Y: $0000~$<span id="Statistic_BottommostYPos_Layer2">001A</span></div>
+						</td>
+					</tr>
+				</table>
 		</td>
 	</tr>
 	<tr>
@@ -124,6 +135,16 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 	const Setting_PadLength_Decimal_YPos = 3;
 	const Setting_PadLength_Hex_XPos = 3;
 	const Setting_PadLength_Hex_YPos = 3;
+	//Don't touch
+		let Statistic_Value_TotalBlocksInLevel = 0n
+		let Statistic_Value_RAMEndingByte = BigInt("0xFDFF")
+		let Statistic_Value_RightmostXPos = 0n
+		let Statistic_Value_BottommostYPos = 0n
+	
+	
+	//SVG settings
+		const Setting_SVG_GridSizeFactorOver1000 = 20n;
+		const Setting_SVG_GraphYPos = 40n;
 
 	[...document.querySelectorAll("[name=LevelTypeHorizVert]")].forEach(Element => {
 		Element.addEventListener("change", NoHorizontalTypesIfVerticalSelected)
@@ -131,7 +152,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 	[...document.querySelectorAll("input[type=number]")].forEach(Element => {
 		Element.addEventListener("change", CorrectInputNumber)
 	});
-	
+	SpawnSVGAddressesDisplay()
 	UpDownArrowKeysIncrement()
 	//These makes input text act like a number input, pressing UP/DOWN on the arrow keys to increment/decrement it, but with any radixes.
 	//In order for this to apply, have these on the number input:
@@ -227,10 +248,10 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			return num <= min ? min : num >= max ? max : num;
 	}
 	function CalculateStatistics() {
-		let Statistic_Value_TotalBlocksInLevel = 0n
-		let Statistic_Value_RAMEndingByte = 0n
-		let Statistic_Value_RightmostXPos = 0n
-		let Statistic_Value_BottommostYPos = 0n
+		Statistic_Value_TotalBlocksInLevel = 0n
+		Statistic_Value_RAMEndingByte = 0n
+		Statistic_Value_RightmostXPos = 0n
+		Statistic_Value_BottommostYPos = 0n
 		
 		if (document.getElementById("LevelTypeHorizVert_Horiz").checked) {
 			//Horizontal level
@@ -282,6 +303,12 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		}
 		document.getElementById("Statistic_TotalBlocksInLevel").textContent = Statistic_Value_TotalBlocksInLevel.toString(10) + " ($" + Statistic_Value_TotalBlocksInLevel.toString(16).toUpperCase().padStart(4, "0") + ", index up to $" + (Statistic_Value_TotalBlocksInLevel-1n).toString(16).toUpperCase().padStart(4, "0") + ")"
 		document.getElementById("Statistic_RAMEndingByte").textContent = Statistic_Value_RAMEndingByte.toString(16).toUpperCase().padStart(4, "0")
+		{
+			let YPos = Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+			let BottomYPos = (Statistic_Value_RAMEndingByte-BigInt("0xC800"))*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+			let Height = BottomYPos - YPos
+			document.getElementById("Layer1LevelUsage").setAttribute("height", Height.toString(10))
+		}
 		document.getElementById("Statistic_RightmostXPos").textContent = ("0").padStart(Setting_PadLength_Decimal_XPos, "0") + "~" + Statistic_Value_RightmostXPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_XPos, "0") + "~$" + Statistic_Value_RightmostXPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")"
 		document.getElementById("Statistic_BottommostYPos").textContent = ("0").padStart(Setting_PadLength_Decimal_YPos, "0") + "~" + Statistic_Value_BottommostYPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_YPos, "0") +"~$" + Statistic_Value_BottommostYPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
 	}
@@ -328,5 +355,80 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		
 		}
 		return Output
+	}
+	function SpawnSVGAddressesDisplay() {
+		let GraphicalC800Map_Display = document.getElementById("GraphicalC800Map")
+		let StartingAddress = BigInt("0xC800")
+		let CurrentAddress = StartingAddress
+		let EndingAddress = BigInt("0xFFFF")
+		let FailsafeLoopLimiter = 100
+		
+		//Display address by the Y axis
+			for (let LoopCount = 0; LoopCount < FailsafeLoopLimiter; LoopCount++) {
+				let YPos = (CurrentAddress-StartingAddress)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				
+				let AddressNumberText = createSVGElement("text")
+				AddressNumberText.setAttribute("stroke", "#ffffff")
+				AddressNumberText.setAttribute("font-weight", "lighter")
+				AddressNumberText.setAttribute("text-anchor", "left")
+				AddressNumberText.setAttribute("alignment-baseline", "middle")
+				AddressNumberText.setAttribute("font-family", "monospace")
+				AddressNumberText.appendChild(document.createTextNode("$" + CurrentAddress.toString(16).toUpperCase()))
+				AddressNumberText.setAttribute("transform", "translate(0, " + (YPos).toString(10) + ")")
+				GraphicalC800Map_Display.appendChild(AddressNumberText)
+				
+				let HorizontalLine = createSVGElement("line")
+				HorizontalLine.setAttribute("stroke", "#ffffff")
+				HorizontalLine.setAttribute("x1", "40")
+				HorizontalLine.setAttribute("x2", "1000")
+				HorizontalLine.setAttribute("y1", (YPos).toString(10))
+				HorizontalLine.setAttribute("y2", (YPos).toString(10))
+				GraphicalC800Map_Display.appendChild(HorizontalLine)
+				
+				CurrentAddress += BigInt("0x0800")
+				if (CurrentAddress > EndingAddress) {
+					break
+				}
+			}
+			{
+				//Ending address
+				let YPos = (EndingAddress-StartingAddress)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let AddressNumberText_EndingAddress = createSVGElement("text")
+				AddressNumberText_EndingAddress.setAttribute("stroke", "#ffffff")
+				AddressNumberText_EndingAddress.setAttribute("font-weight", "lighter")
+				AddressNumberText_EndingAddress.setAttribute("text-anchor", "left")
+				AddressNumberText_EndingAddress.setAttribute("alignment-baseline", "middle")
+				AddressNumberText_EndingAddress.setAttribute("font-family", "monospace")
+				AddressNumberText_EndingAddress.appendChild(document.createTextNode("$" + EndingAddress.toString(16).toUpperCase()))
+				AddressNumberText_EndingAddress.setAttribute("transform", "translate(0, " + (YPos).toString(10) + ")")
+				GraphicalC800Map_Display.appendChild(AddressNumberText_EndingAddress)
+				
+				let HorizontalLine = createSVGElement("line")
+				HorizontalLine.setAttribute("stroke", "#ffffff")
+				HorizontalLine.setAttribute("x1", "40")
+				HorizontalLine.setAttribute("x2", "1000")
+				HorizontalLine.setAttribute("y1", (YPos).toString(10))
+				HorizontalLine.setAttribute("y2", (YPos).toString(10))
+				GraphicalC800Map_Display.appendChild(HorizontalLine)
+			}
+		//Display level layer 1 range
+			{
+				let YPos = Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let BottomYPos = (Statistic_Value_RAMEndingByte-StartingAddress)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let Height = BottomYPos - YPos
+				let Layer1UsageBarRange = createSVGElement("rect")
+				Layer1UsageBarRange.setAttribute("id", "Layer1LevelUsage")
+				Layer1UsageBarRange.setAttribute("rx", "8")
+				Layer1UsageBarRange.setAttribute("ry", "8")
+				Layer1UsageBarRange.setAttribute("transform", "translate(120, " + (YPos).toString(10) + ")")
+				Layer1UsageBarRange.setAttribute("height", Height.toString(10))
+				Layer1UsageBarRange.setAttribute("width", "40")
+				Layer1UsageBarRange.setAttribute("fill", "#008000")
+				GraphicalC800Map_Display.appendChild(Layer1UsageBarRange)
+			}
+			
+	}
+	function createSVGElement(tag) { //https://stackoverflow.com/questions/57894500/why-is-it-necessary-to-use-document-createelementns-when-adding-svg-tags-to
+		return document.createElementNS('http://www.w3.org/2000/svg', tag)
 	}
 </script>
