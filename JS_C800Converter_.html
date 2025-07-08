@@ -80,7 +80,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 					<tr><th colspan="2">Normal level (layer 2 is background)</th><th>Graphical memory usage range</th></tr>
 					<tr>
 						<td>Total blocks in level:</td>
-						<td class="Statistics" id="Statistic_TotalBlocksInLevel">13824 ($3600, index up to $35FF)</td>
+						<td class="Statistics" id="Statistic_TotalBlocksInLevel"></td>
 						<td rowspan="9">
 							<div style="overflow: auto; resize: vertical; min-width: 500px; min-height: 500px; height: 500px; border: 1px solid white;">
 								<svg style="width: 500px; height: 400px; border: 1px solid white;" id="GraphicalC800Map">
@@ -118,19 +118,39 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 						<tr id="Layer2Error" hidden>
 							<td colspan="2">Level have a width of 0 means invalid. A completely black screen viewed on Lunar Magic.</td>
 						</tr>
-
 				</table>
 		</td>
 	</tr>
 	<tr>
 		<td>
 			<h2>Convert XY coordinates to index</h2><br>
-			<div>X: <input type="number" value="0" id="BlockCoordinate_X_Dec">($<input type="text" value="0000" id="BlockCoordinate_X_Hex" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber()">)</div>
-			<div>Y: <input type="number" value="0" id="BlockCoordinate_Y_Dec">($<input type="text" value="0000" id="BlockCoordinate_Y_Hex" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber()">)</div>
+			<div><kbd>X: </kbd><input type="number" value="0" id="BlockCoordinate_X_Dec" onchange="CorrectInputNumber(); BlockCoordsToIndex();" >($<input type="text" value="0000" id="BlockCoordinate_X_Hex" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber(); BlockCoordsToIndex()">)</div>
+			<div><kbd>Y: </kbd><input type="number" value="0" id="BlockCoordinate_Y_Dec" onchange="CorrectInputNumber(); BlockCoordsToIndex();" >($<input type="text" value="0000" id="BlockCoordinate_Y_Hex" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber(); BlockCoordsToIndex()">)</div><br>
+			<table>
+				<tr>
+					<td>Index:</td>
+					<td class="Statistics" id="XYCoordsToIndexResult"></td>
+				</tr>
+				<tr>
+					<td>Layer 1 RAM:</td>
+					<td class="Statistics" id="XYCoordsToIndexResult_L1Address"></td>
+				</tr>
+				<tr>
+					<td>Layer 2 RAM:</td>
+					<td class="Statistics" id="XYCoordsToIndexResult_L2Address"></td>
+				</tr>
+			</table>
+			
 		</td>
 		<td>
 			<h2>Convert Index to XY coords</h2><br>
-			<div>Index: <input type="text" value="0000" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber()"></div>
+			<div><kbd>Index: $</kbd><input type="text" value="0000" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber(); IndexToBlockCoords();" id="IndexToCoords"></div><br>
+			<table>
+				<tr>
+					<td>Position:</td>
+					<td class="Statistics" id="IndexToBlockCoordsResults"></td>
+				</tr>
+			</table>
 		</td>
 	</tr>
 </table>
@@ -156,6 +176,8 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		let Statistic_Value_BottommostYPos_Layer2 = BigInt("0x1A")
 		
 		let HalvedScreenRemainder = 0n
+		
+		let BlocksPerScreenColumnHorizLevel = BigInt("0x01B0")
 	
 	
 	//SVG settings
@@ -165,11 +187,11 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 	[...document.querySelectorAll("[name=LevelTypeHorizVert]")].forEach(Element => {
 		Element.addEventListener("change", NoHorizontalTypesIfVerticalSelected)
 	});
-	[...document.querySelectorAll("input[type=number]")].forEach(Element => {
-		Element.addEventListener("change", CorrectInputNumber)
-	});
 	SpawnSVGAddressesDisplay()
 	UpDownArrowKeysIncrement()
+	 //pre-calculate to save them to a variable.
+		CalculateStatistics()
+		BlockCoordsToIndex()
 	//These makes input text act like a number input, pressing UP/DOWN on the arrow keys to increment/decrement it, but with any radixes.
 	//In order for this to apply, have these on the number input:
 	//- Make sure the class contains "AnyRadixNumberInput"
@@ -309,6 +331,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 				}
 			})
 			let CurrentHorizontalLevelSetting = HorizontalLevelTypes[HorizontalLevelTypeIndex]
+			BlocksPerScreenColumnHorizLevel = CurrentHorizontalLevelSetting.Height*16n
 			//Layer 1 stats
 				Statistic_Value_TotalBlocksInLevel = CurrentHorizontalLevelSetting.Height*16n*CurrentHorizontalLevelSetting.MaxHScreens
 				Statistic_Value_RAMEndingByte = Setting_StartingLevelM16Data + Statistic_Value_TotalBlocksInLevel-1n
@@ -345,7 +368,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			Statistic_Value_Layer2Level_Layer2_RAMEndingByte = Statistic_Value_Layer2Level_Layer2_RAMStartingByte + Statistic_Value_NumbOfBlocksEachLayer -1n
 			Statistic_Value_RightmostXPos = 31n
 			Statistic_Value_RightmostXPos_Layer2 = 31n
-			Statistic_Value_BottommostYPos = 31n
+			Statistic_Value_BottommostYPos = BigInt("0x1BF")
 			Statistic_Value_BottommostYPos_Layer2 = BigInt("0xDF")
 		}
 		//layer 1 level
@@ -385,6 +408,9 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			}
 			document.getElementById("Statistic_RightmostXPos_Layer2").textContent = ("0").padStart(Setting_PadLength_Decimal_XPos, "0") + "~" + Statistic_Value_RightmostXPos_Layer2.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_XPos, "0") + "~$" + Statistic_Value_RightmostXPos_Layer2.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")"
 			document.getElementById("Statistic_BottommostYPos_Layer2").textContent = ("0").padStart(Setting_PadLength_Decimal_YPos, "0") + "~" + Statistic_Value_BottommostYPos_Layer2.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_YPos, "0") + "~$" + Statistic_Value_BottommostYPos_Layer2.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
+	//Update converters
+		BlockCoordsToIndex()
+		IndexToBlockCoords()
 	}
 
 	function CorrectHexBigIntValue(String) {
@@ -429,6 +455,50 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		
 		}
 		return Output
+	}
+	function BlockCoordsToIndex() {
+		let XPos = ParseBigIntValue(document.getElementById("BlockCoordinate_X_Dec").value)
+		let YPos = ParseBigIntValue(document.getElementById("BlockCoordinate_Y_Dec").value)
+		
+		if ((XPos <= Statistic_Value_RightmostXPos)&&(YPos <= Statistic_Value_BottommostYPos)) {
+			let StartingAddressString = Setting_StartingLevelM16Data.toString(16).toUpperCase().padStart(4, "0")
+			let StartingAddressLayer2String = Statistic_Value_Layer2Level_Layer2_RAMStartingByte.toString(16).toUpperCase().padStart(4, "0")
+			let Index = 0n
+			if (document.getElementById("LevelTypeHorizVert_Horiz").checked) {
+				Index = (BlocksPerScreenColumnHorizLevel*(XPos/16n))+(YPos*16n)+(XPos%16n)
+			} else {
+				Index = (512n*(YPos/16n))+(256n*(XPos/16n))+((YPos%16n)*16n)+(XPos%16n)
+			}
+			let IndexString = Index.toString(16).toUpperCase().padStart(4, "0")
+			document.getElementById("XYCoordsToIndexResult").textContent = "$"  + IndexString
+			document.getElementById("XYCoordsToIndexResult_L1Address").textContent = "$" + (Setting_StartingLevelM16Data + Index).toString(16).toUpperCase().padStart(4, "0") + " ($" + StartingAddressString + " + $" + IndexString + ")"
+			if ((XPos <= Statistic_Value_RightmostXPos_Layer2)&&(YPos <= Statistic_Value_BottommostYPos_Layer2)) {
+				document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "$" + (Statistic_Value_Layer2Level_Layer2_RAMStartingByte + Index).toString(16).toUpperCase().padStart(4, "0") + " ($" + StartingAddressLayer2String + " + $" + IndexString + ")"
+			} else {
+				document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "N/A"
+			}
+		} else {
+			document.getElementById("XYCoordsToIndexResult").textContent = "Out of level bounds"
+			document.getElementById("XYCoordsToIndexResult_L1Address").textContent = "N/A"
+			document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "N/A"
+		}
+	}
+	function IndexToBlockCoords() {
+		let EnteredIndex = ParseBigIntValue(document.getElementById("IndexToCoords").value, 16)
+		let XPos = 0n
+		let YPos = 0n
+		if (document.getElementById("LevelTypeHorizVert_Horiz").checked) {
+			XPos = ((EnteredIndex/BlocksPerScreenColumnHorizLevel)*16n) + (EnteredIndex % 16n)
+			YPos = (EnteredIndex % BlocksPerScreenColumnHorizLevel)/16n
+		} else {
+			XPos = (((EnteredIndex % 512n)/256n)*16n) + (EnteredIndex % 16n)
+			YPos = ((EnteredIndex/512n)*16n) + ((EnteredIndex/16n) % 16n)
+		}
+		if (EnteredIndex < Statistic_Value_TotalBlocksInLevel) {
+			document.getElementById("IndexToBlockCoordsResults").textContent = "(" + XPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + ", " + YPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + ") ($" + XPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ", $" + YPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
+		} else {
+			document.getElementById("IndexToBlockCoordsResults").textContent = "Index beyond last block."
+		}
 	}
 	function SpawnSVGAddressesDisplay() {
 		let GraphicalC800Map_Display = document.getElementById("GraphicalC800Map")
