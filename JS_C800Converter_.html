@@ -336,6 +336,17 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			
 		} else {
 			//Vertical level
+			Statistic_Value_TotalBlocksInLevel = 14336n
+			Statistic_Value_RAMEndingByte = Setting_StartingLevelM16Data + Statistic_Value_TotalBlocksInLevel-1n
+			Statistic_Value_Layer2_MaxScreensWide = 2n
+			Statistic_Value_NumbOfBlocksEachLayer = 7168n
+			Statistic_Value_Layer2Level_Layer1_RAMEndingByte = Setting_StartingLevelM16Data + Statistic_Value_NumbOfBlocksEachLayer - 1n
+			Statistic_Value_Layer2Level_Layer2_RAMStartingByte = Statistic_Value_Layer2Level_Layer1_RAMEndingByte+1n
+			Statistic_Value_Layer2Level_Layer2_RAMEndingByte = Statistic_Value_Layer2Level_Layer2_RAMStartingByte + Statistic_Value_NumbOfBlocksEachLayer -1n
+			Statistic_Value_RightmostXPos = 31n
+			Statistic_Value_RightmostXPos_Layer2 = 31n
+			Statistic_Value_BottommostYPos = 31n
+			Statistic_Value_BottommostYPos_Layer2 = BigInt("0xDF")
 		}
 		//layer 1 level
 			document.getElementById("Statistic_TotalBlocksInLevel").textContent = Statistic_Value_TotalBlocksInLevel.toString(10) + " ($" + Statistic_Value_TotalBlocksInLevel.toString(16).toUpperCase().padStart(4, "0") + ", index up to $" + (Statistic_Value_TotalBlocksInLevel-1n).toString(16).toUpperCase().padStart(4, "0") + ")"
