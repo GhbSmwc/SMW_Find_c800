@@ -93,27 +93,32 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 					<tr><td><kbd>$XXC800</kbd> RAM used:</td><td class="Statistics">$C800~$<span id="Statistic_RAMEndingByte">FDFF</span></td></tr>
 					<tr><td>XY valid ranges:</td>
 						<td class="Statistics">
-							<div>X: <span id="Statistic_RightmostXPos">00000~00511 ($0000~$01FF)</span></div>
-							<div>Y: <span id="Statistic_BottommostYPos">00026~00511 ($0000~$001A)</span></div>
+							<div>X: <span id="Statistic_RightmostXPos">000~511 ($0000~$01FF)</span></div>
+							<div>Y: <span id="Statistic_BottommostYPos">026~511 ($0000~$001A)</span></div>
 						</td>
 					</tr>
 					<tr><th colspan="2">Layer 2 level</th></tr>
-					<tr><td>Max number of screens wide:</td><td class="Statistics" id="Statistic_Layer2_MaxScreensWide">16 ($10)</td></tr>
-					<tr><td>Number of blocks in each layer:</td><td class="Statistics" id="Statistic_NumbOfBlocksEachLayer">6912 ($1B00, index up to $1AFF)</td></tr>
-					<tr>
-						<td><kbd>$XXC800</kbd> RAM used:</td>
-						<td class="Statistics">
-							<div>Layer 1: $C800~<span id="Statistics_Layer2Level_Layer1_RAMEndingByte">$E2FF</span></div>
-							<div>Layer 2: <span id="Statistics_Layer2Level_Layer2_RAMStartingByte">$E300</span>~<span id="Statistics_Layer2Level_Layer2_RAMEndingByte">$FDFF</span></div>
-						</td>
-					</tr>
-					<tr>
-						<td>XY valid ranges:</td>
-						<td class="Statistics">
-							<div>X: $0000~$<span id="Statistic_RightmostXPos_Layer2">00FF</span></div>
-							<div>Y: $0000~$<span id="Statistic_BottommostYPos_Layer2">001A</span></div>
-						</td>
-					</tr>
+
+						<tr class="LevelLayer2Stats"><td>Max number of screens wide:</td><td class="Statistics" id="Statistic_Layer2_MaxScreensWide">16 ($10)</td></tr>
+						<tr class="LevelLayer2Stats"><td>Number of blocks in each layer:</td><td class="Statistics" id="Statistic_NumbOfBlocksEachLayer">6912 ($1B00, index up to $1AFF)</td></tr>
+						<tr class="LevelLayer2Stats">
+							<td><kbd>$XXC800</kbd> RAM used:</td>
+							<td class="Statistics">
+								<div>Layer 1: $C800~$<span id="Statistic_Layer2Level_Layer1_RAMEndingByte">E2FF</span></div>
+								<div>Layer 2: $<span id="Statistic_Layer2Level_Layer2_RAMStartingByte">E300</span>~$<span id="Statistic_Layer2Level_Layer2_RAMEndingByte">FDFF</span></div>
+							</td>
+						</tr>
+						<tr class="LevelLayer2Stats">
+							<td>XY valid ranges:</td>
+							<td class="Statistics">
+								<div>X: <span id="Statistic_RightmostXPos_Layer2">000-255 ($000~$0FF)</span></div>
+								<div>Y: <span id="Statistic_BottommostYPos_Layer2">000-026 ($000~$01A)</span></div>
+							</td>
+						</tr>
+						<tr id="Layer2Error" hidden>
+							<td colspan="2">Level have a width of 0 means invalid. A completely black screen viewed on Lunar Magic.</td>
+						</tr>
+
 				</table>
 		</td>
 	</tr>
@@ -135,11 +140,22 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 	const Setting_PadLength_Decimal_YPos = 3;
 	const Setting_PadLength_Hex_XPos = 3;
 	const Setting_PadLength_Hex_YPos = 3;
+	const Setting_StartingLevelM16Data = BigInt("0xC800")
 	//Don't touch
 		let Statistic_Value_TotalBlocksInLevel = 0n
-		let Statistic_Value_RAMEndingByte = BigInt("0xFDFF")
+		let Statistic_Value_RAMEndingByte = BigInt("0xFDFF") //default value
 		let Statistic_Value_RightmostXPos = 0n
 		let Statistic_Value_BottommostYPos = 0n
+		
+		let Statistic_Value_Layer2_MaxScreensWide = 16n
+		let Statistic_Value_NumbOfBlocksEachLayer = 6912n
+		let Statistic_Value_Layer2Level_Layer1_RAMEndingByte = BigInt("0xE2FF")
+		let Statistic_Value_Layer2Level_Layer2_RAMStartingByte = BigInt("0xE300")
+		let Statistic_Value_Layer2Level_Layer2_RAMEndingByte = BigInt("0xFDFF")
+		let Statistic_Value_RightmostXPos_Layer2 = BigInt("0xFF")
+		let Statistic_Value_BottommostYPos_Layer2 = BigInt("0x1A")
+		
+		let HalvedScreenRemainder = 0n
 	
 	
 	//SVG settings
@@ -293,24 +309,71 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 				}
 			})
 			let CurrentHorizontalLevelSetting = HorizontalLevelTypes[HorizontalLevelTypeIndex]
+			//Layer 1 stats
+				Statistic_Value_TotalBlocksInLevel = CurrentHorizontalLevelSetting.Height*16n*CurrentHorizontalLevelSetting.MaxHScreens
+				Statistic_Value_RAMEndingByte = Setting_StartingLevelM16Data + Statistic_Value_TotalBlocksInLevel-1n
+				Statistic_Value_RightmostXPos = (CurrentHorizontalLevelSetting.MaxHScreens*16n)-1n
+				Statistic_Value_BottommostYPos = CurrentHorizontalLevelSetting.Height-1n
+			//Layer 2 level stats
+				Statistic_Value_Layer2_MaxScreensWide = CurrentHorizontalLevelSetting.MaxHScreens/2n
+				HalvedScreenRemainder = CurrentHorizontalLevelSetting.MaxHScreens % 2n //If there are odd screens left, there is a gap between L1's last byte and L2's first byte
+				let Layer2StatisticsElementsToShowAndHide = [...document.querySelectorAll("tr.LevelLayer2Stats")]
+				if (Statistic_Value_Layer2_MaxScreensWide != 0n) {
+					Layer2StatisticsElementsToShowAndHide.forEach(Ele => Ele.hidden = false)
+					document.getElementById("Layer2Error").hidden = true
+					Statistic_Value_NumbOfBlocksEachLayer = CurrentHorizontalLevelSetting.Height*16n*Statistic_Value_Layer2_MaxScreensWide
+					Statistic_Value_Layer2Level_Layer1_RAMEndingByte = Setting_StartingLevelM16Data + Statistic_Value_NumbOfBlocksEachLayer-1n
+					Statistic_Value_Layer2Level_Layer2_RAMStartingByte = Setting_StartingLevelM16Data + Statistic_Value_NumbOfBlocksEachLayer + (CurrentHorizontalLevelSetting.Height*16n*HalvedScreenRemainder)
+					Statistic_Value_Layer2Level_Layer2_RAMEndingByte = Statistic_Value_Layer2Level_Layer2_RAMStartingByte + Statistic_Value_NumbOfBlocksEachLayer-1n
+					Statistic_Value_RightmostXPos_Layer2 = (Statistic_Value_Layer2_MaxScreensWide*16n)-1n
+					Statistic_Value_BottommostYPos_Layer2 = Statistic_Value_BottommostYPos
+				} else {
+					Layer2StatisticsElementsToShowAndHide.forEach(Ele => Ele.hidden = true)
+					document.getElementById("Layer2Error").hidden = false
+					//A 0-wide level
+				}
 			
-			Statistic_Value_TotalBlocksInLevel = CurrentHorizontalLevelSetting.Height*16n*CurrentHorizontalLevelSetting.MaxHScreens
-			Statistic_Value_RAMEndingByte = BigInt("0xC800") + Statistic_Value_TotalBlocksInLevel-1n
-			Statistic_Value_RightmostXPos = (CurrentHorizontalLevelSetting.MaxHScreens*16n)-1n
-			Statistic_Value_BottommostYPos = CurrentHorizontalLevelSetting.Height-1n
+			
 		} else {
 			//Vertical level
 		}
-		document.getElementById("Statistic_TotalBlocksInLevel").textContent = Statistic_Value_TotalBlocksInLevel.toString(10) + " ($" + Statistic_Value_TotalBlocksInLevel.toString(16).toUpperCase().padStart(4, "0") + ", index up to $" + (Statistic_Value_TotalBlocksInLevel-1n).toString(16).toUpperCase().padStart(4, "0") + ")"
-		document.getElementById("Statistic_RAMEndingByte").textContent = Statistic_Value_RAMEndingByte.toString(16).toUpperCase().padStart(4, "0")
-		{
-			let YPos = Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
-			let BottomYPos = (Statistic_Value_RAMEndingByte-BigInt("0xC800"))*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
-			let Height = BottomYPos - YPos
-			document.getElementById("Layer1LevelUsage").setAttribute("height", Height.toString(10))
-		}
-		document.getElementById("Statistic_RightmostXPos").textContent = ("0").padStart(Setting_PadLength_Decimal_XPos, "0") + "~" + Statistic_Value_RightmostXPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_XPos, "0") + "~$" + Statistic_Value_RightmostXPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")"
-		document.getElementById("Statistic_BottommostYPos").textContent = ("0").padStart(Setting_PadLength_Decimal_YPos, "0") + "~" + Statistic_Value_BottommostYPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_YPos, "0") +"~$" + Statistic_Value_BottommostYPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
+		//layer 1 level
+			document.getElementById("Statistic_TotalBlocksInLevel").textContent = Statistic_Value_TotalBlocksInLevel.toString(10) + " ($" + Statistic_Value_TotalBlocksInLevel.toString(16).toUpperCase().padStart(4, "0") + ", index up to $" + (Statistic_Value_TotalBlocksInLevel-1n).toString(16).toUpperCase().padStart(4, "0") + ")"
+			document.getElementById("Statistic_RAMEndingByte").textContent = Statistic_Value_RAMEndingByte.toString(16).toUpperCase().padStart(4, "0")
+			{
+				let YPos = Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let BottomYPos = (Statistic_Value_RAMEndingByte-Setting_StartingLevelM16Data)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let Height = BottomYPos - YPos
+				document.getElementById("Layer1LevelUsage").setAttribute("height", Height.toString(10))
+			}
+			document.getElementById("Statistic_RightmostXPos").textContent = ("0").padStart(Setting_PadLength_Decimal_XPos, "0") + "~" + Statistic_Value_RightmostXPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_XPos, "0") + "~$" + Statistic_Value_RightmostXPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")"
+			document.getElementById("Statistic_BottommostYPos").textContent = ("0").padStart(Setting_PadLength_Decimal_YPos, "0") + "~" + Statistic_Value_BottommostYPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_YPos, "0") +"~$" + Statistic_Value_BottommostYPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
+		//Layer 2 level
+			document.getElementById("Statistic_Layer2_MaxScreensWide").textContent = Statistic_Value_Layer2_MaxScreensWide.toString(10) + " ($" + Statistic_Value_Layer2_MaxScreensWide.toString(16).toUpperCase().padStart(2, "0") + ")"
+			document.getElementById("Statistic_NumbOfBlocksEachLayer").textContent = Statistic_Value_NumbOfBlocksEachLayer.toString(10) + " ($" + Statistic_Value_NumbOfBlocksEachLayer.toString(16).toUpperCase().padStart(4, "0") + ", index up to $" + (Statistic_Value_NumbOfBlocksEachLayer-1n).toString(16).toUpperCase().padStart(4, "0") + ")"
+			document.getElementById("Statistic_Layer2Level_Layer1_RAMEndingByte").textContent = (Statistic_Value_Layer2Level_Layer1_RAMEndingByte).toString(16).toUpperCase()
+			document.getElementById("Statistic_Layer2Level_Layer2_RAMStartingByte").textContent = Statistic_Value_Layer2Level_Layer2_RAMStartingByte.toString(16).toUpperCase()
+			document.getElementById("Statistic_Layer2Level_Layer2_RAMEndingByte").textContent = Statistic_Value_Layer2Level_Layer2_RAMEndingByte.toString(16).toUpperCase()
+			{
+				let YPos = Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let Layer1BottomYPos = (Statistic_Value_Layer2Level_Layer1_RAMEndingByte-Setting_StartingLevelM16Data)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let Layer1Height = Layer1BottomYPos - YPos
+				
+				
+				let YPos2 = (Statistic_Value_Layer2Level_Layer2_RAMStartingByte-Setting_StartingLevelM16Data)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let Layer2BottomYPos = (Statistic_Value_Layer2Level_Layer2_RAMEndingByte-Setting_StartingLevelM16Data)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let Layer2Height = Layer2BottomYPos - YPos2
+				
+				if (Statistic_Value_Layer2_MaxScreensWide == 0n) {
+					Layer1Height = 0n
+					Layer2Height = 0n
+				}
+				document.getElementById("Layer1LevelUsage_Layer2Level").setAttribute("height", Layer1Height.toString(10))
+				document.getElementById("Layer2LevelUsage_Layer2Level").setAttribute("transform", "translate(320, " + (YPos2).toString(10) + ")")
+				document.getElementById("Layer2LevelUsage_Layer2Level").setAttribute("height", Layer2Height.toString(10))
+			}
+			document.getElementById("Statistic_RightmostXPos_Layer2").textContent = ("0").padStart(Setting_PadLength_Decimal_XPos, "0") + "~" + Statistic_Value_RightmostXPos_Layer2.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_XPos, "0") + "~$" + Statistic_Value_RightmostXPos_Layer2.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")"
+			document.getElementById("Statistic_BottommostYPos_Layer2").textContent = ("0").padStart(Setting_PadLength_Decimal_YPos, "0") + "~" + Statistic_Value_BottommostYPos_Layer2.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_YPos, "0") + "~$" + Statistic_Value_BottommostYPos_Layer2.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
 	}
 
 	function CorrectHexBigIntValue(String) {
@@ -358,14 +421,13 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 	}
 	function SpawnSVGAddressesDisplay() {
 		let GraphicalC800Map_Display = document.getElementById("GraphicalC800Map")
-		let StartingAddress = BigInt("0xC800")
-		let CurrentAddress = StartingAddress
+		let CurrentAddress = Setting_StartingLevelM16Data
 		let EndingAddress = BigInt("0xFFFF")
 		let FailsafeLoopLimiter = 100
 		
 		//Display address by the Y axis
 			for (let LoopCount = 0; LoopCount < FailsafeLoopLimiter; LoopCount++) {
-				let YPos = (CurrentAddress-StartingAddress)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let YPos = (CurrentAddress-Setting_StartingLevelM16Data)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
 				
 				let AddressNumberText = createSVGElement("text")
 				AddressNumberText.setAttribute("stroke", "#ffffff")
@@ -392,7 +454,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			}
 			{
 				//Ending address
-				let YPos = (EndingAddress-StartingAddress)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let YPos = (EndingAddress-Setting_StartingLevelM16Data)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
 				let AddressNumberText_EndingAddress = createSVGElement("text")
 				AddressNumberText_EndingAddress.setAttribute("stroke", "#ffffff")
 				AddressNumberText_EndingAddress.setAttribute("font-weight", "lighter")
@@ -414,19 +476,48 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		//Display level layer 1 range
 			{
 				let YPos = Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
-				let BottomYPos = (Statistic_Value_RAMEndingByte-StartingAddress)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let BottomYPos = (Statistic_Value_RAMEndingByte-Setting_StartingLevelM16Data)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
 				let Height = BottomYPos - YPos
-				let Layer1UsageBarRange = createSVGElement("rect")
-				Layer1UsageBarRange.setAttribute("id", "Layer1LevelUsage")
-				Layer1UsageBarRange.setAttribute("rx", "8")
-				Layer1UsageBarRange.setAttribute("ry", "8")
-				Layer1UsageBarRange.setAttribute("transform", "translate(120, " + (YPos).toString(10) + ")")
-				Layer1UsageBarRange.setAttribute("height", Height.toString(10))
-				Layer1UsageBarRange.setAttribute("width", "40")
-				Layer1UsageBarRange.setAttribute("fill", "#008000")
-				GraphicalC800Map_Display.appendChild(Layer1UsageBarRange)
+				let RAMUsageBar = createSVGElement("rect")
+				RAMUsageBar.setAttribute("id", "Layer1LevelUsage")
+				RAMUsageBar.setAttribute("rx", "8")
+				RAMUsageBar.setAttribute("ry", "8")
+				RAMUsageBar.setAttribute("transform", "translate(120, " + (YPos).toString(10) + ")")
+				RAMUsageBar.setAttribute("height", Height.toString(10))
+				RAMUsageBar.setAttribute("width", "40")
+				RAMUsageBar.setAttribute("fill", "#008000")
+				GraphicalC800Map_Display.appendChild(RAMUsageBar)
 			}
-			
+			{
+				//Layer 1 in layer 2 level
+				let YPos = Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let BottomYPos = (Statistic_Value_Layer2Level_Layer1_RAMEndingByte-Setting_StartingLevelM16Data)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let Height = BottomYPos - YPos
+				let RAMUsageBar = createSVGElement("rect")
+				RAMUsageBar.setAttribute("id", "Layer1LevelUsage_Layer2Level")
+				RAMUsageBar.setAttribute("rx", "8")
+				RAMUsageBar.setAttribute("ry", "8")
+				RAMUsageBar.setAttribute("transform", "translate(320, " + (YPos).toString(10) + ")")
+				RAMUsageBar.setAttribute("height", Height.toString(10))
+				RAMUsageBar.setAttribute("width", "40")
+				RAMUsageBar.setAttribute("fill", "#008000")
+				GraphicalC800Map_Display.appendChild(RAMUsageBar)
+			}
+			{
+				//Layer 2 in layer 2 level
+				let YPos = (Statistic_Value_Layer2Level_Layer2_RAMStartingByte-Setting_StartingLevelM16Data)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let BottomYPos = (Statistic_Value_Layer2Level_Layer2_RAMEndingByte-Setting_StartingLevelM16Data)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
+				let Height = BottomYPos - YPos
+				let RAMUsageBar = createSVGElement("rect")
+				RAMUsageBar.setAttribute("id", "Layer2LevelUsage_Layer2Level")
+				RAMUsageBar.setAttribute("rx", "8")
+				RAMUsageBar.setAttribute("ry", "8")
+				RAMUsageBar.setAttribute("transform", "translate(320, " + (YPos).toString(10) + ")")
+				RAMUsageBar.setAttribute("height", Height.toString(10))
+				RAMUsageBar.setAttribute("width", "40")
+				RAMUsageBar.setAttribute("fill", "#C0C000")
+				GraphicalC800Map_Display.appendChild(RAMUsageBar)
+			}
 	}
 	function createSVGElement(tag) { //https://stackoverflow.com/questions/57894500/why-is-it-necessary-to-use-document-createelementns-when-adding-svg-tags-to
 		return document.createElementNS('http://www.w3.org/2000/svg', tag)
