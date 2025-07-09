@@ -148,7 +148,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			<table>
 				<tr>
 					<td>Position:</td>
-					<td class="Statistics" id="IndexToBlockCoordsResults"></td>
+					<td class="Statistics" id="IndexToBlockCoordsResults" style="white-space: pre;"></td>
 				</tr>
 			</table>
 		</td>
@@ -158,8 +158,8 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 <script>
 	const Setting_PadLength_Decimal_XPos = 3;
 	const Setting_PadLength_Decimal_YPos = 3;
-	const Setting_PadLength_Hex_XPos = 3;
-	const Setting_PadLength_Hex_YPos = 3;
+	const Setting_PadLength_Hex_XPos = 4;
+	const Setting_PadLength_Hex_YPos = 4;
 	const Setting_StartingLevelM16Data = BigInt("0xC800")
 	//Don't touch
 		let Statistic_Value_TotalBlocksInLevel = 0n
@@ -495,7 +495,8 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			YPos = ((EnteredIndex/512n)*16n) + ((EnteredIndex/16n) % 16n)
 		}
 		if (EnteredIndex < Statistic_Value_TotalBlocksInLevel) {
-			document.getElementById("IndexToBlockCoordsResults").textContent = "(" + XPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + ", " + YPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + ") ($" + XPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ", $" + YPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
+			document.getElementById("IndexToBlockCoordsResults").textContent = "X: " + XPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + XPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")\nY: " + YPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + YPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
+			//XPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + ", " + YPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + "), Hex: ($" + XPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ", $" + YPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
 		} else {
 			document.getElementById("IndexToBlockCoordsResults").textContent = "Index beyond last block."
 		}
