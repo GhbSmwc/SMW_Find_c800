@@ -511,7 +511,8 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 				let YPos = (CurrentAddress-Setting_StartingLevelM16Data)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
 				
 				let AddressNumberText = createSVGElement("text")
-				AddressNumberText.setAttribute("stroke", "#ffffff")
+				//AddressNumberText.setAttribute("stroke", "#ffffff")
+				AddressNumberText.setAttribute("fill", "#ffffff")
 				AddressNumberText.setAttribute("font-weight", "lighter")
 				AddressNumberText.setAttribute("text-anchor", "left")
 				AddressNumberText.setAttribute("alignment-baseline", "middle")
@@ -537,7 +538,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 				//Ending address
 				let YPos = (EndingAddress-Setting_StartingLevelM16Data)*Setting_SVG_GridSizeFactorOver1000/1000n+Setting_SVG_GraphYPos
 				let AddressNumberText_EndingAddress = createSVGElement("text")
-				AddressNumberText_EndingAddress.setAttribute("stroke", "#ffffff")
+				AddressNumberText_EndingAddress.setAttribute("fill", "#ffffff")
 				AddressNumberText_EndingAddress.setAttribute("font-weight", "lighter")
 				AddressNumberText_EndingAddress.setAttribute("text-anchor", "left")
 				AddressNumberText_EndingAddress.setAttribute("alignment-baseline", "middle")
