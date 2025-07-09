@@ -475,7 +475,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			if ((XPos <= Statistic_Value_RightmostXPos_Layer2)&&(YPos <= Statistic_Value_BottommostYPos_Layer2)) {
 				document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "$" + (Statistic_Value_Layer2Level_Layer2_RAMStartingByte + Index).toString(16).toUpperCase().padStart(4, "0") + " ($" + StartingAddressLayer2String + " + $" + IndexString + ")"
 			} else {
-				document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "N/A"
+				document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "N/A (Outside level bounds for layer 2 level)"
 			}
 		} else {
 			document.getElementById("XYCoordsToIndexResult").textContent = "Out of level bounds"
@@ -496,7 +496,6 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		}
 		if (EnteredIndex < Statistic_Value_TotalBlocksInLevel) {
 			document.getElementById("IndexToBlockCoordsResults").textContent = "X: " + XPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + XPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")\nY: " + YPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + YPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
-			//XPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + ", " + YPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + "), Hex: ($" + XPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ", $" + YPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
 		} else {
 			document.getElementById("IndexToBlockCoordsResults").textContent = "Index beyond last block."
 		}
