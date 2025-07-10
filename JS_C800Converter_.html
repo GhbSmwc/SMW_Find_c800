@@ -31,7 +31,7 @@
 			}
 		</style>
 	</head>
-<body style="max-width: 1000px; margin: auto; padding: 15px">
+<body>
 See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how the blocks are formatted
 <table>
 	<tr>
@@ -154,6 +154,24 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		</td>
 	</tr>
 </table>
+<div style="overflow: auto; width: 1000px; height: 500px; border: 1px solid white">
+	<svg id="C800Grid" style="background-color: #808080">
+		<defs>
+			<pattern id="grid" width="16" height="16"  patternUnits="userSpaceOnUse">
+				<rect x="0" y="0" width="16" height="16" fill="transparent" stroke="#000000" stroke-width="1" shape-rendering="crispEdges"/>
+			</pattern>
+			<pattern id="ScreenBounds_ColumnDivider" width="256" height="1" patternUnits="userSpaceOnUse">
+				<line x1="0" y1="0" x2="0" y2="1" stroke="blue" ></line>
+			</pattern>
+			<pattern id="ScreenBounds_RowDivider" width="256" height="16" patternUnits="userSpaceOnUse">
+				<line x1="0" y1="0" x2="1" y2="2" stroke="blue" ></line>
+			</pattern>
+		</defs>
+		<rect x="0" y="0" fill="url(#grid)" width="200" height="200" id="C800Grid_TileGrid" />
+		<rect x="0" y="0" fill="url(#ScreenBounds_ColumnDivider)" width="200" height="200" id="C800Grid_ScreenColumnDivider" />
+		<rect x="0" y="0" fill="url(#ScreenBounds_RowDivider)" width="200" height="200" id="C800Grid_RowDivider" />
+	</svg>
+</div>
 
 <script>
 	const Setting_PadLength_Decimal_XPos = 3;
@@ -295,35 +313,47 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			//Horizontal level
 			let HorizontalLevelTypeIndex = document.getElementById("HorizontalLevelTypes").selectedIndex;
 			let HorizontalLevelTypes = [
-				{Height: "0x001B", MaxHScreens: "0x20"},
-				{Height: "0x001C", MaxHScreens: "0x20"},
-				{Height: "0x001D", MaxHScreens: "0x1E"},
-				{Height: "0x0020", MaxHScreens: "0x1C"},
-				{Height: "0x0022", MaxHScreens: "0x1A"},
-				{Height: "0x0025", MaxHScreens: "0x18"},
-				{Height: "0x0026", MaxHScreens: "0x17"},
-				{Height: "0x0028", MaxHScreens: "0x16"},
-				{Height: "0x002A", MaxHScreens: "0x15"},
-				{Height: "0x002C", MaxHScreens: "0x14"},
-				{Height: "0x002F", MaxHScreens: "0x13"},
-				{Height: "0x0031", MaxHScreens: "0x12"},
-				{Height: "0x0034", MaxHScreens: "0x11"},
-				{Height: "0x0038", MaxHScreens: "0x10"},
-				{Height: "0x003B", MaxHScreens: "0x0F"},
-				{Height: "0x0040", MaxHScreens: "0x0E"},
-				{Height: "0x0044", MaxHScreens: "0x0D"},
-				{Height: "0x004A", MaxHScreens: "0x0C"},
-				{Height: "0x0051", MaxHScreens: "0x0B"},
-				{Height: "0x0059", MaxHScreens: "0x0A"},
-				{Height: "0x0063", MaxHScreens: "0x09"},
-				{Height: "0x0070", MaxHScreens: "0x08"},
-				{Height: "0x0080", MaxHScreens: "0x07"},
-				{Height: "0x0095", MaxHScreens: "0x06"},
-				{Height: "0x00B3", MaxHScreens: "0x05"},
-				{Height: "0x00E0", MaxHScreens: "0x04"},
-				{Height: "0x012A", MaxHScreens: "0x03"},
-				{Height: "0x01C0", MaxHScreens: "0x02"},
-				{Height: "0x0380", MaxHScreens: "0x01"}
+				//Note: ScreenBorderHeights is an array containing the block heights of the
+				//screen exit boundaries of each row. Format:
+				//
+				// {
+				//   MainRows: //This refers to the heights of each row. If the last row have a different height, then it's not considered the main row.
+				//   {
+				//    Height: <BigInt>
+				//    Count: <Number> //This is how many rows having the same height, from the top to either the last row (if all heights equal) or the second-last (if the last one is different)
+				//   },
+				//   LastRow: <Number> //Height of the last row if the last row have a different height unlike all previous. If same as others, this shall be 0.
+				// }
+				//
+				{Height: "0x001B", MaxHScreens: "0x20", ScreenBorderHeights: {MainRows: {Height: BigInt("0x1B"), Count: 0}, LastRow: 0n}}, //Setting $00 \1 screen row
+				{Height: "0x001C", MaxHScreens: "0x20", ScreenBorderHeights: {MainRows: {Height: BigInt("0x1C"), Count: 0}, LastRow: 0n}}, //Setting $01 |
+				{Height: "0x001D", MaxHScreens: "0x1E", ScreenBorderHeights: {MainRows: {Height: BigInt("0x1D"), Count: 0}, LastRow: 0n}}, //Setting $02 |
+				{Height: "0x0020", MaxHScreens: "0x1C", ScreenBorderHeights: {MainRows: {Height: BigInt("0x20"), Count: 0}, LastRow: 0n}}, //Setting $03 |
+				{Height: "0x0022", MaxHScreens: "0x1A", ScreenBorderHeights: {MainRows: {Height: BigInt("0x22"), Count: 0}, LastRow: 0n}}, //Setting $04 |
+				{Height: "0x0025", MaxHScreens: "0x18", ScreenBorderHeights: {MainRows: {Height: BigInt("0x25"), Count: 0}, LastRow: 0n}}, //Setting $05 |
+				{Height: "0x0026", MaxHScreens: "0x17", ScreenBorderHeights: {MainRows: {Height: BigInt("0x26"), Count: 0}, LastRow: 0n}}, //Setting $06 |
+				{Height: "0x0028", MaxHScreens: "0x16", ScreenBorderHeights: {MainRows: {Height: BigInt("0x28"), Count: 0}, LastRow: 0n}}, //Setting $07 |
+				{Height: "0x002A", MaxHScreens: "0x15", ScreenBorderHeights: {MainRows: {Height: BigInt("0x2A"), Count: 0}, LastRow: 0n}}, //Setting $08 |
+				{Height: "0x002C", MaxHScreens: "0x14", ScreenBorderHeights: {MainRows: {Height: BigInt("0x2C"), Count: 0}, LastRow: 0n}}, //Setting $09 |
+				{Height: "0x002F", MaxHScreens: "0x13", ScreenBorderHeights: {MainRows: {Height: BigInt("0x2F"), Count: 0}, LastRow: 0n}}, //Setting $0A |
+				{Height: "0x0031", MaxHScreens: "0x12", ScreenBorderHeights: {MainRows: {Height: BigInt("0x31"), Count: 0}, LastRow: 0n}}, //Setting $0B |
+				{Height: "0x0034", MaxHScreens: "0x11", ScreenBorderHeights: {MainRows: {Height: BigInt("0x34"), Count: 0}, LastRow: 0n}}, //Setting $0C /
+				{Height: "0x0038", MaxHScreens: "0x10", ScreenBorderHeights: {MainRows: {Height: 28n, Count: 02}, LastRow: BigInt("00")}}, //Setting $0D \2 screen rows
+				{Height: "0x003B", MaxHScreens: "0x0F", ScreenBorderHeights: {MainRows: {Height: 29n, Count: 01}, LastRow: BigInt("30")}}, //Setting $0E |Also, had to use BigInt("decimal number string") because
+				{Height: "0x0040", MaxHScreens: "0x0E", ScreenBorderHeights: {MainRows: {Height: 32n, Count: 02}, LastRow: BigInt("00")}}, //Setting $0F |having leading zeroes using n notation (such as 00n) causes errors
+				{Height: "0x0044", MaxHScreens: "0x0D", ScreenBorderHeights: {MainRows: {Height: 34n, Count: 02}, LastRow: BigInt("00")}}, //Setting $10 |
+				{Height: "0x004A", MaxHScreens: "0x0C", ScreenBorderHeights: {MainRows: {Height: 37n, Count: 02}, LastRow: BigInt("00")}}, //Setting $11 |
+				{Height: "0x0051", MaxHScreens: "0x0B", ScreenBorderHeights: {MainRows: {Height: 40n, Count: 01}, LastRow: BigInt("41")}}, //Setting $12 /
+				{Height: "0x0059", MaxHScreens: "0x0A", ScreenBorderHeights: {MainRows: {Height: 29n, Count: 02}, LastRow: BigInt("31")}}, //Setting $13 \3 screen rows
+				{Height: "0x0063", MaxHScreens: "0x09", ScreenBorderHeights: {MainRows: {Height: 33n, Count: 03}, LastRow: BigInt("00")}}, //Setting $14 /
+				{Height: "0x0070", MaxHScreens: "0x08", ScreenBorderHeights: {MainRows: {Height: 28n, Count: 04}, LastRow: BigInt("00")}}, //Setting $15 \4 screen rows
+				{Height: "0x0080", MaxHScreens: "0x07", ScreenBorderHeights: {MainRows: {Height: 32n, Count: 04}, LastRow: BigInt("00")}}, //Setting $16 /
+				{Height: "0x0095", MaxHScreens: "0x06", ScreenBorderHeights: {MainRows: {Height: 29n, Count: 04}, LastRow: BigInt("33")}}, //Setting $17 >5 screen rows
+				{Height: "0x00B3", MaxHScreens: "0x05", ScreenBorderHeights: {MainRows: {Height: 29n, Count: 05}, LastRow: BigInt("34")}}, //Setting $18 >6 screen rows
+				{Height: "0x00E0", MaxHScreens: "0x04", ScreenBorderHeights: {MainRows: {Height: 28n, Count: 08}, LastRow: BigInt("00")}}, //Setting $19 >8 screen rows
+				{Height: "0x012A", MaxHScreens: "0x03", ScreenBorderHeights: {MainRows: {Height: 29n, Count: 00}, LastRow: BigInt("37")}}, //Setting $1A >9 screen rows
+				{Height: "0x01C0", MaxHScreens: "0x02", ScreenBorderHeights: {MainRows: {Height: 28n, Count: 16}, LastRow: BigInt("00")}}, //Setting $1B >16 screen rows
+				{Height: "0x0380", MaxHScreens: "0x01", ScreenBorderHeights: {MainRows: {Height: 28n, Count: 32}, LastRow: BigInt("00")}}  //Setting $1C >32 screen rows
 			].map(LevelDimensionSetting => {
 				return {
 					Height: BigInt(LevelDimensionSetting.Height),
@@ -408,6 +438,18 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			}
 			document.getElementById("Statistic_RightmostXPos_Layer2").textContent = ("0").padStart(Setting_PadLength_Decimal_XPos, "0") + "~" + Statistic_Value_RightmostXPos_Layer2.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_XPos, "0") + "~$" + Statistic_Value_RightmostXPos_Layer2.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")"
 			document.getElementById("Statistic_BottommostYPos_Layer2").textContent = ("0").padStart(Setting_PadLength_Decimal_YPos, "0") + "~" + Statistic_Value_BottommostYPos_Layer2.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_YPos, "0") + "~$" + Statistic_Value_BottommostYPos_Layer2.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
+		//Handle SVG width and height
+			document.getElementById("C800Grid").setAttribute("width", ((Statistic_Value_RightmostXPos+1n)*16n).toString(10) + "px")
+			document.getElementById("C800Grid").setAttribute("height", ((Statistic_Value_BottommostYPos+1n)*16n).toString(10) + "px")
+			
+			document.getElementById("C800Grid_TileGrid").setAttribute("width", (Statistic_Value_RightmostXPos+1n)*16n)
+			document.getElementById("C800Grid_TileGrid").setAttribute("height", (Statistic_Value_BottommostYPos+1n)*16n)
+			
+			document.getElementById("C800Grid_ScreenColumnDivider").setAttribute("width", (Statistic_Value_RightmostXPos+1n)*16n)
+			document.getElementById("C800Grid_ScreenColumnDivider").setAttribute("height", (Statistic_Value_BottommostYPos+1n)*16n)
+			
+			document.getElementById("C800Grid_RowDivider").setAttribute("width", (Statistic_Value_RightmostXPos+1n)*16n)
+			document.getElementById("C800Grid_RowDivider").setAttribute("height", (Statistic_Value_BottommostYPos+1n)*16n)
 	//Update converters
 		BlockCoordsToIndex()
 		IndexToBlockCoords()
