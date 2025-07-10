@@ -154,22 +154,22 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		</td>
 	</tr>
 </table>
-<div style="overflow: auto; width: 1000px; height: 500px; border: 1px solid white">
+<div style="overflow: auto; width: 1000px; height: 500px; border: 1px solid white; resize: both">
 	<svg id="C800Grid" style="background-color: #808080">
 		<defs>
-			<pattern id="grid" width="16" height="16"  patternUnits="userSpaceOnUse">
-				<rect x="0" y="0" width="16" height="16" fill="transparent" stroke="#000000" stroke-width="1" shape-rendering="crispEdges"/>
+			<pattern id="BlockGrid_L1Only" width="16" height="16"  patternUnits="userSpaceOnUse">
+				<rect x="0" y="0" width="16" height="16" stroke="#000000" stroke-width="1" shape-rendering="crispEdges" fill="#008000"/>
 			</pattern>
-			<pattern id="ScreenBounds_ColumnDivider" width="256" height="1" patternUnits="userSpaceOnUse">
-				<line x1="0" y1="0" x2="0" y2="1" stroke="blue" ></line>
+			<pattern id="BlockGrid_L1L2" width="16" height="16"  patternUnits="userSpaceOnUse">
+				<rect x="0" y="0" width="16" height="16" stroke="#000000" stroke-width="1" shape-rendering="crispEdges" fill="#80C000"/>
 			</pattern>
-			<pattern id="ScreenBounds_RowDivider" width="256" height="16" patternUnits="userSpaceOnUse">
-				<line x1="0" y1="0" x2="1" y2="2" stroke="blue" ></line>
+			<pattern id="ScreenBoundryGrid" width="256" height="256" patternUnits="userSpaceOnUse" id="ScreenBoundryGrid_Pattern">
+				<rect x="0" y="0" width="256" height="256" fill="none" stroke="#0000ff" stroke-width="3" shape-rendering="crispEdges" id="ScreenBoundryGrid_Cell">
 			</pattern>
 		</defs>
-		<rect x="0" y="0" fill="url(#grid)" width="200" height="200" id="C800Grid_TileGrid" />
-		<rect x="0" y="0" fill="url(#ScreenBounds_ColumnDivider)" width="200" height="200" id="C800Grid_ScreenColumnDivider" />
-		<rect x="0" y="0" fill="url(#ScreenBounds_RowDivider)" width="200" height="200" id="C800Grid_RowDivider" />
+		<rect x="0" y="0" fill="url(#BlockGrid_L1Only)" width="200" height="200" id="C800Grid_TileGrid" />
+		<rect x="0" y="0" fill="url(#BlockGrid_L1L2)" width="200" height="200" id="C800Grid_TileGrid_Layer2" />
+		<rect x="0" y="0" fill="url(#ScreenBoundryGrid)" id="C800Grid_ScreenBoundryGrid" />
 	</svg>
 </div>
 
@@ -192,6 +192,8 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		let Statistic_Value_Layer2Level_Layer2_RAMEndingByte = BigInt("0xFDFF")
 		let Statistic_Value_RightmostXPos_Layer2 = BigInt("0xFF")
 		let Statistic_Value_BottommostYPos_Layer2 = BigInt("0x1A")
+		
+		let CurrentHorizontalLevelSetting = {}
 		
 		let HalvedScreenRemainder = 0n
 		
@@ -325,19 +327,19 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 				//   LastRow: <Number> //Height of the last row if the last row have a different height unlike all previous. If same as others, this shall be 0.
 				// }
 				//
-				{Height: "0x001B", MaxHScreens: "0x20", ScreenBorderHeights: {MainRows: {Height: BigInt("0x1B"), Count: 0}, LastRow: 0n}}, //Setting $00 \1 screen row
-				{Height: "0x001C", MaxHScreens: "0x20", ScreenBorderHeights: {MainRows: {Height: BigInt("0x1C"), Count: 0}, LastRow: 0n}}, //Setting $01 |
-				{Height: "0x001D", MaxHScreens: "0x1E", ScreenBorderHeights: {MainRows: {Height: BigInt("0x1D"), Count: 0}, LastRow: 0n}}, //Setting $02 |
-				{Height: "0x0020", MaxHScreens: "0x1C", ScreenBorderHeights: {MainRows: {Height: BigInt("0x20"), Count: 0}, LastRow: 0n}}, //Setting $03 |
-				{Height: "0x0022", MaxHScreens: "0x1A", ScreenBorderHeights: {MainRows: {Height: BigInt("0x22"), Count: 0}, LastRow: 0n}}, //Setting $04 |
-				{Height: "0x0025", MaxHScreens: "0x18", ScreenBorderHeights: {MainRows: {Height: BigInt("0x25"), Count: 0}, LastRow: 0n}}, //Setting $05 |
-				{Height: "0x0026", MaxHScreens: "0x17", ScreenBorderHeights: {MainRows: {Height: BigInt("0x26"), Count: 0}, LastRow: 0n}}, //Setting $06 |
-				{Height: "0x0028", MaxHScreens: "0x16", ScreenBorderHeights: {MainRows: {Height: BigInt("0x28"), Count: 0}, LastRow: 0n}}, //Setting $07 |
-				{Height: "0x002A", MaxHScreens: "0x15", ScreenBorderHeights: {MainRows: {Height: BigInt("0x2A"), Count: 0}, LastRow: 0n}}, //Setting $08 |
-				{Height: "0x002C", MaxHScreens: "0x14", ScreenBorderHeights: {MainRows: {Height: BigInt("0x2C"), Count: 0}, LastRow: 0n}}, //Setting $09 |
-				{Height: "0x002F", MaxHScreens: "0x13", ScreenBorderHeights: {MainRows: {Height: BigInt("0x2F"), Count: 0}, LastRow: 0n}}, //Setting $0A |
-				{Height: "0x0031", MaxHScreens: "0x12", ScreenBorderHeights: {MainRows: {Height: BigInt("0x31"), Count: 0}, LastRow: 0n}}, //Setting $0B |
-				{Height: "0x0034", MaxHScreens: "0x11", ScreenBorderHeights: {MainRows: {Height: BigInt("0x34"), Count: 0}, LastRow: 0n}}, //Setting $0C /
+				{Height: "0x001B", MaxHScreens: "0x20", ScreenBorderHeights: {MainRows: {Height: BigInt("0x1B"), Count: 01}, LastRow: 0n}}, //Setting $00 \1 screen row
+				{Height: "0x001C", MaxHScreens: "0x20", ScreenBorderHeights: {MainRows: {Height: BigInt("0x1C"), Count: 01}, LastRow: 0n}}, //Setting $01 |
+				{Height: "0x001D", MaxHScreens: "0x1E", ScreenBorderHeights: {MainRows: {Height: BigInt("0x1D"), Count: 01}, LastRow: 0n}}, //Setting $02 |
+				{Height: "0x0020", MaxHScreens: "0x1C", ScreenBorderHeights: {MainRows: {Height: BigInt("0x20"), Count: 01}, LastRow: 0n}}, //Setting $03 |
+				{Height: "0x0022", MaxHScreens: "0x1A", ScreenBorderHeights: {MainRows: {Height: BigInt("0x22"), Count: 01}, LastRow: 0n}}, //Setting $04 |
+				{Height: "0x0025", MaxHScreens: "0x18", ScreenBorderHeights: {MainRows: {Height: BigInt("0x25"), Count: 01}, LastRow: 0n}}, //Setting $05 |
+				{Height: "0x0026", MaxHScreens: "0x17", ScreenBorderHeights: {MainRows: {Height: BigInt("0x26"), Count: 01}, LastRow: 0n}}, //Setting $06 |
+				{Height: "0x0028", MaxHScreens: "0x16", ScreenBorderHeights: {MainRows: {Height: BigInt("0x28"), Count: 01}, LastRow: 0n}}, //Setting $07 |
+				{Height: "0x002A", MaxHScreens: "0x15", ScreenBorderHeights: {MainRows: {Height: BigInt("0x2A"), Count: 01}, LastRow: 0n}}, //Setting $08 |
+				{Height: "0x002C", MaxHScreens: "0x14", ScreenBorderHeights: {MainRows: {Height: BigInt("0x2C"), Count: 01}, LastRow: 0n}}, //Setting $09 |
+				{Height: "0x002F", MaxHScreens: "0x13", ScreenBorderHeights: {MainRows: {Height: BigInt("0x2F"), Count: 01}, LastRow: 0n}}, //Setting $0A |
+				{Height: "0x0031", MaxHScreens: "0x12", ScreenBorderHeights: {MainRows: {Height: BigInt("0x31"), Count: 01}, LastRow: 0n}}, //Setting $0B |
+				{Height: "0x0034", MaxHScreens: "0x11", ScreenBorderHeights: {MainRows: {Height: BigInt("0x34"), Count: 01}, LastRow: 0n}}, //Setting $0C /
 				{Height: "0x0038", MaxHScreens: "0x10", ScreenBorderHeights: {MainRows: {Height: 28n, Count: 02}, LastRow: BigInt("00")}}, //Setting $0D \2 screen rows
 				{Height: "0x003B", MaxHScreens: "0x0F", ScreenBorderHeights: {MainRows: {Height: 29n, Count: 01}, LastRow: BigInt("30")}}, //Setting $0E |Also, had to use BigInt("decimal number string") because
 				{Height: "0x0040", MaxHScreens: "0x0E", ScreenBorderHeights: {MainRows: {Height: 32n, Count: 02}, LastRow: BigInt("00")}}, //Setting $0F |having leading zeroes using n notation (such as 00n) causes errors
@@ -358,9 +360,10 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 				return {
 					Height: BigInt(LevelDimensionSetting.Height),
 					MaxHScreens: BigInt(LevelDimensionSetting.MaxHScreens),
+					ScreenBorderHeights: LevelDimensionSetting.ScreenBorderHeights
 				}
 			})
-			let CurrentHorizontalLevelSetting = HorizontalLevelTypes[HorizontalLevelTypeIndex]
+			CurrentHorizontalLevelSetting = HorizontalLevelTypes[HorizontalLevelTypeIndex]
 			BlocksPerScreenColumnHorizLevel = CurrentHorizontalLevelSetting.Height*16n
 			//Layer 1 stats
 				Statistic_Value_TotalBlocksInLevel = CurrentHorizontalLevelSetting.Height*16n*CurrentHorizontalLevelSetting.MaxHScreens
@@ -439,17 +442,32 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			document.getElementById("Statistic_RightmostXPos_Layer2").textContent = ("0").padStart(Setting_PadLength_Decimal_XPos, "0") + "~" + Statistic_Value_RightmostXPos_Layer2.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_XPos, "0") + "~$" + Statistic_Value_RightmostXPos_Layer2.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")"
 			document.getElementById("Statistic_BottommostYPos_Layer2").textContent = ("0").padStart(Setting_PadLength_Decimal_YPos, "0") + "~" + Statistic_Value_BottommostYPos_Layer2.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_YPos, "0") + "~$" + Statistic_Value_BottommostYPos_Layer2.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
 		//Handle SVG width and height
-			document.getElementById("C800Grid").setAttribute("width", ((Statistic_Value_RightmostXPos+1n)*16n).toString(10) + "px")
-			document.getElementById("C800Grid").setAttribute("height", ((Statistic_Value_BottommostYPos+1n)*16n).toString(10) + "px")
-			
-			document.getElementById("C800Grid_TileGrid").setAttribute("width", (Statistic_Value_RightmostXPos+1n)*16n)
-			document.getElementById("C800Grid_TileGrid").setAttribute("height", (Statistic_Value_BottommostYPos+1n)*16n)
-			
-			document.getElementById("C800Grid_ScreenColumnDivider").setAttribute("width", (Statistic_Value_RightmostXPos+1n)*16n)
-			document.getElementById("C800Grid_ScreenColumnDivider").setAttribute("height", (Statistic_Value_BottommostYPos+1n)*16n)
-			
-			document.getElementById("C800Grid_RowDivider").setAttribute("width", (Statistic_Value_RightmostXPos+1n)*16n)
-			document.getElementById("C800Grid_RowDivider").setAttribute("height", (Statistic_Value_BottommostYPos+1n)*16n)
+			//Main svg
+				document.getElementById("C800Grid").setAttribute("width", ((Statistic_Value_RightmostXPos+1n)*16n).toString(10) + "px")
+				document.getElementById("C800Grid").setAttribute("height", ((Statistic_Value_BottommostYPos+1n)*16n).toString(10) + "px")
+			//Block grid
+				document.getElementById("C800Grid_TileGrid").setAttribute("width", (Statistic_Value_RightmostXPos+1n)*16n)
+				document.getElementById("C800Grid_TileGrid").setAttribute("height", (Statistic_Value_BottommostYPos+1n)*16n)
+				
+				document.getElementById("C800Grid_TileGrid_Layer2").setAttribute("width", (Statistic_Value_RightmostXPos_Layer2+1n)*16n)
+				document.getElementById("C800Grid_TileGrid_Layer2").setAttribute("height", (Statistic_Value_BottommostYPos_Layer2+1n)*16n)
+			//Screen boundry grid
+				if (document.getElementById("LevelTypeHorizVert_Horiz").checked) {
+					document.getElementById("C800Grid_ScreenBoundryGrid").setAttribute("width", CurrentHorizontalLevelSetting.MaxHScreens*256n) //Total level width in pixels
+					document.getElementById("C800Grid_ScreenBoundryGrid").setAttribute("height", CurrentHorizontalLevelSetting.ScreenBorderHeights.MainRows.Height*BigInt(CurrentHorizontalLevelSetting.ScreenBorderHeights.MainRows.Count)*16n) //Total level height in pixel
+					document.getElementById("ScreenBoundryGrid_Cell").setAttribute("height", CurrentHorizontalLevelSetting.ScreenBorderHeights.MainRows.Height*16n) //The height of each screen rows, other than the last if the last have a different height
+					
+					document.getElementById("ScreenBoundryGrid").setAttribute("height", CurrentHorizontalLevelSetting.ScreenBorderHeights.MainRows.Height*16n) //Same as above but is the height of the same-height screens total
+				} else {
+					document.getElementById("C800Grid_ScreenBoundryGrid").setAttribute("width", 512n) //Total level width in pixels
+					document.getElementById("C800Grid_ScreenBoundryGrid").setAttribute("height", 8192n) //Total level height in pixel
+					document.getElementById("ScreenBoundryGrid_Cell").setAttribute("width", 512n) //The height of each screen rows, other than the last if the last have a different height
+					document.getElementById("ScreenBoundryGrid_Cell").setAttribute("height", 256n) //The height of each screen rows, other than the last if the last have a different height
+					
+					document.getElementById("ScreenBoundryGrid").setAttribute("height", 256n) //Same as above but is the height of the same-height screens total
+					document.getElementById("ScreenBoundryGrid").setAttribute("width", 512n) //Same as above but is the height of the same-height screens total
+				}
+
 	//Update converters
 		BlockCoordsToIndex()
 		IndexToBlockCoords()
