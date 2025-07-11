@@ -722,7 +722,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		BlockCoordsToIndex();
 	}
 	function SetSVGSelectedTileXY(XPos, YPos) {
-		if ((XPos <= Statistic_Value_RightmostXPos)&&(YPos <= Statistic_Value_BottommostYPos)) {
+		if ((XPos <= Statistic_Value_RightmostXPos)&&(YPos <= Statistic_Value_BottommostYPos)&&(XPos >= 0n)&&(YPos >= 0n)) {
 			document.getElementById("C800Grid_SelectedBlock").setAttribute("visibility", "visible")
 			document.getElementById("C800Grid_SelectedBlock").setAttribute("x", XPos*16n)
 			document.getElementById("C800Grid_SelectedBlock").setAttribute("y", YPos*16n)
@@ -772,7 +772,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		}
 	}
 	function SetC800Address(XPos, YPos, BlockIndex) {
-		if ((XPos <= Statistic_Value_RightmostXPos)&&(YPos <= Statistic_Value_BottommostYPos)) {
+		if ((XPos <= Statistic_Value_RightmostXPos)&&(YPos <= Statistic_Value_BottommostYPos)&&(XPos >= 0n)&&(YPos >= 0n)) {
 			let StartingAddressString = Setting_StartingLevelM16Data.toString(16).toUpperCase().padStart(4, "0")
 			let StartingAddressLayer2String = Statistic_Value_Layer2Level_Layer2_RAMStartingByte.toString(16).toUpperCase().padStart(4, "0")
 			let IndexString = BlockIndex.toString(16).toUpperCase().padStart(4, "0")
