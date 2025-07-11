@@ -155,7 +155,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 	</tr>
 </table>
 <div style="overflow: auto; width: 1000px; height: 500px; border: 1px solid white; resize: both">
-	<svg id="C800Grid" style="background-color: #808080">
+	<svg id="C800Grid" style="background-color: #808080" onclick="MouseCursorTilemapToCoords()" onmousemove="MouseMoveToXYSVG();">
 		<defs>
 			<pattern id="BlockGrid_L1Only" width="16" height="16"  patternUnits="userSpaceOnUse">
 				<rect x="0" y="0" width="16" height="16" stroke="#000000" stroke-width="1" shape-rendering="crispEdges" fill="#008000"/>
@@ -170,7 +170,11 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		<rect x="0" y="0" fill="url(#BlockGrid_L1Only)" width="200" height="200" id="C800Grid_TileGrid" />
 		<rect x="0" y="0" fill="url(#BlockGrid_L1L2)" width="200" height="200" id="C800Grid_TileGrid_Layer2" />
 		<rect x="0" y="0" fill="url(#ScreenBoundryGridPeriod)" id="C800Grid_FilledRectShowingScrnBndry" />
+		<rect x="0" y="0" fill="none" stroke="#ffffff" stroke-width="4" id="C800Grid_SelectedBlock" width="16" height="16"/>
 	</svg>
+</div>
+<div>
+	<span style="font-family: monospace; white-space: pre;" id="SVGMouseOverBlockXY"></span>
 </div>
 <div style="height: 500px"></div>
 
@@ -527,7 +531,11 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		let XPos = ParseBigIntValue(document.getElementById("BlockCoordinate_X_Dec").value)
 		let YPos = ParseBigIntValue(document.getElementById("BlockCoordinate_Y_Dec").value)
 		
+		document.getElementById("C800Grid_SelectedBlock").setAttribute("x", XPos*16n)
+		document.getElementById("C800Grid_SelectedBlock").setAttribute("y", YPos*16n)
+		
 		if ((XPos <= Statistic_Value_RightmostXPos)&&(YPos <= Statistic_Value_BottommostYPos)) {
+			document.getElementById("C800Grid_SelectedBlock").setAttribute("visibility", "visible")
 			let StartingAddressString = Setting_StartingLevelM16Data.toString(16).toUpperCase().padStart(4, "0")
 			let StartingAddressLayer2String = Statistic_Value_Layer2Level_Layer2_RAMStartingByte.toString(16).toUpperCase().padStart(4, "0")
 			let Index = 0n
@@ -548,6 +556,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			document.getElementById("XYCoordsToIndexResult").textContent = "Out of level bounds"
 			document.getElementById("XYCoordsToIndexResult_L1Address").textContent = "N/A"
 			document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "N/A"
+			document.getElementById("C800Grid_SelectedBlock").setAttribute("visibility", "hidden")
 		}
 	}
 	function IndexToBlockCoords() {
@@ -667,6 +676,36 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 				RAMUsageBar.setAttribute("fill", "#C0C000")
 				GraphicalC800Map_Display.appendChild(RAMUsageBar)
 			}
+	}
+	function MouseCursorTilemapToCoords() {
+		event.preventDefault()
+		let SVGTileGrid = event.target
+		let MouseXRelativeToElement = event.offsetX
+		let MouseYRelativeToElement = event.offsetY
+		
+		let ClickedBlockXPos = BigInt(Math.floor(MouseXRelativeToElement/16))
+		let ClickedBlockYPos = BigInt(Math.floor(MouseYRelativeToElement/16))
+		document.getElementById("C800Grid_SelectedBlock").setAttribute("visibility", "visible") //failsafe
+		
+		document.getElementById("C800Grid_SelectedBlock").setAttribute("x", ClickedBlockXPos*16n) //(Multiply back up AFTER rounding so that selected block is aligned with the 16x16 dimension grid)
+		document.getElementById("C800Grid_SelectedBlock").setAttribute("y", ClickedBlockYPos*16n) 
+		
+		document.getElementById("BlockCoordinate_X_Dec").value = ClickedBlockXPos.toString(10)
+		document.getElementById("BlockCoordinate_X_Hex").value = ClickedBlockXPos.toString(16).toUpperCase().padStart(4, "0")
+		document.getElementById("BlockCoordinate_Y_Dec").value = ClickedBlockYPos.toString(10)
+		document.getElementById("BlockCoordinate_Y_Hex").value = ClickedBlockYPos.toString(16).toUpperCase().padStart(4, "0")
+		
+		
+		BlockCoordsToIndex();
+	}
+	function MouseMoveToXYSVG() {
+		let MouseXRelativeToElement = event.offsetX
+		let MouseYRelativeToElement = event.offsetY
+		
+		let BlockXPos = BigInt(Math.floor(MouseXRelativeToElement/16))
+		let BlockYPos = BigInt(Math.floor(MouseYRelativeToElement/16))
+		
+		document.getElementById("SVGMouseOverBlockXY").textContent = "X: " + BlockXPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + BlockXPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")\nY: " + BlockYPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + BlockYPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
 	}
 	function createSVGElement(tag) { //https://stackoverflow.com/questions/57894500/why-is-it-necessary-to-use-document-createelementns-when-adding-svg-tags-to
 		return document.createElementNS('http://www.w3.org/2000/svg', tag)
