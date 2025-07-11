@@ -130,10 +130,6 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			</div>
 			<table>
 				<tr>
-					<td>Index:</td>
-					<td class="Statistics" id="XYCoordsToIndexResult"></td>
-				</tr>
-				<tr>
 					<td>Layer 1 RAM:</td>
 					<td class="Statistics" id="XYCoordsToIndexResult_L1Address"></td>
 				</tr>
@@ -147,12 +143,6 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		<td>
 			<h2>Convert Index to XY coords</h2><br>
 			<div><kbd>Index: $</kbd><input type="text" value="0000" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber(); IndexToBlockCoords();" id="IndexToCoords"></div><br>
-			<table>
-				<tr>
-					<td>Position:</td>
-					<td class="Statistics" id="IndexToBlockCoordsResults" style="white-space: pre;"></td>
-				</tr>
-			</table>
 		</td>
 	</tr>
 </table>
@@ -601,32 +591,13 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		
 		SetSVGSelectedTileXY(XPos, YPos)
 		let Index = SetBlockIndex(XPos, YPos)
-		if ((XPos <= Statistic_Value_RightmostXPos)&&(YPos <= Statistic_Value_BottommostYPos)) {
-			let StartingAddressString = Setting_StartingLevelM16Data.toString(16).toUpperCase().padStart(4, "0")
-			let StartingAddressLayer2String = Statistic_Value_Layer2Level_Layer2_RAMStartingByte.toString(16).toUpperCase().padStart(4, "0")
-			let IndexString = Index.toString(16).toUpperCase().padStart(4, "0")
-			document.getElementById("XYCoordsToIndexResult").textContent = "$"  + IndexString
-			document.getElementById("XYCoordsToIndexResult_L1Address").textContent = "$" + (Setting_StartingLevelM16Data + Index).toString(16).toUpperCase().padStart(4, "0") + " ($" + StartingAddressString + " + $" + IndexString + ")"
-			if ((XPos <= Statistic_Value_RightmostXPos_Layer2)&&(YPos <= Statistic_Value_BottommostYPos_Layer2)) {
-				document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "$" + (Statistic_Value_Layer2Level_Layer2_RAMStartingByte + Index).toString(16).toUpperCase().padStart(4, "0") + " ($" + StartingAddressLayer2String + " + $" + IndexString + ")"
-			} else {
-				document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "N/A (Outside level bounds for layer 2 level)"
-			}
-		} else {
-			document.getElementById("XYCoordsToIndexResult").textContent = "Out of level bounds"
-			document.getElementById("XYCoordsToIndexResult_L1Address").textContent = "N/A"
-			document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "N/A"
-		}
+		SetC800Address(XPos, YPos, Index)
 	}
 	function IndexToBlockCoords() {
 		let EnteredIndex = ParseBigIntValue(document.getElementById("IndexToCoords").value, 16)
 		let Coords = SetInputsXY(EnteredIndex)
 		SetSVGSelectedTileXY(Coords.XPos, Coords.YPos)
-		if (EnteredIndex < Statistic_Value_TotalBlocksInLevel) {
-			document.getElementById("IndexToBlockCoordsResults").textContent = "X: " + Coords.XPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + Coords.XPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")\nY: " + Coords.YPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + Coords.YPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
-		} else {
-			document.getElementById("IndexToBlockCoordsResults").textContent = "Index beyond last block."
-		}
+		SetC800Address(Coords.XPos, Coords.YPos, EnteredIndex)
 	}
 	function SpawnSVGAddressesDisplay() {
 		let GraphicalC800Map_Display = document.getElementById("GraphicalC800Map")
@@ -730,6 +701,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			}
 	}
 	function MouseCursorTilemapToCoords() {
+		//User clicks on a square on the SVG
 		event.preventDefault()
 		let SVGTileGrid = event.target
 		let MouseXRelativeToElement = event.offsetX
@@ -799,7 +771,24 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			YPos: YPos
 		}
 	}
+	function SetC800Address(XPos, YPos, BlockIndex) {
+		if ((XPos <= Statistic_Value_RightmostXPos)&&(YPos <= Statistic_Value_BottommostYPos)) {
+			let StartingAddressString = Setting_StartingLevelM16Data.toString(16).toUpperCase().padStart(4, "0")
+			let StartingAddressLayer2String = Statistic_Value_Layer2Level_Layer2_RAMStartingByte.toString(16).toUpperCase().padStart(4, "0")
+			let IndexString = BlockIndex.toString(16).toUpperCase().padStart(4, "0")
+			document.getElementById("XYCoordsToIndexResult_L1Address").textContent = "$" + (Setting_StartingLevelM16Data + BlockIndex).toString(16).toUpperCase().padStart(4, "0") + " ($" + StartingAddressString + " + $" + IndexString + ")"
+			if ((XPos <= Statistic_Value_RightmostXPos_Layer2)&&(YPos <= Statistic_Value_BottommostYPos_Layer2)) {
+				document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "$" + (Statistic_Value_Layer2Level_Layer2_RAMStartingByte + BlockIndex).toString(16).toUpperCase().padStart(4, "0") + " ($" + StartingAddressLayer2String + " + $" + IndexString + ")"
+			} else {
+				document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "N/A (Outside level bounds for layer 2 level)"
+			}
+		} else {
+			document.getElementById("XYCoordsToIndexResult_L1Address").textContent = "N/A"
+			document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "N/A"
+		}
+	}
 	function MouseMoveToXYSVG() {
+		//User hovers mouse
 		let MouseXRelativeToElement = event.offsetX
 		let MouseYRelativeToElement = event.offsetY
 		
