@@ -518,22 +518,29 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 							document.getElementById("SVGText_Screen_" + i.toString(10)).setAttribute("y", -10)
 						}
 					//Move the text to every top-left of each screen exits
-						let NumberOfRows = BigInt(CurrentHorizontalLevelSetting.ScreenBorderHeights.MainRows.Count)
-						if (CurrentHorizontalLevelSetting.ScreenBorderHeights.UniqueLastRow != 0n) {
-							NumberOfRows++
-						}
-						let ScreenExitHight = CurrentHorizontalLevelSetting.ScreenBorderHeights.MainRows.Height
-						let NumberOfColumns = CurrentHorizontalLevelSetting.MaxHScreens
-						let CurrentScreenNumber = 0
-						for (let Row = 0n; Row < NumberOfRows; Row++) {
-							for (let Column = 0n; Column < NumberOfColumns; Column++) {
-								let TextXPos = Column*256n
-								let TextYPos = Row*ScreenExitHight*16n
-								
-								document.getElementById("SVGText_Screen_" + CurrentScreenNumber.toString(10)).setAttribute("x", TextXPos)
-								document.getElementById("SVGText_Screen_" + CurrentScreenNumber.toString(10)).setAttribute("y", TextYPos)
-								
-								CurrentScreenNumber++
+						if (document.getElementById("LevelTypeHorizVert_Horiz").checked) {
+							let NumberOfRows = BigInt(CurrentHorizontalLevelSetting.ScreenBorderHeights.MainRows.Count)
+							if (CurrentHorizontalLevelSetting.ScreenBorderHeights.UniqueLastRow != 0n) {
+								NumberOfRows++
+							}
+							let ScreenExitHight = CurrentHorizontalLevelSetting.ScreenBorderHeights.MainRows.Height
+							let NumberOfColumns = CurrentHorizontalLevelSetting.MaxHScreens
+							let CurrentScreenNumber = 0
+							for (let Row = 0n; Row < NumberOfRows; Row++) {
+								for (let Column = 0n; Column < NumberOfColumns; Column++) {
+									let TextXPos = Column*256n
+									let TextYPos = Row*ScreenExitHight*16n
+									
+									document.getElementById("SVGText_Screen_" + CurrentScreenNumber.toString(10)).setAttribute("x", TextXPos)
+									document.getElementById("SVGText_Screen_" + CurrentScreenNumber.toString(10)).setAttribute("y", TextYPos)
+									
+									CurrentScreenNumber++
+								}
+							}
+						} else {
+							for (let i = 0n; i < 28n; i++) {
+								document.getElementById("SVGText_Screen_" + i.toString(10)).setAttribute("x", 0n)
+								document.getElementById("SVGText_Screen_" + i.toString(10)).setAttribute("y", i*256n)
 							}
 						}
 				}
