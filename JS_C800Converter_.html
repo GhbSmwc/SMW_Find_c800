@@ -26,7 +26,7 @@
 				-ms-filter: "FlipH";
 			}
 			
-			input[type=text], input[type=number], td.Statistics {
+			input[type=text], input[type=number], td.Statistics, text {
 				font-family: monospace;
 			}
 		</style>
@@ -170,6 +170,38 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		<rect x="0" y="0" fill="url(#BlockGrid_L1Only)" width="200" height="200" id="C800Grid_TileGrid" />
 		<rect x="0" y="0" fill="url(#BlockGrid_L1L2)" width="200" height="200" id="C800Grid_TileGrid_Layer2" />
 		<rect x="0" y="0" fill="url(#ScreenBoundryGridPeriod)" id="C800Grid_FilledRectShowingScrnBndry" />
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_0">$00</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_1">$01</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_2">$02</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_3">$03</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_4">$04</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_5">$05</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_6">$06</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_7">$07</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_8">$08</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_9">$09</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_10">$0A</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_11">$0B</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_12">$0C</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_13">$0D</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_14">$0E</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_15">$0F</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_16">$10</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_17">$11</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_18">$12</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_19">$13</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_20">$14</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_21">$15</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_22">$16</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_23">$17</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_24">$18</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_25">$19</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_26">$1A</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_27">$1B</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_28">$1C</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_29">$1D</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_30">$1E</text>
+		<text x="0" y="-10" text-anchor="start" alignment-baseline="hanging" fill="#0000ff" id="SVGText_Screen_31">$1F</text>
 		<rect x="0" y="0" fill="none" stroke="#ffffff" stroke-width="4" id="C800Grid_SelectedBlock" width="16" height="16"/>
 	</svg>
 </div>
@@ -460,7 +492,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 					document.getElementById("C800Grid_TileGrid_Layer2").setAttribute("width", 0n)
 					document.getElementById("C800Grid_TileGrid_Layer2").setAttribute("height", 0n)
 				}
-			//Screen boundry grid
+			//Screen boundary grid
 				if (document.getElementById("LevelTypeHorizVert_Horiz").checked) {
 					document.getElementById("C800Grid_FilledRectShowingScrnBndry").setAttribute("width", CurrentHorizontalLevelSetting.MaxHScreens*256n) //Total level width in pixels
 					document.getElementById("C800Grid_FilledRectShowingScrnBndry").setAttribute("height", CurrentHorizontalLevelSetting.ScreenBorderHeights.MainRows.Height*BigInt(CurrentHorizontalLevelSetting.ScreenBorderHeights.MainRows.Count)*16n) //Total level height in pixel
@@ -477,6 +509,33 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 					
 					document.getElementById("ScreenBoundryGridPeriod").setAttribute("width", 512n) //Same as above but is the height of the same-height screens total
 					document.getElementById("ScreenBoundryGridPeriod").setAttribute("height", 256n) //Same as above but is the height of the same-height screens total
+				}
+			//screen exit numbers
+				{
+					//Clear them out to prevent leftover when switching level dimensions
+						for (let i = 0; i < 32; i++) {
+							document.getElementById("SVGText_Screen_" + i.toString(10)).setAttribute("x", 0)
+							document.getElementById("SVGText_Screen_" + i.toString(10)).setAttribute("y", -10)
+						}
+					//Move the text to every top-left of each screen exits
+						let NumberOfRows = BigInt(CurrentHorizontalLevelSetting.ScreenBorderHeights.MainRows.Count)
+						if (CurrentHorizontalLevelSetting.ScreenBorderHeights.UniqueLastRow != 0n) {
+							NumberOfRows++
+						}
+						let ScreenExitHight = CurrentHorizontalLevelSetting.ScreenBorderHeights.MainRows.Height
+						let NumberOfColumns = CurrentHorizontalLevelSetting.MaxHScreens
+						let CurrentScreenNumber = 0
+						for (let Row = 0n; Row < NumberOfRows; Row++) {
+							for (let Column = 0n; Column < NumberOfColumns; Column++) {
+								let TextXPos = Column*256n
+								let TextYPos = Row*ScreenExitHight*16n
+								
+								document.getElementById("SVGText_Screen_" + CurrentScreenNumber.toString(10)).setAttribute("x", TextXPos)
+								document.getElementById("SVGText_Screen_" + CurrentScreenNumber.toString(10)).setAttribute("y", TextYPos)
+								
+								CurrentScreenNumber++
+							}
+						}
 				}
 
 	//Update converters
