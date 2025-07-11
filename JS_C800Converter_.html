@@ -124,8 +124,10 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 	<tr>
 		<td>
 			<h2>Convert XY coordinates to index</h2><br>
-			<div><kbd>X: </kbd><input type="number" value="0" id="BlockCoordinate_X_Dec" onchange="CorrectInputNumber(); BlockCoordsToIndex();" >($<input type="text" value="0000" id="BlockCoordinate_X_Hex" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber(); BlockCoordsToIndex()">)</div>
-			<div><kbd>Y: </kbd><input type="number" value="0" id="BlockCoordinate_Y_Dec" onchange="CorrectInputNumber(); BlockCoordsToIndex();" >($<input type="text" value="0000" id="BlockCoordinate_Y_Hex" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber(); BlockCoordsToIndex()">)</div><br>
+			<div id="BlockCoordinateInputs">
+				<div><kbd>X: </kbd><input type="number" value="0" id="BlockCoordinate_X_Dec" onchange="CorrectInputNumber(); BlockCoordsToIndex();" >($<input type="text" value="0000" id="BlockCoordinate_X_Hex" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber(); BlockCoordsToIndex()">)</div>
+				<div><kbd>Y: </kbd><input type="number" value="0" id="BlockCoordinate_Y_Dec" onchange="CorrectInputNumber(); BlockCoordsToIndex();" >($<input type="text" value="0000" id="BlockCoordinate_Y_Hex" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber(); BlockCoordsToIndex()">)</div><br>
+			</div>
 			<table>
 				<tr>
 					<td>Index:</td>
@@ -597,19 +599,11 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		let XPos = ParseBigIntValue(document.getElementById("BlockCoordinate_X_Dec").value)
 		let YPos = ParseBigIntValue(document.getElementById("BlockCoordinate_Y_Dec").value)
 		
-		document.getElementById("C800Grid_SelectedBlock").setAttribute("x", XPos*16n)
-		document.getElementById("C800Grid_SelectedBlock").setAttribute("y", YPos*16n)
-		
+		SetSVGSelectedTileXY(XPos, YPos)
+		let Index = SetBlockIndex(XPos, YPos)
 		if ((XPos <= Statistic_Value_RightmostXPos)&&(YPos <= Statistic_Value_BottommostYPos)) {
-			document.getElementById("C800Grid_SelectedBlock").setAttribute("visibility", "visible")
 			let StartingAddressString = Setting_StartingLevelM16Data.toString(16).toUpperCase().padStart(4, "0")
 			let StartingAddressLayer2String = Statistic_Value_Layer2Level_Layer2_RAMStartingByte.toString(16).toUpperCase().padStart(4, "0")
-			let Index = 0n
-			if (document.getElementById("LevelTypeHorizVert_Horiz").checked) {
-				Index = (BlocksPerScreenColumnHorizLevel*(XPos/16n))+(YPos*16n)+(XPos%16n)
-			} else {
-				Index = (512n*(YPos/16n))+(256n*(XPos/16n))+((YPos%16n)*16n)+(XPos%16n)
-			}
 			let IndexString = Index.toString(16).toUpperCase().padStart(4, "0")
 			document.getElementById("XYCoordsToIndexResult").textContent = "$"  + IndexString
 			document.getElementById("XYCoordsToIndexResult_L1Address").textContent = "$" + (Setting_StartingLevelM16Data + Index).toString(16).toUpperCase().padStart(4, "0") + " ($" + StartingAddressString + " + $" + IndexString + ")"
@@ -622,22 +616,14 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			document.getElementById("XYCoordsToIndexResult").textContent = "Out of level bounds"
 			document.getElementById("XYCoordsToIndexResult_L1Address").textContent = "N/A"
 			document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "N/A"
-			document.getElementById("C800Grid_SelectedBlock").setAttribute("visibility", "hidden")
 		}
 	}
 	function IndexToBlockCoords() {
 		let EnteredIndex = ParseBigIntValue(document.getElementById("IndexToCoords").value, 16)
-		let XPos = 0n
-		let YPos = 0n
-		if (document.getElementById("LevelTypeHorizVert_Horiz").checked) {
-			XPos = ((EnteredIndex/BlocksPerScreenColumnHorizLevel)*16n) + (EnteredIndex % 16n)
-			YPos = (EnteredIndex % BlocksPerScreenColumnHorizLevel)/16n
-		} else {
-			XPos = (((EnteredIndex % 512n)/256n)*16n) + (EnteredIndex % 16n)
-			YPos = ((EnteredIndex/512n)*16n) + ((EnteredIndex/16n) % 16n)
-		}
+		let Coords = SetInputsXY(EnteredIndex)
+		SetSVGSelectedTileXY(Coords.XPos, Coords.YPos)
 		if (EnteredIndex < Statistic_Value_TotalBlocksInLevel) {
-			document.getElementById("IndexToBlockCoordsResults").textContent = "X: " + XPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + XPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")\nY: " + YPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + YPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
+			document.getElementById("IndexToBlockCoordsResults").textContent = "X: " + Coords.XPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + Coords.XPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")\nY: " + Coords.YPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + Coords.YPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
 		} else {
 			document.getElementById("IndexToBlockCoordsResults").textContent = "Index beyond last block."
 		}
@@ -751,11 +737,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		
 		let ClickedBlockXPos = BigInt(Math.floor(MouseXRelativeToElement/16))
 		let ClickedBlockYPos = BigInt(Math.floor(MouseYRelativeToElement/16))
-		document.getElementById("C800Grid_SelectedBlock").setAttribute("visibility", "visible") //failsafe
-		
-		document.getElementById("C800Grid_SelectedBlock").setAttribute("x", ClickedBlockXPos*16n) //(Multiply back up AFTER rounding so that selected block is aligned with the 16x16 dimension grid)
-		document.getElementById("C800Grid_SelectedBlock").setAttribute("y", ClickedBlockYPos*16n) 
-		
+		SetSVGSelectedTileXY(ClickedBlockXPos, ClickedBlockYPos)
 		document.getElementById("BlockCoordinate_X_Dec").value = ClickedBlockXPos.toString(10)
 		document.getElementById("BlockCoordinate_X_Hex").value = ClickedBlockXPos.toString(16).toUpperCase().padStart(4, "0")
 		document.getElementById("BlockCoordinate_Y_Dec").value = ClickedBlockYPos.toString(10)
@@ -763,6 +745,56 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		
 		
 		BlockCoordsToIndex();
+	}
+	function SetSVGSelectedTileXY(XPos, YPos) {
+		if ((XPos <= Statistic_Value_RightmostXPos)&&(YPos <= Statistic_Value_BottommostYPos)) {
+			document.getElementById("C800Grid_SelectedBlock").setAttribute("visibility", "visible")
+			document.getElementById("C800Grid_SelectedBlock").setAttribute("x", XPos*16n)
+			document.getElementById("C800Grid_SelectedBlock").setAttribute("y", YPos*16n)
+		} else {
+			document.getElementById("C800Grid_SelectedBlock").setAttribute("visibility", "hidden")
+		}
+	}
+	function SetBlockIndex(XPos, YPos) {
+		let BlockIndex = -1n
+		if ((XPos <= Statistic_Value_RightmostXPos)&&(YPos <= Statistic_Value_BottommostYPos)) {
+			if (document.getElementById("LevelTypeHorizVert_Horiz").checked) {
+				BlockIndex = (BlocksPerScreenColumnHorizLevel*(XPos/16n))+(YPos*16n)+(XPos%16n)
+			} else {
+				BlockIndex = (512n*(YPos/16n))+(256n*(XPos/16n))+((YPos%16n)*16n)+(XPos%16n)
+			}
+			document.getElementById("IndexToCoords").disabled = false
+			document.getElementById("IndexToCoords").value = BlockIndex.toString(16).toUpperCase().padStart(4, "0")
+		} else {
+			document.getElementById("IndexToCoords").disabled = true
+		}
+		return BlockIndex
+	}
+	function SetInputsXY(BlockIndex) {
+		let XPos = -1n
+		let YPos = -1n
+		
+		let ListOfBlockCoordinateInputs = [...document.getElementById("BlockCoordinateInputs").querySelectorAll("input[type=number], input[type=text]")]
+		if (BlockIndex < Statistic_Value_TotalBlocksInLevel) {
+			ListOfBlockCoordinateInputs.forEach(Ele => Ele.disabled = false)
+			if (document.getElementById("LevelTypeHorizVert_Horiz").checked) {
+				XPos = ((BlockIndex/BlocksPerScreenColumnHorizLevel)*16n) + (BlockIndex % 16n)
+				YPos = (BlockIndex % BlocksPerScreenColumnHorizLevel)/16n
+			} else {
+				XPos = (((BlockIndex % 512n)/256n)*16n) + (BlockIndex % 16n)
+				YPos = ((BlockIndex/512n)*16n) + ((BlockIndex/16n) % 16n)
+			}
+			document.getElementById("BlockCoordinate_X_Dec").value = XPos.toString(10)
+			document.getElementById("BlockCoordinate_X_Hex").value = XPos.toString(16).toUpperCase().padStart(4, "0")
+			document.getElementById("BlockCoordinate_Y_Dec").value = YPos.toString(10)
+			document.getElementById("BlockCoordinate_Y_Hex").value = YPos.toString(16).toUpperCase().padStart(4, "0")
+		} else {
+			ListOfBlockCoordinateInputs.forEach(Ele => Ele.disabled = true)
+		}
+		return {
+			XPos: XPos,
+			YPos: YPos
+		}
 	}
 	function MouseMoveToXYSVG() {
 		let MouseXRelativeToElement = event.offsetX
