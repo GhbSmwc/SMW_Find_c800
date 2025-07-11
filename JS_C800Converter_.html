@@ -743,6 +743,9 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		document.getElementById("BlockCoordinate_Y_Dec").value = ClickedBlockYPos.toString(10)
 		document.getElementById("BlockCoordinate_Y_Hex").value = ClickedBlockYPos.toString(16).toUpperCase().padStart(4, "0")
 		
+		let ListOfBlockCoordinateInputs = [...document.getElementById("BlockCoordinateInputs").querySelectorAll("input[type=number], input[type=text]")]
+		ListOfBlockCoordinateInputs.forEach(Ele => Ele.disabled = false)
+		
 		
 		BlockCoordsToIndex();
 	}
@@ -804,6 +807,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 		let BlockYPos = BigInt(Math.floor(MouseYRelativeToElement/16))
 		
 		document.getElementById("SVGMouseOverBlockXY").textContent = "X: " + BlockXPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + BlockXPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")\nY: " + BlockYPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + BlockYPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
+		
 	}
 	function createSVGElement(tag) { //https://stackoverflow.com/questions/57894500/why-is-it-necessary-to-use-document-createelementns-when-adding-svg-tags-to
 		return document.createElementNS('http://www.w3.org/2000/svg', tag)
