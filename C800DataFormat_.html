@@ -1,0 +1,161 @@
+<html>
+	<head>
+		<style>
+			html {
+			background-color: #101010;
+			color: rgb(221, 221, 221);
+			font-family: sans-serif;
+			}
+			
+			table, th, td {
+			border: 1px solid white;
+			border-collapse: collapse;
+			}
+			
+			span.NoLineBreak {
+				white-space: nowrap;
+			}
+			
+			abbr{cursor: help;}
+			img.img-hor {
+				-moz-transform: scaleX(-1);
+				-o-transform: scaleX(-1);
+				-webkit-transform: scaleX(-1);
+				transform: scaleX(-1);
+				filter: FlipH;
+				-ms-filter: "FlipH";
+			}
+			
+			input[type=text], input[type=number], td.Statistics, text {
+				font-family: monospace;
+			}
+			
+			td.Monospace {
+				font-family: monospace;
+			}
+			div.Indent {
+				padding-left: 20px;
+			}
+			.MathFormula {
+				font-family: monospace;
+				white-space: pre;
+			}
+		</style>
+	</head>
+<body style="max-width: 720px; margin: auto; padding: 15px">
+<p>See <a href="JS_C800Converter.html">JS_C800Converter.html</a> to obtain values of which block in the level along with statistics</p>
+<p>In SMW, when any level save for boss levels is loaded, the tile data, which keeps track of every tile on how Mario and sprites interact with blocks on layer 1 (or layer 2), are stored in RAM <kbd>$7EC800</kbd> for low byte map16 numbers and <kbd>$7FC800</kbd> for the high bytes.</p>
+
+<p>In a SA-1 game, it would be at address <kbd>$40C800</kbd> and <kbd>$41C800</kbd> instead.</p>
+
+<p>Because the 2 lower bytes (low word, or &ldquo;page&rdquo;) of the 24-bit (3-bit) address are the same on different banks (leftmost byte of the 3-byte), I'll be referring the blocks by their page.</p>
+
+<p>When a block is in a level, its map16 number is written on both banks on the same page. For example a cement block, which is tile <kbd>$<span style="color: #ff0000">01</span><span style="color: #0000ff">30</span></kbd>, placed at the top-left of the level, which is <kbd>X: $0000, Y: $0000</kbd> in block units (not pixels),
+would mean <kbd>$7E/40:C800: $<span style="color: #ff0000">30</span></kbd> and <kbd>$7F/41:C800: $<span style="color: #0000ff">01</span></kbd>. Each byte on both banks correspond to a block, using the same example but at <kbd>X: $0001, Y: $0000</kbd> would cause the cement block to to be written to <kbd>$C801</kbd> of both banks instead.
+Therefore they correspond:
+<table>
+	<tr>
+		<th></th>
+		<th>+0</th>
+		<th>+1</th>
+		<th>+2</th>
+		<th>+3</th>
+		<th>...</th>
+	</tr>
+	<tr>
+		<th>In banks $7E/$40</th>
+		<td class="Monospace">$C800 (X:$0000,Y:$0000)</td>
+		<td class="Monospace">$C801 (X:$0001,Y:$0000)</td>
+		<td class="Monospace">$C802 (X:$0002,Y:$0000)</td>
+		<td class="Monospace">$C803 (X:$0003,Y:$0000)</td>
+		<td>...</td>
+	</tr>
+	<tr>
+		<th>In banks $7F/$41</th>
+		<td class="Monospace">$C800 (X:$0000,Y:$0000)</td>
+		<td class="Monospace">$C801 (X:$0001,Y:$0000)</td>
+		<td class="Monospace">$C802 (X:$0002,Y:$0000)</td>
+		<td class="Monospace">$C803 (X:$0003,Y:$0000)</td>
+		<td>...</td>
+	</tr>
+</table>
+</p>
+
+<p>Now you may be wondering, how are the blocks being placed in a two-dimensional array when their data is stored in a linear array? Well, SMW, and by extension, Lunar Magic, stores utilizes a combination of
+<a href="https://en.wikipedia.org/wiki/Row-_and_column-major_order">row and column-major</a> <a href="https://en.wikipedia.org/wiki/Array_(data_type)#Multi-dimensional_arrays">multidimensional array</a>. The format stored in the RAM
+differs depending on horizontal level and vertical level. Since LM added custom horizontal level dimensions, that also differs the layout of the blocks.</p>
+<p>Notes:
+	<ul>
+		<li>Coordinates discussed here are in units of blocks, not pixels. To convert pixels to blocks, do <kbd>BlockXPos = floor(PixelXPos/16)</kbd> <kbd>BlockYPos = floor(PixelYPos/16)</kbd>. <a href="https://en.wikipedia.org/wiki/Floor_and_ceiling_functions"><kbd>floor()</kbd></a> is a function
+		that rounds down a number; picking the highest integer less-than or equal to the input.</li>
+		<li>As always, X increases going rightwards, and Y increases going downwards. 2D Computer graphics often have the Y-axis orientated downwards, the same way how we read english text.</li>
+	</ul>
+</p>
+<h1>Horizontal level block format</h1>
+<div class="Indent">
+	<p>In horizontal levels, the grid of blocks are divided by 16-block wide &ldquo;screen columns&rdquo;, then subdivided those screen columns into many rows of 16x1 block groups.</p>
+	<p>Let's start with the smallest unit of chunking first, the blocks are ordered like a newspaper:
+	<img src="Readme_files/SMW_RowMajorBlocksPerScreen.png">
+	</p>
+	
+	<p>Now, I used the term &ldquo;screen columns&rdquo; for a reason. When enumerating past the last block within the screen exit boundary (the blue-bordered chunks seen in Lunar Magic when &ldquo;View Screen Exits&rdquo;) is turned on,
+	you advance to the top-leftmost block of a screen exit <b>below</b>, rather than the screen exit to the right. If the bottom of the level is reached, then it would be the top screen exit to the right:
+	<img src="Readme_files/SMW_ColumnMajorScreenColumn.png">
+	</p>
+	<div class="Indent">
+		<h2>Calculating Index &lt;-&gt; Coordinates of horizontal levels</h2>
+		<p>Because the block grid is subdivided this way, here's a visual on how I solved a formula on converting the index and coordinates:
+		<img src="Readme_files/ComputationHorizLevel.png">
+		</p>
+		<p>Formula in text form:
+			<ul>
+				<li>Obtain Index: <span class="MathFormula">Index = (BlocksPerScrnCol * floor(XPos/16)) + (YPos*16) + (XPos MOD 16)</span></li>
+				<li>Obtain X and Y positions:
+					<ul>
+						<li class="MathFormula">XPos = (floor(BlockIndex/BlocksPerScreenColumn)*16) + (Index MOD 16)</li>
+						<li class="MathFormula">YPos = floor((BlockIndex MOD BlocksPerScreenColumn)/16)</li>
+					</ul>
+				</li>
+			</ul>
+			Notes:
+			<ul>
+				<li>
+					RAM <kbd><a href="https://smwc.me/m/smw/ram/7E13D7">$13D7 ($73D7 in SA-1)</a></kbd> is the level height in pixels, because of powers of 2 and every screen column in horizontal levels are always 16 blocks wide, this is also
+					the number of blocks per screen column.
+				</li>
+				<li>
+					<kbd>Mod</kbd> is the modulo operator, the remainder of dividing two numbers. For example: <span class="MathFormula">18/16</span>, in <a href="https://en.wikipedia.org/wiki/Euclidean_division">Euclidean Division</a>, is <span class="MathFormula">quotient = 1, remainder = 2</span>. therefore
+					<span class="MathFormula">18 MOD 16</span> will output <kbd>2</kbd>.
+				</li>
+			</ul>
+		</p>
+	</div>
+</div>
+<h1>Vertical level block format</h1>
+<div class="Indent">
+	<p>Vertical levels are formatted like this: The grid is divided into 32x16-block screen exits, then they are subdivided by the 2 16x16 sub-screen areas (left and right half of the screen exit), and finally subdivided again by 16x1 areas:
+	<img src="Readme_files/SMW_VerticalLevelFormat.png">
+	</p>
+	<p>When enumerating past the last block in a screen exit, it repeats on the next screen exit down:
+	<img src="Readme_files/SMW_VerticalLevelFormatByScreen.png">
+	</p>
+	<h2>Calculating Index &lt;-&gt; Coordinates of horizontal levels</h2>
+	<div class="Indent">
+		<img src="Readme_files/ComputationVertLevel.png">
+	
+		<p>Similar to horizontal levels, but because there are no dimension settings for vertical levels, the task is much easier, and even more so thanks to the fact that each screen's width and height and the number of blocks are all powers of 2, making easy use of bitwise operations.
+		In fact, the index in binary is %00YYYYYXyyyyxxxx, where uppercase X and Y represents what screen boundary and what halves (X = 0 for left and 1 for right) within a screen boundary.</p>
+		<p>Formulas:
+		<ul>
+			<li>To calculate index: <span class="MathFormula">Index = (512 * floor(YPos/16)) + (256 * floor(XPos/16)) + ((YPos MOD 16)*16) + (XPos MOD 16)</span></li>
+			<li>To calculate coordinates:
+				<ul>
+					<li class="MathFormula">XPos = (floor((BlockIndex MOD 512)/256)*16) + (BlockIndex MOD 16)</li>
+					<li class="MathFormula">YPos = (floor(BlockIndex/512)*16) + (floor(BlockIndex/16) MOD 16)</li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+	
+	</p>
+</div>
