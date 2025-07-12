@@ -32,13 +32,13 @@
 		</style>
 	</head>
 <body>
-See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how the blocks are formatted
+See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how the blocks are formatted.
 <table>
 	<tr>
 		<td colspan="2">
 			<div>
 				<div><label><input type="radio" name="LevelTypeHorizVert" id="LevelTypeHorizVert_Horiz" checked>Horizontal level</label>:
-					<select id="HorizontalLevelTypes" style="font-family: monospace;" onchange="CalculateStatistics()">
+					<select id="HorizontalLevelTypes" style="font-family: monospace;" onchange="ResetXYAndIndex(); CalculateStatistics()">
 						<option>$00: Height=$01B tiles, MaxHScreens=$20</option>
 						<option>$01: Height=$01C tiles, MaxHScreens=$20</option>
 						<option>$02: Height=$01D tiles, MaxHScreens=$1E</option>
@@ -337,6 +337,15 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 	function BigintClamp(num, min, max) {
 		//Restrict a number within a specified range, bigInt edition.
 			return num <= min ? min : num >= max ? max : num;
+	}
+	function ResetXYAndIndex() {
+		[...document.getElementById("BlockCoordinateInputs").querySelectorAll("input[type=number], input[type=text]")].forEach(ele => {
+			if (ele.type == "number") {
+				ele.value = "0"
+			} else {
+				ele.value = "0000"
+			}
+		});
 	}
 	function CalculateStatistics() {
 		Statistic_Value_TotalBlocksInLevel = 0n
