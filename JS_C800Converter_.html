@@ -37,7 +37,7 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 	<tr>
 		<td colspan="2">
 			<div>
-				<div><label><input type="radio" name="LevelTypeHorizVert" id="LevelTypeHorizVert_Horiz" checked>Horizontal level</label>:
+				<div><label><input type="radio" name="LevelTypeHorizVert" id="LevelTypeHorizVert_Horiz" checked onchange="ResetXYAndIndex();">Horizontal level</label>:
 					<select id="HorizontalLevelTypes" style="font-family: monospace;" onchange="ResetXYAndIndex(); CalculateStatistics()">
 						<option>$00: Height=$01B tiles, MaxHScreens=$20</option>
 						<option>$01: Height=$01C tiles, MaxHScreens=$20</option>
