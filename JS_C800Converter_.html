@@ -345,7 +345,9 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 			} else {
 				ele.value = "0000"
 			}
+			ele.disabled = false
 		});
+		document.getElementById("IndexToCoords").disabled = false
 	}
 	function CalculateStatistics() {
 		Statistic_Value_TotalBlocksInLevel = 0n
