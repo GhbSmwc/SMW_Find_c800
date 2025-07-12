@@ -128,21 +128,17 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 				<div><kbd>X: </kbd><input type="number" value="0" id="BlockCoordinate_X_Dec" onchange="CorrectInputNumber(); BlockCoordsToIndex();" >($<input type="text" value="0000" id="BlockCoordinate_X_Hex" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber(); BlockCoordsToIndex()">)</div>
 				<div><kbd>Y: </kbd><input type="number" value="0" id="BlockCoordinate_Y_Dec" onchange="CorrectInputNumber(); BlockCoordsToIndex();" >($<input type="text" value="0000" id="BlockCoordinate_Y_Hex" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber(); BlockCoordsToIndex()">)</div><br>
 			</div>
-			<table>
-				<tr>
-					<td>Layer 1 RAM:</td>
-					<td class="Statistics" id="XYCoordsToIndexResult_L1Address"></td>
-				</tr>
-				<tr>
-					<td>Layer 2 RAM:</td>
-					<td class="Statistics" id="XYCoordsToIndexResult_L2Address"></td>
-				</tr>
-			</table>
-			
 		</td>
 		<td>
 			<h2>Convert Index to XY coords</h2><br>
 			<div><kbd>Index: $</kbd><input type="text" value="0000" class="AnyRadixNumberInput" data-input_number_radix="16" onchange="CorrectInputNumber(); IndexToBlockCoords();" id="IndexToCoords"></div><br>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+<span style="font-family: monospace; white-space: pre;">Layer 1 RAM: <span id="XYCoordsToIndexResult_L1Address"></span>
+Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
+</span>
 		</td>
 	</tr>
 </table>
@@ -811,8 +807,8 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 				document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "N/A (Outside level bounds for layer 2 level)"
 			}
 		} else {
-			document.getElementById("XYCoordsToIndexResult_L1Address").textContent = "N/A"
-			document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "N/A"
+			document.getElementById("XYCoordsToIndexResult_L1Address").textContent = "N/A (Outside level bounds)"
+			document.getElementById("XYCoordsToIndexResult_L2Address").textContent = "N/A (Outside level bounds)"
 		}
 	}
 	function MouseMoveToXYSVG() {
