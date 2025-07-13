@@ -48,14 +48,16 @@
 	<b>Table of contents</b>
 	<ol>
 		<li id="TOCBack_Introduction"><a href="#TOC_Introduction">Introduction</a></li>
-		<li><a id="TOCBack_Horizontal_level_block_format" href="#TOC_Horizontal_level_block_format">Horizontal level block format</a></li>
-		<ol>
-			<li><a id="TOCBack_CalculateHorizLevels" href="#TOC_CalculateHorizLevels">Calculating Index &lt;-&gt; Coordinates of horizontal levels</a></li>
-		</ol>
-		<li><a id="TOCBack_Vertical_level_block_format" href="#TOC_Vertical_level_block_format">Vertical level block format</a></li>
-		<ol>
-			<li><a id="TOCBack_CalculateVertLevels" href="#TOC_CalculateVertLevels">Calculating Index &lt;-&gt; Coordinates of vertical levels</a></li>
-		</ol>
+		<li><a id="TOCBack_Horizontal_level_block_format" href="#TOC_Horizontal_level_block_format">Horizontal level block format</a>
+			<ol>
+				<li><a id="TOCBack_CalculateHorizLevels" href="#TOC_CalculateHorizLevels">Calculating Index &lt;-&gt; Coordinates of horizontal levels</a></li>
+			</ol>
+		</li>
+		<li><a id="TOCBack_Vertical_level_block_format" href="#TOC_Vertical_level_block_format">Vertical level block format</a>
+			<ol>
+				<li><a id="TOCBack_CalculateVertLevels" href="#TOC_CalculateVertLevels">Calculating Index &lt;-&gt; Coordinates of vertical levels</a></li>
+			</ol>
+		</li>
 		<li><a id="TOCBack_OtherInfo" href="#TOC_OtherInfo">Other information</a></li>
 	</ol>
 </div>
@@ -204,14 +206,21 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 	the blocks they lie on a solid invisible tile instead of using a routine that message boxes, red ? light switch, and invisible solid sprite block (sprite <kbd>#$6D</kbd>) uses, that prevents the player from going through
 	the sprite.</li>
 	</ul></p></li>
-	<li><p>The rightmost boundary for horizontal levels and the bottommost boundary for vertical levels the routines uses to determine if the given coordinate is beyond that boundary is NOT always
-	the rightmost/bottommost edge that LM would allow placing stuff there, rather RAM address <kbd>$5E</kbd> (horizontal levels) and <kbd>$5F</kbd> (vertical level), these specify the width and
-	height of the level in number of screens (and where the screen stops scrolling rightwards or downwards). This boundary can be a lower number than the full width and height of the level.
-	For example: A horizontal level with a setting of <kbd>$04: Height=$022 tiles, MaxHScreens=$1A</kbd> with $5E set to $02 (screens 0 and 1 are accessible in-game), if you give a coordinate
-	that is beyond screen column 1 (the position the screen stops scrolling rightwards), would flag this as &ldquo;out of bounds&rdquo;, despite being block X position is at or lower than $19F
-	(the rightmost X position possible to be placed in the level in LM). Therefore, this &ldquo;out of bounds&rdquo; detection for the rightmost or bottomost uses the border where the screen ends
-	at, not where the level's full dimension ends at. This is set by LM's &ldquo;Number of Screens&rdquo; in &ldquo;Change Properties in Header&rdquo; dialog (don't forget to uncheck the
-	&ldquo;Auto-Set Number of Screens&rdquo; in the &ldquo;General Options&rdquo; if you need to change that).</p></li>
+	<li>
+		<p>The rightmost boundary for horizontal levels and the bottommost boundary for vertical levels the routines uses to determine if the given coordinate is beyond that boundary is NOT always
+		the rightmost/bottommost edge that LM would allow placing stuff there, rather RAM address <a href="https://www.smwcentral.net/?p=memorymap&game=smw&u=0&address=%245E-%245F&sizeOperation=%3D&sizeValue=&region[]=ram&type=*&description="><kbd>$5E</kbd> (horizontal levels) and <kbd>$5F</kbd> (vertical level)</a>.</p>
+		
+		<p><kbd>$5E</kbd> and <kbd>$5F</kbd> specify the width and height of the level in number of screens (and where the game screen stops scrolling rightwards or downwards), minus 1. This boundary
+		can be a lower number than the full width and height of the level.</p>
+		
+		<p>For example: A horizontal level with a setting of <kbd>$04: Height=$022 tiles, MaxHScreens=$1A</kbd> with $5E set to $02 (therefore, screens 0 and 1 are accessible in-game), if you give a coordinate
+		that is beyond screen column 1 (the position the screen stops scrolling rightwards), would flag this as &ldquo;out of bounds&rdquo;, despite being block X position is at or lower than $19F
+		(the rightmost X position possible to be placed in the level in LM).</p>
+		
+		<p>Therefore, this &ldquo;out of bounds&rdquo; detection for the rightmost or bottomost uses the border where the screen scroll ends
+		at, not where the level's full dimension ends at. This is set by LM's &ldquo;Number of Screens&rdquo; in &ldquo;Change Properties in Header&rdquo; dialog (don't forget to uncheck the
+		&ldquo;Auto-Set Number of Screens&rdquo; in the &ldquo;General Options&rdquo; if you need to change that). The provided tool will always assume the full width and height on determining what RAM is used or not.</p>
+	</li>
 	
 	<li><p>Thankfully, during block interaction (including during custom block code), <kbd>$98</kbd>-<kbd>$9B</kbd> (scratch RAM <kbd>$0A</kbd>-<kbd>$0D</kbd> for sprites after executing <kbd>$019138</kbd>) while processing layer 2,
 	their XY positions are relative to the top-left of layer 2, not the level, so this means that if you touch the top-left block on layer 2, regardless of the layer 2 positioning ((<kbd>$1E</kbd> or
