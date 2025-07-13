@@ -1,9 +1,28 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Macros
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-function GetC800IndexHorizLvl(RAM13D7, XPos, YPos) = (RAM13D7*(XPos/16))+(YPos*16)+(XPos%16)
-function GetC800IndexVertiLvl(XPos, YPos) = (512*(YPos/16))+(256*(XPos/16))+((YPos%16)*16)+(XPos%16)
-;Make sure you have [math round on] to prevent unexpected rounded numbers.
+;These calculate the level map16 addresses index and its XY positions.
+;Make sure you have [math round on] to prevent unexpected rounded numbers (truncate or
+;round down). Note that these do not have a failsafe of out-of-bounds locations.
+;
+;-XPos and YPos are X and Y positions, in units of blocks. To convert pixel positions to
+; blocks, divide them by 16 and round down. Example: X:$0025, Y:$0018 would be
+; X:$0002, Y:$0001.
+;
+;-RAM13D7 refers to RAM $13D7, the level height in pixels. Coincidentally, because
+; horizontal level screen column's width is always 16-blocks wide, this is also the blocks
+; per screen column. You enter RAM13D7 exactly how it is set in game when the level is
+; loaded.
+
+;These obtain the index (offset from the beginning address of layer 1 or layer 2)
+	function GetC800IndexHorizLvl(RAM13D7, XPos, YPos) = (RAM13D7*(XPos/16))+(YPos*16)+(XPos%16)
+	function GetC800IndexVertLvl(XPos, YPos) = (512*(YPos/16))+(256*(XPos/16))+((YPos%16)*16)+(XPos%16)
+;These obtain the X and Y positions from a given index and blocks per screen column
+	function GetC800XPosHorizLevl(BlockIndex, RAM13D7) = ((BlockIndex/RAM13D7)*16)+(BlockIndex%16)
+	function GetC800YPosHorizLevl(BlockIndex, RAM13D7) = ((BlockIndex%RAM13D7)/16)
+;Same as above but for vertical level (no need to use blocks per screen column)
+	function GetC800XPosVertLvl(BlockIndex) = (((BlockIndex%512)/256)*16)+(BlockIndex%16)
+	function GetC800YPosVertLvl(BlockIndex) = ((BlockIndex/512)*16)+((BlockIndex/16)%16)
 ;Horizontal level example:
 ; LDA #$30
 ; STA.l $7EC800+GetC800IndexHorizLvl($01B0, $01, $01)
@@ -11,9 +30,9 @@ function GetC800IndexVertiLvl(XPos, YPos) = (512*(YPos/16))+(256*(XPos/16))+((YP
 ; STA.l $7FC800+GetC800IndexHorizLvl($01B0, $01, $01)
 ;Vertical level example:
 ; LDA #$30
-; STA.l $7EC800+GetC800IndexVertiLvl($01, $01)
+; STA.l $7EC800+GetC800IndexVertLvl($01, $01)
 ; LDA #$01
-; STA.l $7FC800+GetC800IndexVertiLvl($01, $01)
+; STA.l $7FC800+GetC800IndexVertLvl($01, $01)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;Defines
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
