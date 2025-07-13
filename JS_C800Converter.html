@@ -33,6 +33,13 @@
 	</head>
 <body style="max-width: 720px; margin: auto; padding: 15px">
 See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how the blocks are formatted.<br>
+<p>Notes:
+	<ul>
+		<li><span style="color: #008000;">Green</span> represents layer 1 tiles</li>
+		<li><span style="color: #C0C000;">Yellow</span> represents layer 2 tiles</li>
+		<li><span style="color: #80C000;">Light-green</span> represents layer 1 and layer 2 tiles that can be on those coordinates.</li>
+	</ul>
+</p>
 <table>
 	<tr>
 		<td colspan="2">
@@ -82,15 +89,21 @@ See: <a href="C800DataFormat.html"><kbd>C800DataFormat.html</kbd></a> for how th
 						<td>Total blocks in level:</td>
 						<td class="Statistics" id="Statistic_TotalBlocksInLevel"></td>
 						<td rowspan="9">
-							<div style="overflow: auto; resize: vertical; min-width: 500px; min-height: 500px; height: 500px; border: 1px solid white;">
-								<svg style="width: 500px; height: 400px; border: 1px solid white;" id="GraphicalC800Map">
-									<text stroke="#ffffff" font-weight="lighter" text-anchor="left" alignment-baseline="hanging" font-family="monospace" x="100" y="0">Layer 1 level</text>
-									<text stroke="#ffffff" font-weight="lighter" text-anchor="left" alignment-baseline="hanging" font-family="monospace" x="300" y="0">Layer 2 level</text>
+							<div style="overflow: auto; resize: vertical; min-width: 300px; min-height: 500px; height: 500px; border: 1px solid white;">
+								<svg style="width: 300px; height: 400px; border: 1px solid white;" id="GraphicalC800Map">
+									<text stroke="#ffffff" font-weight="lighter" text-anchor="left" alignment-baseline="hanging" font-family="monospace" x="40" y="0">Layer 1 level</text>
+									<text stroke="#ffffff" font-weight="lighter" text-anchor="left" alignment-baseline="hanging" font-family="monospace" x="160" y="0">Layer 2 level</text>
 								</svg>
 							</div>
 						</td>
 					</tr>
 					<tr><td><kbd>$XXC800</kbd> RAM used:</td><td class="Statistics">$C800~$<span id="Statistic_RAMEndingByte">FDFF</span></td></tr>
+					<tr>
+						<td>Unused:</td>
+						<td class="Statistics">
+							<span id="Layer1Level_UnusedAddresses"></span>
+						</td>
+					</tr>
 					<tr><td>XY valid ranges:</td>
 						<td class="Statistics">
 							<div>X: <span id="Statistic_RightmostXPos">000~511 ($0000~$01FF)</span></div>
@@ -142,7 +155,7 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 		</td>
 	</tr>
 </table>
-<div style="overflow: auto; width: 1000px; height: 500px; border: 1px solid white; resize: both">
+<div style="overflow: auto; width: 700px; height: 500px; border: 1px solid white; resize: both">
 	<svg id="C800Grid" style="background-color: #808080" onclick="MouseCursorTilemapToCoords()" onmousemove="MouseMoveToXYSVG();">
 		<defs>
 			<pattern id="BlockGrid_L1Only" width="16" height="16"  patternUnits="userSpaceOnUse">
@@ -207,6 +220,7 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 	const Setting_PadLength_Hex_XPos = 4;
 	const Setting_PadLength_Hex_YPos = 4;
 	const Setting_StartingLevelM16Data = BigInt("0xC800")
+	const Setting_EndingLevelM16Data = BigInt("0xFFFF")
 	//Don't touch
 		let Statistic_Value_TotalBlocksInLevel = 0n
 		let Statistic_Value_RAMEndingByte = BigInt("0xFDFF") //default value
@@ -454,6 +468,14 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 			}
 			document.getElementById("Statistic_RightmostXPos").textContent = ("0").padStart(Setting_PadLength_Decimal_XPos, "0") + "~" + Statistic_Value_RightmostXPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_XPos, "0") + "~$" + Statistic_Value_RightmostXPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")"
 			document.getElementById("Statistic_BottommostYPos").textContent = ("0").padStart(Setting_PadLength_Decimal_YPos, "0") + "~" + Statistic_Value_BottommostYPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_YPos, "0") +"~$" + Statistic_Value_BottommostYPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
+			{
+				let UnusedMemorySize = Setting_EndingLevelM16Data - (Statistic_Value_RAMEndingByte+1n) +1n
+				if (UnusedMemorySize > 0n) {
+					document.getElementById("Layer1Level_UnusedAddresses").textContent = "$" + (Statistic_Value_RAMEndingByte+1n).toString(16).toUpperCase().padStart(4, "0") + "~$" + Setting_EndingLevelM16Data.toString(16).toUpperCase().padStart(4, "0") + " (" + UnusedMemorySize.toString(10) + " byte(s) on each bank)"
+				} else {
+					document.getElementById("Layer1Level_UnusedAddresses").textContent = "All used up"
+				}
+			}
 		//Layer 2 level
 			document.getElementById("Statistic_Layer2_MaxScreensWide").textContent = Statistic_Value_Layer2_MaxScreensWide.toString(10) + " ($" + Statistic_Value_Layer2_MaxScreensWide.toString(16).toUpperCase().padStart(2, "0") + ")"
 			document.getElementById("Statistic_NumbOfBlocksEachLayer").textContent = Statistic_Value_NumbOfBlocksEachLayer.toString(10) + " ($" + Statistic_Value_NumbOfBlocksEachLayer.toString(16).toUpperCase().padStart(4, "0") + ", index up to $" + (Statistic_Value_NumbOfBlocksEachLayer-1n).toString(16).toUpperCase().padStart(4, "0") + ")"
@@ -475,7 +497,7 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 					Layer2Height = 0n
 				}
 				document.getElementById("Layer1LevelUsage_Layer2Level").setAttribute("height", Layer1Height.toString(10))
-				document.getElementById("Layer2LevelUsage_Layer2Level").setAttribute("transform", "translate(320, " + (YPos2).toString(10) + ")")
+				document.getElementById("Layer2LevelUsage_Layer2Level").setAttribute("transform", "translate(180, " + (YPos2).toString(10) + ")")
 				document.getElementById("Layer2LevelUsage_Layer2Level").setAttribute("height", Layer2Height.toString(10))
 			}
 			document.getElementById("Statistic_RightmostXPos_Layer2").textContent = ("0").padStart(Setting_PadLength_Decimal_XPos, "0") + "~" + Statistic_Value_RightmostXPos_Layer2.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + ("0").padStart(Setting_PadLength_Hex_XPos, "0") + "~$" + Statistic_Value_RightmostXPos_Layer2.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")"
@@ -623,6 +645,7 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 		SetC800Address(Coords.XPos, Coords.YPos, EnteredIndex)
 	}
 	function SpawnSVGAddressesDisplay() {
+		//This sets up the usage graph from $C800-$FFFF
 		let GraphicalC800Map_Display = document.getElementById("GraphicalC800Map")
 		let CurrentAddress = Setting_StartingLevelM16Data
 		let EndingAddress = BigInt("0xFFFF")
@@ -686,7 +709,7 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 				RAMUsageBar.setAttribute("id", "Layer1LevelUsage")
 				RAMUsageBar.setAttribute("rx", "8")
 				RAMUsageBar.setAttribute("ry", "8")
-				RAMUsageBar.setAttribute("transform", "translate(120, " + (YPos).toString(10) + ")")
+				RAMUsageBar.setAttribute("transform", "translate(60, " + (YPos).toString(10) + ")")
 				RAMUsageBar.setAttribute("height", Height.toString(10))
 				RAMUsageBar.setAttribute("width", "40")
 				RAMUsageBar.setAttribute("fill", "#008000")
@@ -701,7 +724,7 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 				RAMUsageBar.setAttribute("id", "Layer1LevelUsage_Layer2Level")
 				RAMUsageBar.setAttribute("rx", "8")
 				RAMUsageBar.setAttribute("ry", "8")
-				RAMUsageBar.setAttribute("transform", "translate(320, " + (YPos).toString(10) + ")")
+				RAMUsageBar.setAttribute("transform", "translate(180, " + (YPos).toString(10) + ")")
 				RAMUsageBar.setAttribute("height", Height.toString(10))
 				RAMUsageBar.setAttribute("width", "40")
 				RAMUsageBar.setAttribute("fill", "#008000")
@@ -716,7 +739,7 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 				RAMUsageBar.setAttribute("id", "Layer2LevelUsage_Layer2Level")
 				RAMUsageBar.setAttribute("rx", "8")
 				RAMUsageBar.setAttribute("ry", "8")
-				RAMUsageBar.setAttribute("transform", "translate(320, " + (YPos).toString(10) + ")")
+				RAMUsageBar.setAttribute("transform", "translate(170, " + (YPos).toString(10) + ")")
 				RAMUsageBar.setAttribute("height", Height.toString(10))
 				RAMUsageBar.setAttribute("width", "40")
 				RAMUsageBar.setAttribute("fill", "#C0C000")
