@@ -44,6 +44,22 @@
 	</head>
 <body style="max-width: 720px; margin: auto; padding: 15px">
 <p>See <a href="JS_C800Converter.html">JS_C800Converter.html</a> to obtain values of which block in the level along with statistics</p>
+<div>
+	<b>Table of contents</b>
+	<ol>
+		<li id="TOCBack_Introduction"><a href="#TOC_Introduction">Introduction</a></li>
+		<li><a id="TOCBack_Horizontal_level_block_format" href="#TOC_Horizontal_level_block_format">Horizontal level block format</a></li>
+		<ol>
+			<li><a id="TOCBack_CalculateHorizLevels" href="#TOC_CalculateHorizLevels">Calculating Index &lt;-&gt; Coordinates of horizontal levels</a></li>
+		</ol>
+		<li><a id="TOCBack_Vertical_level_block_format" href="#TOC_Vertical_level_block_format">Calculating Index &lt;-&gt; Coordinates of horizontal levels</a></li>
+		<ol>
+			<li><a id="TOCBack_CalculateVertLevels" href="#TOC_CalculateVertLevels">Calculating Index &lt;-&gt; Coordinates of vertical levels</a></li>
+		</ol>
+		<li><a id="TOCBack_OtherInfo" href="#TOC_OtherInfo">Other information</a></li>
+	</ol>
+</div>
+<h1><a id="TOC_Introduction" href="#TOCBack_Introduction">^</a>Introduction</h1>
 <p>In SMW, when any level save for boss levels is loaded, the tile data, which keeps track of every tile on how Mario and sprites interact with blocks on layer 1 (or layer 2), are stored in RAM <kbd>$7EC800</kbd> for low byte map16 numbers and <kbd>$7FC800</kbd> for the high bytes.</p>
 
 <p>In a SA-1 game, it would be at address <kbd>$40C800</kbd> and <kbd>$41C800</kbd> instead.</p>
@@ -91,7 +107,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 		<li>As always, X increases going rightwards, and Y increases going downwards. 2D Computer graphics often have the Y-axis orientated downwards, the same way how we read english text.</li>
 	</ul>
 </p>
-<h1>Horizontal level block format</h1>
+<h1><a id="TOC_Horizontal_level_block_format" href="#TOCBack_Horizontal_level_block_format">^</a>Horizontal level block format</h1>
 <div class="Indent">
 	<p>In horizontal levels, the grid of blocks are divided by 16-block wide &ldquo;screen columns&rdquo;, then subdivided those screen columns into many rows of 16x1 block groups.</p>
 	<p>Let's start with the smallest unit of chunking first, the blocks are ordered like a newspaper:
@@ -103,7 +119,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 	<img src="Readme_files/SMW_ColumnMajorScreenColumn.png">
 	</p>
 	<div class="Indent">
-		<h2>Calculating Index &lt;-&gt; Coordinates of horizontal levels</h2>
+		<h2><a id="TOC_CalculateHorizLevels" href="#TOCBack_CalculateHorizLevels">^</a>Calculating Index &lt;-&gt; Coordinates of horizontal levels</h2>
 		<p>Because the block grid is subdivided this way, here's a visual on how I solved a formula on converting the index and coordinates:
 		<img src="Readme_files/ComputationHorizLevel.png">
 		</p>
@@ -131,7 +147,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 		</p>
 	</div>
 </div>
-<h1>Vertical level block format</h1>
+<h1><a id="TOC_Vertical_level_block_format" href="#TOCBack_Vertical_level_block_format">^</a>Vertical level block format</h1>
 <div class="Indent">
 	<p>Vertical levels are formatted like this: The grid is divided into 32x16-block screen exits, then they are subdivided by the 2 16x16 sub-screen areas (left and right half of the screen exit), and finally subdivided again by 16x1 areas:
 	<img src="Readme_files/SMW_VerticalLevelFormat.png">
@@ -139,7 +155,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 	<p>When enumerating past the last block in a screen exit, it repeats on the next screen exit down:
 	<img src="Readme_files/SMW_VerticalLevelFormatByScreen.png">
 	</p>
-	<h2>Calculating Index &lt;-&gt; Coordinates of vertical levels</h2>
+	<h2><a id="TOC_CalculateVertLevels" href="#TOCBack_CalculateVertLevels">^</a>Calculating Index &lt;-&gt; Coordinates of vertical levels</h2>
 	<div class="Indent">
 		<img src="Readme_files/ComputationVertLevel.png">
 	
@@ -158,7 +174,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 		</p>
 	</div>
 </div>
-<h1>Other information</h1>
+<h1><a id="TOC_OtherInfo" href="#TOCBack_OtherInfo">^</a>Other information</h1>
 <div class="Indent">
 	<ul>
 	<li><p>When using Layer 2 (or layer 3) levels, the width of the level in horizontal levels or the height in vertical levels is halved, rounded downwards to
