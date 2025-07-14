@@ -190,9 +190,10 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 	<img src="Readme_files/GapBetweenLayer1And2Dbg.png"><br>
 	Notice the gap ranging from <kbd>$7EE220</kbd> to <kbd>$7EE47F</kbd> (this also applies to the other bank, as their data position corresponds). This gap is 608 ($260 in hex) bytes long, this is also
 	the number of blocks per screen column (16*38 = 608). This gap being the number of blocks per screen column bytes long always exists when having any odd-number
-	of H-screens for a layer 2 level. It's unknown why <a href="https://www.smwcentral.net/?p=profile&id=8251">Vitor Vilela</a>/<a href="https://www.smwcentral.net/?p=profile&id=9435">FuSoYa</a>
+	of H-screens for a layer 2 level, except the 1-screen wide area (setting $1C), which you shouldn't probably use (0-screen wide area = black void).
+	It's unknown why <a href="https://www.smwcentral.net/?p=profile&id=8251">Vitor Vilela</a>/<a href="https://www.smwcentral.net/?p=profile&id=9435">FuSoYa</a>
 	to position the layer 2 data table in such a position, probably due to the rounding of the number of screens downwards to an integer as odd numbers isn't
-	divisible by 2, probably to avoid risking data overlaps of layer 1 and 2..</p></li>
+	divisible by 2, and also to avoid risking data overlaps of layer 1 and 2.</p></li>
 	<li><p>If you write to the <kbd>$C800</kbd> table, it <b>does</b> change the map16 number like you would with GPS's <kbd>change_map16</kbd> routine, however, the graphics will not be updated until
 	it is refreshed by level loading (during the screen fades to the level) or when re-entering the player's screen after being scrolled offscreen far enough. This is to prevent
 	V-blank overflow by updating the graphics only when necessary at the moment the block is changed during a map16 change routine (instead of writing to V-RAM's
