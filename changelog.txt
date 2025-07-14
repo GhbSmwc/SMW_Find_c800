@@ -1,4 +1,4 @@
-2025-07-13
+2025-07-13 v4
  - C800 calculator changes:
  -- No longer using innerHTML and instead use textContent and createElement.
  -- Statistics now graphically displays the $C800-$FFFF usage.
@@ -8,11 +8,11 @@
  -- Unused data of $C800 are now explained to the user.
  - Dark mode added on both HTMLs
  - added asar functions that converts index to XY position
-2020-07-19:
+2020-07-19 v3:
  - some HTML changes
 
-2019-06-02:
+2019-06-02 v2:
  - Adopted to newer LM version v3 that have custom level dimension routines.
 
-201607-01:
+201607-01 v1:
  - First version
