@@ -1,3 +1,13 @@
+2025-07-15 v4.1.0
+ - C800 calculator updated so that instead of disabling the other inputs if the user
+   enters an out of range value, it instead changes background of the the input the user
+   entered red.
+ - C800DataFormatExplained.html changes
+ -- Added images I forgot to include in v4.
+ -- Added info about that layer 2 is in the same way as layer 1 on the arrangement of
+    blocks that I forgot to include in v4.
+ -- Explained better on what's flagged as out of bounds in the ASM codes, and that the
+    JavaScript HTML calculator always assumes the full width as the level bounds.
 2025-07-13 v4
  - C800 calculator changes:
  -- No longer using innerHTML and instead use textContent and createElement.

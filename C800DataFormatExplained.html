@@ -105,8 +105,14 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 <p>Notes:
 	<ul>
 		<li>Coordinates discussed here are in units of blocks, not pixels. To convert pixel coordinates to block coordinates, do <span class="MathFormula">BlockXPos = floor(PixelXPos/16)</span> and <span class="MathFormula">BlockYPos = floor(PixelYPos/16)</span>. <a href="https://en.wikipedia.org/wiki/Floor_and_ceiling_functions"><kbd>floor()</kbd></a> is a function
-		that rounds down a number; picking the highest integer less-than or equal to the input.</li>
-		<li>As always, X increases going rightwards, and Y increases going downwards. 2D Computer graphics often have the Y-axis orientated downwards, the same way how we read english text.</li>
+		that rounds down a number; picking the highest integer less-than or equal to the input. In ASM programming, division by 16 and rounding down can be performed via <span class="MathFormula">LSR #4</span> (shift bits to the right by 4 bits).</li>
+		<li>As always, X increases going rightwards, and Y increases going downwards. 2D Computer graphics often have the Y-axis orientated downwards, the same way how we read English text. Here is what it looks like:<br>
+		<img src="Readme_files/BlockCoordinateSystem.png"></li>
+		<li>Lunar Magic displays the block coordinate in the level on the status bar on the bottom-left corner of the window when hovering a mouse within the level boundaries:<br>
+			<img src="Readme_files/LM_BlockCoordDisplay.png"><br>
+			Note that before version 3.03 (released in April 1, 2019), the coordinates are displayed in <b>decimal</b> rather than hex.
+		</li>
+		<li>On layer 2 levels, layer 2 will have the same arrangement of blocks format as layer 1 for both horizontal and vertical levels. It will, however be reserving second half (roughly if there's an odd number of screens wide) of the <kbd>$C800</kbd> table memory.</li>
 	</ul>
 </p>
 <h1><a id="TOC_Horizontal_level_block_format" href="#TOCBack_Horizontal_level_block_format">^</a>Horizontal level block format</h1>
@@ -205,7 +211,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 	<kbd>$0582C8</kbd> and <kbd>$05833A</kbd>) and before any LM-placed blocks (all objects and direct map16 tiles), therefore avoid placing any tiles using LM on the spot
 	you are going to write your block using uberasm tool's <kbd>load:</kbd>.</li>
 	<li>Changing the blocks that are offscreen, beyond the &ldquo;loading seam&rdquo; (a column or row of blocks at the edge of the screen that loads the appropriate graphics to the tilemap).</li>
-	<li>Have the block it is changing from and to uses the exact same graphic, so the graphics are unnoticeable. Rarely ever you would need this, purposes like if sprites are &ldquo;pseudo-solid&rdquo; by writing
+	<li>Have the block it is changing from and to use the exact same graphic, so the graphics are unnoticeable. Rarely ever you would need this, purposes like if sprites are &ldquo;pseudo-solid&rdquo; by writing
 	the blocks they lie on a solid invisible tile instead of using a routine that message boxes, red ? light switch, and invisible solid sprite block (sprite <kbd>#$6D</kbd>) uses, that prevents the player from going through
 	the sprite.</li>
 	</ul></p></li>
@@ -217,12 +223,12 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 		can be a lower number than the full width and height of the level.</p>
 		
 		<p>For example: A horizontal level with a setting of <kbd>$04: Height=$022 tiles, MaxHScreens=$1A</kbd> with $5E set to $02 (therefore, screens 0 and 1 are accessible in-game), if you give a coordinate
-		that is beyond screen column 1 (the position the screen stops scrolling rightwards), would flag this as &ldquo;out of bounds&rdquo;, despite being block X position is at or lower than $19F
+		that is beyond screen column 1 (the position the screen stops scrolling rightwards), and then call subroutines involving block coordinates and indexing in <kbd>C800ASMCodes.asm</kbd>, this would flag this as &ldquo;out of bounds&rdquo;, despite being block X position is at or lower than $19F
 		(the rightmost X position possible to be placed in the level in LM).</p>
 		
 		<p>Therefore, this &ldquo;out of bounds&rdquo; detection for the rightmost or bottomost uses the border where the screen scroll ends
 		at, not where the level's full dimension ends at. This is set by LM's &ldquo;Number of Screens&rdquo; in &ldquo;Change Properties in Header&rdquo; dialog (don't forget to uncheck the
-		&ldquo;Auto-Set Number of Screens&rdquo; in the &ldquo;General Options&rdquo; if you need to change that). The provided tool will always assume the full width and height on determining what RAM is used or not.</p>
+		&ldquo;Auto-Set Number of Screens&rdquo; in the &ldquo;General Options&rdquo; if you need to change that). The C800 calculator JavaScript HTML file will always assume the full width and height on determining what RAM is used or not.</p>
 	</li>
 	
 	<li><p>Thankfully, during block interaction (including during custom block code), <kbd>$98</kbd>-<kbd>$9B</kbd> (scratch RAM <kbd>$0A</kbd>-<kbd>$0D</kbd> for sprites after executing <kbd>$019138</kbd>) while processing layer 2 (RAM <a href="https://smwc.me/m/smw/ram/7E1933"><kbd>$1933</kbd></a> set to <kbd>#$01</kbd>),

@@ -123,7 +123,7 @@ endif
 ;; -$02 to $03: Same as above but for Y position
 ;;Output:
 ;; -$00-$01: The index of the blocks.
-;; -Carry: Set if coordinate points to outside of level.
+;; -Carry: Set if coordinate points to outside of level bounds.
 ;;Overwritten:
 ;  -If SA-1 not applied:
 ;; --$04 to $0B: copy of $00 due to math routines.

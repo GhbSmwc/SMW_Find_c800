@@ -237,6 +237,10 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 	const Setting_PadLength_Hex_YPos = 4;
 	const Setting_StartingLevelM16Data = BigInt("0xC800")
 	const Setting_EndingLevelM16Data = BigInt("0xFFFF")
+	//Following item is an out of bounds value indicator, used to turn input fields red if a value is outside a range.
+	//Arr[0] = in bounds
+	//Arr[1] = out of bounds
+		const Setting_OutOfBoundsInputState = ["#ffffff", "#e08080"]
 	//Don't touch
 		let Statistic_Value_TotalBlocksInLevel = 0n
 		let Statistic_Value_RAMEndingByte = BigInt("0xFDFF") //default value
@@ -370,9 +374,8 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 			} else {
 				ele.value = "0000"
 			}
-			ele.disabled = false
+			ele.style.backgroundColor = Setting_OutOfBoundsInputState[0]
 		});
-		document.getElementById("IndexToCoords").disabled = false
 	}
 	function CalculateStatistics() {
 		Statistic_Value_TotalBlocksInLevel = 0n
@@ -689,6 +692,14 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 		let XPos = ParseBigIntValue(document.getElementById("BlockCoordinate_X_Dec").value)
 		let YPos = ParseBigIntValue(document.getElementById("BlockCoordinate_Y_Dec").value)
 		
+		let IsXPosOutOfBounds = (XPos > Statistic_Value_RightmostXPos)
+		document.getElementById("BlockCoordinate_X_Dec").style.backgroundColor = Setting_OutOfBoundsInputState[Number(IsXPosOutOfBounds)]
+		document.getElementById("BlockCoordinate_X_Hex").style.backgroundColor = Setting_OutOfBoundsInputState[Number(IsXPosOutOfBounds)]
+		
+		let IsYPosOutOfBounds = (YPos > Statistic_Value_BottommostYPos)
+		document.getElementById("BlockCoordinate_Y_Dec").style.backgroundColor = Setting_OutOfBoundsInputState[Number(IsYPosOutOfBounds)]
+		document.getElementById("BlockCoordinate_Y_Hex").style.backgroundColor = Setting_OutOfBoundsInputState[Number(IsYPosOutOfBounds)]
+		
 		SetSVGSelectedTileXY(XPos, YPos)
 		let Index = SetBlockIndex(XPos, YPos)
 		SetC800Address(XPos, YPos, Index)
@@ -817,7 +828,7 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 		document.getElementById("BlockCoordinate_Y_Hex").value = ClickedBlockYPos.toString(16).toUpperCase().padStart(4, "0")
 		
 		let ListOfBlockCoordinateInputs = [...document.getElementById("BlockCoordinateInputs").querySelectorAll("input[type=number], input[type=text]")]
-		ListOfBlockCoordinateInputs.forEach(Ele => Ele.disabled = false)
+		ListOfBlockCoordinateInputs.forEach(Ele => Ele.style.backgroundColor = Setting_OutOfBoundsInputState[0])
 		
 		
 		BlockCoordsToIndex();
@@ -839,10 +850,8 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 			} else {
 				BlockIndex = (512n*(YPos/16n))+(256n*(XPos/16n))+((YPos%16n)*16n)+(XPos%16n)
 			}
-			document.getElementById("IndexToCoords").disabled = false
 			document.getElementById("IndexToCoords").value = BlockIndex.toString(16).toUpperCase().padStart(4, "0")
-		} else {
-			document.getElementById("IndexToCoords").disabled = true
+			document.getElementById("IndexToCoords").style.backgroundColor = Setting_OutOfBoundsInputState[0]
 		}
 		return BlockIndex
 	}
@@ -852,7 +861,7 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 		
 		let ListOfBlockCoordinateInputs = [...document.getElementById("BlockCoordinateInputs").querySelectorAll("input[type=number], input[type=text]")]
 		if (BlockIndex < Statistic_Value_TotalBlocksInLevel) {
-			ListOfBlockCoordinateInputs.forEach(Ele => Ele.disabled = false)
+			ListOfBlockCoordinateInputs.forEach(Ele => Ele.style.backgroundColor = Setting_OutOfBoundsInputState[0])
 			if (document.getElementById("LevelTypeHorizVert_Horiz").checked) {
 				XPos = ((BlockIndex/BlocksPerScreenColumnHorizLevel)*16n) + (BlockIndex % 16n)
 				YPos = (BlockIndex % BlocksPerScreenColumnHorizLevel)/16n
@@ -864,8 +873,13 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 			document.getElementById("BlockCoordinate_X_Hex").value = XPos.toString(16).toUpperCase().padStart(4, "0")
 			document.getElementById("BlockCoordinate_Y_Dec").value = YPos.toString(10)
 			document.getElementById("BlockCoordinate_Y_Hex").value = YPos.toString(16).toUpperCase().padStart(4, "0")
+			document.getElementById("IndexToCoords").style.backgroundColor = Setting_OutOfBoundsInputState[0]
 		} else {
-			ListOfBlockCoordinateInputs.forEach(Ele => Ele.disabled = true)
+			document.getElementById("IndexToCoords").style.backgroundColor = Setting_OutOfBoundsInputState[1]
+			return {
+			XPos: -1n,
+			YPos: -1n
+			}
 		}
 		return {
 			XPos: XPos,
