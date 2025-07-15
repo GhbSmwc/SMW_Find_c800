@@ -62,7 +62,7 @@
 	</ol>
 </div>
 <h1><a id="TOC_Introduction" href="#TOCBack_Introduction">^</a>Introduction</h1>
-<p>In SMW, when any level save for boss levels is loaded, the tile data, which keeps track of every tile on how Mario and sprites interact with blocks on layer 1 (or layer 2), are stored in RAM <kbd>$7EC800</kbd> for low byte map16 numbers and <kbd>$7FC800</kbd> for the high bytes.</p>
+<p>In SMW, during levels, save for boss levels, is loaded, the tile data, which keeps track of every tile on how Mario and sprites interact with blocks on layer 1 (or layer 2), are stored in RAM <a href="https://smwc.me/m/smw/ram/7EC800"><kbd>$7EC800</kbd></a> for low byte map16 numbers and <a href="https://smwc.me/m/smw/ram/7FC800"><kbd>$7FC800</kbd></a> for the high bytes.</p>
 
 <p>In a SA-1 game, it would be at address <kbd>$40C800</kbd> and <kbd>$41C800</kbd> instead.</p>
 
@@ -104,7 +104,7 @@ Therefore they correspond:
 differs depending on horizontal level and vertical level. Since LM added custom horizontal level dimensions, that also differs the layout of the blocks.</p>
 <p>Notes:
 	<ul>
-		<li>Coordinates discussed here are in units of blocks, not pixels. To convert pixels to blocks, do <span class="MathFormula">BlockXPos = floor(PixelXPos/16)</span> and <span class="MathFormula">BlockYPos = floor(PixelYPos/16)</span>. <a href="https://en.wikipedia.org/wiki/Floor_and_ceiling_functions"><kbd>floor()</kbd></a> is a function
+		<li>Coordinates discussed here are in units of blocks, not pixels. To convert pixel coordinates to block coordinates, do <span class="MathFormula">BlockXPos = floor(PixelXPos/16)</span> and <span class="MathFormula">BlockYPos = floor(PixelYPos/16)</span>. <a href="https://en.wikipedia.org/wiki/Floor_and_ceiling_functions"><kbd>floor()</kbd></a> is a function
 		that rounds down a number; picking the highest integer less-than or equal to the input.</li>
 		<li>As always, X increases going rightwards, and Y increases going downwards. 2D Computer graphics often have the Y-axis orientated downwards, the same way how we read english text.</li>
 	</ul>
@@ -116,9 +116,11 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 	<img src="Readme_files/SMW_RowMajorBlocksPerScreen.png">
 	</p>
 	
-	<p>Now, I used the term &ldquo;screen columns&rdquo; for a reason. When enumerating past the last block within the screen exit boundary (the blue-bordered chunks seen in Lunar Magic when &ldquo;View Screen Exits&rdquo;) is turned on,
-	you advance to the top-leftmost block of a screen exit <b>below</b>, rather than the screen exit <b>to the right</b> (unlike the screen exit numbering). If the bottom of the level is reached, then it would be the top screen exit to the right:
-	<img src="Readme_files/SMW_ColumnMajorScreenColumn.png">
+	<p>Now, I used the term &ldquo;screen columns&rdquo; for a reason. When enumerating past the last block within the screen exit boundary (the blue-bordered chunks seen in Lunar Magic when &ldquo;View Screen Exits&rdquo; is turned on),
+	you advance to the top-leftmost block of a screen exit <b>below</b>, rather than the screen exit <b>to the right</b> (unlike the screen exit numbering). If the bottom of the level is reached, however, then it would be the top screen exit to the right, for example:
+	<img src="Readme_files/SMW_ColumnMajorScreenColumn.png"><br>
+	Starting from screen $00, blocks are enumerated left to right, and going past the rightmost block in the screen column, the next block would be the leftmost block but now down a row, and repeats. When the bottom row's last block in a screen exit boundary is reached (shown in red),
+	the next block would be the top-leftmost block the screen below (in orange). Finally, when reaching the bottom of the level, after the last block in the screen column (yellow), the next block would be the first block of the next column (green).
 	</p>
 	<div class="Indent">
 		<h2><a id="TOC_CalculateHorizLevels" href="#TOCBack_CalculateHorizLevels">^</a>Calculating Index &lt;-&gt; Coordinates of horizontal levels</h2>
@@ -128,7 +130,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 		<p>Formula in text form:
 			<ul>
 				<li>Obtain Index: <span class="MathFormula">Index = (BlocksPerScrnCol * floor(XPos/16)) + (YPos*16) + (XPos MOD 16)</span></li>
-				<li>Obtain X and Y positions:
+				<li>Obtain X and Y positions (lots of <a href="https://en.wikipedia.org/wiki/Euclidean_division">euclidean division</a> being used):
 					<ul>
 						<li class="MathFormula">XPos = (floor(BlockIndex/BlocksPerScreenColumn)*16) + (Index MOD 16)</li>
 						<li class="MathFormula">YPos = floor((BlockIndex MOD BlocksPerScreenColumn)/16)</li>
@@ -138,8 +140,8 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 			Notes:
 			<ul>
 				<li>
-					RAM <kbd><a href="https://smwc.me/m/smw/ram/7E13D7">$13D7 ($73D7 in SA-1)</a></kbd> is the level height in pixels, because of powers of 2 and every screen column in horizontal levels are always 16 blocks wide, this is also
-					the number of blocks per screen column.
+					RAM <kbd><a href="https://smwc.me/m/smw/ram/7E13D7">$13D7 ($73D7 in SA-1)</a></kbd> is the level height in pixels, but because every screen column in horizontal levels are always 16 blocks wide, and that blocks are always 16 pixels high,
+					this is also the number of blocks per screen column (we do this: <span class="MathFormula">LevelHeightInBlocks = LevelHeightInPixels / 16 pixels per block</span> &rarr; <span class="MathFormula">BlocksPerScreenColumn = LevelHeightInBlocks * 16</span>, resulting in dividing by 16, then multiplying back up by 16).
 				</li>
 				<li>
 					<kbd>Mod</kbd> is the modulo operator, the remainder of dividing two numbers. For example: <span class="MathFormula">18/16</span>, in <a href="https://en.wikipedia.org/wiki/Euclidean_division">Euclidean Division</a>, is <span class="MathFormula">quotient = 1, remainder = 2</span>. therefore
@@ -161,7 +163,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 	<div class="Indent">
 		<img src="Readme_files/ComputationVertLevel.png">
 	
-		<p>Similar to horizontal levels, but because there are no dimension settings for vertical levels, the task is much easier, and even more so thanks to the fact that each screen's width and height and the number of blocks are all powers of 2, making easy use of bitwise operations.
+		<p>Similar to horizontal levels, but because there are no dimension settings for vertical levels, the task is much easier, and even more so thanks to the fact that each screen's width and height and the number of blocks are all powers of 2, making easy use of bitwise operations (just re-arrange the sequence of bits).
 		In fact, the index in binary is %00YYYYYXyyyyxxxx, where uppercase X and Y represents what screen boundary and what halves (X = 0 for left and 1 for right) within a screen boundary.</p>
 		<p>Formulas:
 		<ul>
@@ -223,7 +225,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 		&ldquo;Auto-Set Number of Screens&rdquo; in the &ldquo;General Options&rdquo; if you need to change that). The provided tool will always assume the full width and height on determining what RAM is used or not.</p>
 	</li>
 	
-	<li><p>Thankfully, during block interaction (including during custom block code), <kbd>$98</kbd>-<kbd>$9B</kbd> (scratch RAM <kbd>$0A</kbd>-<kbd>$0D</kbd> for sprites after executing <kbd>$019138</kbd>) while processing layer 2,
+	<li><p>Thankfully, during block interaction (including during custom block code), <kbd>$98</kbd>-<kbd>$9B</kbd> (scratch RAM <kbd>$0A</kbd>-<kbd>$0D</kbd> for sprites after executing <kbd>$019138</kbd>) while processing layer 2 (RAM <a href="https://smwc.me/m/smw/ram/7E1933"><kbd>$1933</kbd></a> set to <kbd>#$01</kbd>),
 	their XY positions are relative to the top-left of layer 2, not the level, so this means that if you touch the top-left block on layer 2, regardless of the layer 2 positioning ((<kbd>$1E</kbd> or
 	<kbd>$1466</kbd>), (<kbd>$20</kbd> or <kbd>$1468</kbd>)), collision point will read as (<kbd>$000*</kbd>, <kbd>$000*</kbd>). This means you first check <kbd>$1933</kbd>, simply take the coordinates (if in pixels, divide by 16; <kbd>LSR #4</kbd>) as if
 	they're layer 1, use the routine to convert to <kbd>$C800</kbd> indexing, and then load where the byte starts for layer 2. The list of layer 2 address follows:
