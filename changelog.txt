@@ -8,6 +8,8 @@
     blocks that I forgot to include in v4.
  -- Explained better on what's flagged as out of bounds in the ASM codes, and that the
     JavaScript HTML calculator always assumes the full width as the level bounds.
+ - Corrected the info about (BlocksPerScrnCol * floor(XPos/16)) on the image.
+ - Fixed a typo on the image showing a data gap between layer 1 and layer 2.
 2025-07-13 v4
  - C800 calculator changes:
  -- No longer using innerHTML and instead use textContent and createElement.

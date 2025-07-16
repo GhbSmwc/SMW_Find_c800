@@ -69,8 +69,7 @@
 <p>Because the 2 lower bytes (low word, or &ldquo;page&rdquo;) of the 24-bit (3-bit) address are the same on different banks (leftmost byte of the 3-byte), I'll be referring the blocks by their page.</p>
 
 <p>When a block is in a level, its map16 number, which each being 2 bytes long, are written on both banks on the same page, with the low byte on the lower bank value ($7E/$40) and the high byte in the higher bank value ($7F/$41). For example a cement block, which is tile <kbd>$<span style="color: #ff0000">01</span><span style="color: #0000ff">30</span></kbd>, placed at the top-left of the level, which is <kbd>X: $0000, Y: $0000</kbd> in block units (not pixels),
-would mean <kbd>$7E/40:C800: $<span style="color: #ff0000">30</span></kbd> and <kbd>$7F/41:C800: $<span style="color: #0000ff">01</span></kbd>. Each byte on both banks correspond to a block, using the same example but at <kbd>X: $0001, Y: $0000</kbd> would cause the cement block to to be written to <kbd>$C801</kbd> of both banks instead.
-Therefore they correspond:
+would mean <kbd>$7E/40:C800: $<span style="color: #0000ff">30</span></kbd> and <kbd>$7F/41:C800: $<span style="color: #ff0000">01</span></kbd>. Each byte on both banks correspond to a block, using the same example but at <kbd>X: $0001, Y: $0000</kbd> would cause the cement block to to be written to <kbd>$C801</kbd> of both banks instead. Here is what it looks like:
 <table>
 	<tr>
 		<th></th>
@@ -101,7 +100,7 @@ Therefore they correspond:
 
 <p>Now you may be wondering, how are the blocks being placed in a two-dimensional array when their data is stored in a linear array? Well, SMW, and by extension, Lunar Magic utilizes a combination of
 <a href="https://en.wikipedia.org/wiki/Row-_and_column-major_order">row and column-major</a> <a href="https://en.wikipedia.org/wiki/Array_(data_type)#Multi-dimensional_arrays">multidimensional array</a>. The format stored in the RAM
-differs depending on horizontal level and vertical level. Since LM added custom horizontal level dimensions, that also differs the layout of the blocks.</p>
+differs depending on horizontal level and vertical level. Since LM added custom horizontal level dimensions, that also differs the layout of the blocks (primarily due to the blocks per screen column).</p>
 <p>Notes:
 	<ul>
 		<li>Coordinates discussed here are in units of blocks, not pixels. To convert pixel coordinates to block coordinates, do <span class="MathFormula">BlockXPos = floor(PixelXPos/16)</span> and <span class="MathFormula">BlockYPos = floor(PixelYPos/16)</span>. <a href="https://en.wikipedia.org/wiki/Floor_and_ceiling_functions"><kbd>floor()</kbd></a> is a function
@@ -118,7 +117,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 <h1><a id="TOC_Horizontal_level_block_format" href="#TOCBack_Horizontal_level_block_format">^</a>Horizontal level block format</h1>
 <div class="Indent">
 	<p>In horizontal levels, the grid of blocks are divided by 16-block wide &ldquo;screen columns&rdquo;, then subdivided those screen columns into many rows of 16x1 block groups.</p>
-	<p>Let's start with the smallest unit of chunking first, the blocks are ordered like a newspaper:
+	<p>Let's start with the smallest unit of chunking first, the blocks are ordered like a newspaper text:
 	<img src="Readme_files/SMW_RowMajorBlocksPerScreen.png">
 	</p>
 	
@@ -136,7 +135,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 		<p>Formula in text form:
 			<ul>
 				<li>Obtain Index: <span class="MathFormula">Index = (BlocksPerScrnCol * floor(XPos/16)) + (YPos*16) + (XPos MOD 16)</span></li>
-				<li>Obtain X and Y positions (lots of <a href="https://en.wikipedia.org/wiki/Euclidean_division">euclidean division</a> being used):
+				<li>Obtain X and Y positions (<a href="https://en.wikipedia.org/wiki/Euclidean_division">euclidean division</a> frequently used here):
 					<ul>
 						<li class="MathFormula">XPos = (floor(BlockIndex/BlocksPerScreenColumn)*16) + (Index MOD 16)</li>
 						<li class="MathFormula">YPos = floor((BlockIndex MOD BlocksPerScreenColumn)/16)</li>
@@ -147,7 +146,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 			<ul>
 				<li>
 					RAM <kbd><a href="https://smwc.me/m/smw/ram/7E13D7">$13D7 ($73D7 in SA-1)</a></kbd> is the level height in pixels, but because every screen column in horizontal levels are always 16 blocks wide, and that blocks are always 16 pixels high,
-					this is also the number of blocks per screen column (we do this: <span class="MathFormula">LevelHeightInBlocks = LevelHeightInPixels / 16 pixels per block</span> &rarr; <span class="MathFormula">BlocksPerScreenColumn = LevelHeightInBlocks * 16</span>, resulting in dividing by 16, then multiplying back up by 16).
+					this is also the number of blocks per screen column (we do this: <span class="MathFormula">LevelHeightInBlocks = LevelHeightInPixels / 16 pixels per block</span> &rarr; <span class="MathFormula">BlocksPerScreenColumn = LevelHeightInBlocks * 16 across each screen</span>, resulting in dividing by 16, then multiplying back up by 16).
 				</li>
 				<li>
 					<kbd>Mod</kbd> is the modulo operator, the remainder of dividing two numbers. For example: <span class="MathFormula">18/16</span>, in <a href="https://en.wikipedia.org/wiki/Euclidean_division">Euclidean Division</a>, is <span class="MathFormula">quotient = 1, remainder = 2</span>. therefore
@@ -170,7 +169,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 		<img src="Readme_files/ComputationVertLevel.png">
 	
 		<p>Similar to horizontal levels, but because there are no dimension settings for vertical levels, the task is much easier, and even more so thanks to the fact that each screen's width and height and the number of blocks are all powers of 2, making easy use of bitwise operations (just re-arrange the sequence of bits).
-		In fact, the index in binary is %00YYYYYXyyyyxxxx, where uppercase X and Y represents what screen boundary and what halves (X = 0 for left and 1 for right) within a screen boundary.</p>
+		In fact, the index in binary is <kbd>%00YYYYYXyyyyxxxx</kbd>, where uppercase X and Y represents what screen boundary and what halves (X = 0 for left and 1 for right) within a screen boundary.</p>
 		<p>Formulas:
 		<ul>
 			<li>To calculate index: <span class="MathFormula">Index = (512 * floor(YPos/16)) + (256 * floor(XPos/16)) + ((YPos MOD 16)*16) + (XPos MOD 16)</span></li>
@@ -228,7 +227,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 		
 		<p>Therefore, this &ldquo;out of bounds&rdquo; detection for the rightmost or bottomost uses the border where the screen scroll ends
 		at, not where the level's full dimension ends at. This is set by LM's &ldquo;Number of Screens&rdquo; in &ldquo;Change Properties in Header&rdquo; dialog (don't forget to uncheck the
-		&ldquo;Auto-Set Number of Screens&rdquo; in the &ldquo;General Options&rdquo; if you need to change that). The C800 calculator JavaScript HTML file will always assume the full width and height on determining what RAM is used or not.</p>
+		&ldquo;Auto-Set Number of Screens&rdquo; in the &ldquo;General Options&rdquo; if you need to change that). The $C800 calculator JavaScript HTML file will always assume the full width and height on determining what RAM is used or not.</p>
 	</li>
 	
 	<li><p>Thankfully, during block interaction (including during custom block code), <kbd>$98</kbd>-<kbd>$9B</kbd> (scratch RAM <kbd>$0A</kbd>-<kbd>$0D</kbd> for sprites after executing <kbd>$019138</kbd>) while processing layer 2 (RAM <a href="https://smwc.me/m/smw/ram/7E1933"><kbd>$1933</kbd></a> set to <kbd>#$01</kbd>),
