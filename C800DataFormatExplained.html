@@ -128,7 +128,8 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 			<img src="Readme_files/LM_BlockCoordDisplay.png"><br>
 			Note that before version 3.03 (released in April 1, 2019), the coordinates are displayed in <b>decimal</b> rather than hex.
 		</li>
-		<li>On layer 2 levels, layer 2 will have the same arrangement of blocks format as layer 1 for both horizontal and vertical levels. It will, however be reserving second half (roughly if there's an odd number of screens wide) of the <kbd>$C800</kbd> table memory.</li>
+		<li>On layer 2 levels, layer 2 will have the same arrangement of blocks format as layer 1 for both horizontal and vertical levels. It will, however be reserving second half (roughly if there's an odd number of screens wide) of the <kbd>$C800</kbd> table memory.
+		The exception to this is if you set the level dimension to only have 1 screen wide, which when divided by 2 and rounded down, results in 0 screens, causing a black void in LM.</li>
 	</ul>
 </p>
 <h1><a id="TOC_Horizontal_level_block_format" href="#TOCBack_Horizontal_level_block_format">^</a>Horizontal level block format</h1>
@@ -213,6 +214,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 	and then reverse the offset when you are done: <span class="MathFormula">RestoredXYPos = ConvertedLayer2XY - (Layer2XYScreen - Layer1XYScreen)</span>. In SMW, a code
 	at <kbd>$00E953</kbd> does this:
 <div class="CodeBlock"><pre>
+;[...]
 CODE_00E94C:        A9 01         LDA.B #$01                ;\ process layer 2
 CODE_00E94E:        8D 33 19      STA.W $1933               ;/
 CODE_00E951:        C2 20         REP #$20                  ; Accum (16 bit) 
@@ -236,6 +238,7 @@ CODE_00E971:        38            SEC                       ;|
 CODE_00E972:        E5 28         SBC $28                   ;|
 CODE_00E974:        85 96         STA RAM_MarioYPos         ;/
 CODE_00E976:        E2 20         SEP #$20                  ; Accum (8 bit) 
+;[...]
 </pre></div>
 	RAM <a href="https://www.smwcentral.net/?p=memorymap&game=smw&u=0&address=26-29&sizeOperation=%3D&sizeValue=&region[]=ram&type=*&description="><kbd>$26~$27</kbd> and <kbd>$28~29</kbd></a> contains <span class="MathFormula">(Layer2XYScreen - Layer1XYScreen)</span> which is essentially layer 2's X position relative to layer 1.
 
