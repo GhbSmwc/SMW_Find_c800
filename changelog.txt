@@ -1,3 +1,6 @@
+2025-07-15 v4.1.0 (layer 2 XY)
+ - Added info in "C800DataFormatExplained.html" to explain on how to convert XY position
+   to layer 2.
 2025-07-15 v4.1.0
  - C800 calculator updated so that instead of disabling the other inputs if the user
    enters an out of range value, it instead changes background of the the input the user

@@ -40,6 +40,16 @@
 				font-family: monospace;
 				white-space: pre;
 			}
+			div.CodeBlock {
+				border: 1px solid white;
+				overflow: auto;
+				width: 800px;
+				height: 300px;
+				resize: both;
+			}
+			pre {
+				margin: 0px;
+			}
 		</style>
 	</head>
 <body style="max-width: 720px; margin: auto; padding: 15px">
@@ -103,8 +113,15 @@ would mean <kbd>$7E/40:C800: $<span style="color: #0000ff">30</span></kbd> and <
 differs depending on horizontal level and vertical level. Since LM added custom horizontal level dimensions, that also differs the layout of the blocks (primarily due to the blocks per screen column).</p>
 <p>Notes:
 	<ul>
-		<li>Coordinates discussed here are in units of blocks, not pixels. To convert pixel coordinates to block coordinates, do <span class="MathFormula">BlockXPos = floor(PixelXPos/16)</span> and <span class="MathFormula">BlockYPos = floor(PixelYPos/16)</span>. <a href="https://en.wikipedia.org/wiki/Floor_and_ceiling_functions"><kbd>floor()</kbd></a> is a function
-		that rounds down a number; picking the highest integer less-than or equal to the input. In ASM programming, division by 16 and rounding down can be performed via <span class="MathFormula">LSR #4</span> (shift bits to the right by 4 bits).</li>
+		<li>
+			Coordinates discussed here are in units of blocks, not pixels. To convert pixel coordinates to block coordinates, do <span class="MathFormula">BlockXPos = floor(PixelXPos/16)</span> and <span class="MathFormula">BlockYPos = floor(PixelYPos/16)</span>. <a href="https://en.wikipedia.org/wiki/Floor_and_ceiling_functions"><kbd>floor()</kbd></a> is a function
+			that rounds down a number; picking the highest integer less-than or equal to the input. In ASM programming, division by 16 and rounding down can be performed via <span class="MathFormula">LSR #4</span> (shift bits to the right by 4 bits).
+			<ul>
+				<li>As a side note, RAM <kbd>$98~$99</kbd> (Y position) and <kbd>$9A~$9B</kbd> (X position) are entity collision point positions <b>in pixels</b>, as they are used to handle collision points currently processed by Mario and
+				Sprite to see if a given pixel coordinate is within which block in a 16x16 block grid. Various routines such as &ldquo;ChangeMap16&rdquo; or &ldquo;GetMap16&rdquo;, using <kbd>$98~$9B</kbd> however, rounds these values to the nearest
+				multiple of 16 (done via <kbd>AND #$FFF0</kbd>) internally.</li>
+			</ul>
+		</li>
 		<li>As always, X increases going rightwards, and Y increases going downwards. 2D Computer graphics often have the Y-axis orientated downwards, the same way how we read English text. Here is what it looks like:<br>
 		<img src="Readme_files/BlockCoordinateSystem.png"></li>
 		<li>Lunar Magic displays the block coordinate in the level on the status bar on the bottom-left corner of the window when hovering a mouse within the level boundaries:<br>
@@ -189,6 +206,41 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 	<li><p>When using Layer 2 (or layer 3) levels, the width of the level in horizontal levels or the height in vertical levels is halved, rounded downwards to
 	the nearest screen boundary. The other &ldquo;half&rdquo; (in quotes because it is not always exactly) of the $C800 table is used up by layer 2/3 in the
 	same data format order pattern as layer 1.</p></li>
+	
+	<li>For layer 2 levels, to get the corresponding position of something relative to layer 1 but on layer 2 that may be moved around, you would do this:
+	<span class="MathFormula">ConvertedLayer2XY = PositionRelativeToLevelXY + (Layer2XYScreen - Layer1XYScreen)</span>, then perform interaction with layer 2 using <kbd>ConvertedLayer2XY</kbd> instead of
+	<kbd>PositionRelativeToLevelXY</kbd> (and make sure RAM <a href="https://www.smwcentral.net/?p=memorymap&game=smw&u=0&address=1933&sizeOperation=%3D&sizeValue=&region[]=ram&type=*&description="><kbd>$1933</kbd></a> is set to <kbd>#$01</kbd> so subroutines you use also goes layer 2 mode),
+	and then reverse the offset when you are done: <span class="MathFormula">RestoredXYPos = ConvertedLayer2XY - (Layer2XYScreen - Layer1XYScreen)</span>. In SMW, a code
+	at <kbd>$00E953</kbd> does this:
+<div class="CodeBlock"><pre>
+CODE_00E94C:        A9 01         LDA.B #$01                ;\ process layer 2
+CODE_00E94E:        8D 33 19      STA.W $1933               ;/
+CODE_00E951:        C2 20         REP #$20                  ; Accum (16 bit) 
+CODE_00E953:        A5 94         LDA RAM_MarioXPos         ;\Temporally displace mario's position, this makes it so that layer 2 interaction account for layer 2 being moved.
+CODE_00E955:        18            CLC                       ;|
+CODE_00E956:        65 26         ADC $26                   ;|Mario's position is now ConvertedLayer2XY.
+CODE_00E958:        85 94         STA RAM_MarioXPos         ;|
+CODE_00E95A:        A5 96         LDA RAM_MarioYPos         ;|
+CODE_00E95C:        18            CLC                       ;|
+CODE_00E95D:        65 28         ADC $28                   ;|
+CODE_00E95F:        85 96         STA RAM_MarioYPos         ;/
+CODE_00E961:        E2 20         SEP #$20                  ; Accum (8 bit) 
+CODE_00E963:        20 DB EA      JSR.W CODE_00EADB         
+CODE_00E966:        C2 20         REP #$20                  ; Accum (16 bit) 
+CODE_00E968:        A5 94         LDA RAM_MarioXPos         ;\reverse the displacement of mairo's position to counteract the above code. NOTE that this doesn't use push-pull stack
+CODE_00E96A:        38            SEC                       ;|so that blocks that sets player XY position aren't canceled (pull commands (PLA/PLX/PLY) followed by "store" (STA/STX/STY)
+CODE_00E96B:        E5 26         SBC $26                   ;|would always set them to specific value no matter of the changes before it by blocks)
+CODE_00E96D:        85 94         STA RAM_MarioXPos         ;|
+CODE_00E96F:        A5 96         LDA RAM_MarioYPos         ;|Mario's Position is now RestoredXYPos.
+CODE_00E971:        38            SEC                       ;|
+CODE_00E972:        E5 28         SBC $28                   ;|
+CODE_00E974:        85 96         STA RAM_MarioYPos         ;/
+CODE_00E976:        E2 20         SEP #$20                  ; Accum (8 bit) 
+</pre></div>
+	RAM <a href="https://www.smwcentral.net/?p=memorymap&game=smw&u=0&address=26-29&sizeOperation=%3D&sizeValue=&region[]=ram&type=*&description="><kbd>$26~$27</kbd> and <kbd>$28~29</kbd></a> contains <span class="MathFormula">(Layer2XYScreen - Layer1XYScreen)</span> which is essentially layer 2's X position relative to layer 1.
+
+
+	</li>
 	<li><p>If there is an odd number of H-screens, such as &ldquo;<kbd>$06: Height=$026 tiles, MaxHScreens=$17</kbd>&rdquo; on a layer 2 horizontal level, there
 	is a gap in the data between the last byte of layer 1 and the first byte of layer 2 of a size equal to the number of blocks per screen column. For example of the mentioned setting:<br>
 	<img src="Readme_files/GapBetweenLayer1And2.png"><br>

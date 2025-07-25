@@ -476,13 +476,13 @@ MathDiv:	REP #$20
 		RTL
 endif
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;Write a 2D array of blocks into $C800 (does not work with layer 2 blocks if layer 2 level).
+;Write a 2D array of blocks into $C800.
 ;
 ; !Scratchram_WriteArrayC800 usage range: 00 to +14 ($00 to $0E)
 ;
 ;Input:
-; -!Scratchram_WriteArrayC800+00 to !Scratchram_WriteArrayC800+02: Table location containing low bytes
-; -!Scratchram_WriteArrayC800+03 to !Scratchram_WriteArrayC800+05: Table location containing high bytes
+; -!Scratchram_WriteArrayC800+00 to !Scratchram_WriteArrayC800+02: Address table location containing low bytes
+; -!Scratchram_WriteArrayC800+03 to !Scratchram_WriteArrayC800+05: Address table location containing high bytes
 ; -!Scratchram_WriteArrayC800+06:                                  Number of blocks, minus 1, to transfer the 2D array table.
 ; -!Scratchram_WriteArrayC800+07:                                  Number of blocks wide, minus 1, to transfer the 2D array table.
 ; -!Scratchram_WriteArrayC800+08 to !Scratchram_WriteArrayC800+09: Block array X position to place in $C800 table.
@@ -494,7 +494,7 @@ endif
 ;
 ;Example:
 ; load:
-;  LDA.b #Table0     : STA !Scratchram_WriteArrayC800+00	;\Table location
+;  LDA.b #Table0     : STA !Scratchram_WriteArrayC800+00	;\Address table location
 ;  LDA.b #Table0>>8  : STA !Scratchram_WriteArrayC800+01	;|
 ;  LDA.b #Table0>>16 : STA !Scratchram_WriteArrayC800+02	;|
 ;  LDA.b #Table1     : STA !Scratchram_WriteArrayC800+03	;|
@@ -617,12 +617,12 @@ Write2DArrayC800:
 	+
 	RTL
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;Write a horizontal line of blocks into $C800 (does not work with layer 2 blocks if layer 2 level).
+;Write a horizontal line of blocks into $C800.
 ;
 ; !Scratchram_WriteArrayC800 usage range: 00 to +10 ($00 to $0A)
 ;
-; -!Scratchram_WriteArrayC800+00 to !Scratchram_WriteArrayC800+02: Table location containing low bytes
-; -!Scratchram_WriteArrayC800+03 to !Scratchram_WriteArrayC800+05: Table location containing high bytes
+; -!Scratchram_WriteArrayC800+00 to !Scratchram_WriteArrayC800+02: Address table location containing low bytes
+; -!Scratchram_WriteArrayC800+03 to !Scratchram_WriteArrayC800+05: Address table location containing high bytes
 ; -!Scratchram_WriteArrayC800+06:                                  Number of blocks, minus 1.
 ; -!Scratchram_WriteArrayC800+07 to !Scratchram_WriteArrayC800+08: Block array X position to place in $C800 table.
 ; -!Scratchram_WriteArrayC800+09 to !Scratchram_WriteArrayC800+10: Block array Y position to place in $C800 table.
@@ -680,12 +680,12 @@ WriteHorizLineArrayC800:
 	BCS .Loop					;>If unsigned underflow ($00->$FF), break loop.
 	RTL
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;Write a vertical line of blocks into $C800 (does not work with layer 2 blocks if layer 2 level).
+;Write a vertical line of blocks into $C800.
 ;
 ; !Scratchram_WriteArrayC800 usage range: 00 to +10 ($00 to $0A)
 ;
-; -!Scratchram_WriteArrayC800+00 to !Scratchram_WriteArrayC800+02: Table location containing low bytes
-; -!Scratchram_WriteArrayC800+03 to !Scratchram_WriteArrayC800+05: Table location containing high bytes
+; -!Scratchram_WriteArrayC800+00 to !Scratchram_WriteArrayC800+02: Address table location containing low bytes
+; -!Scratchram_WriteArrayC800+03 to !Scratchram_WriteArrayC800+05: Address table location containing high bytes
 ; -!Scratchram_WriteArrayC800+06:                                  Number of blocks, minus 1.
 ; -!Scratchram_WriteArrayC800+07 to !Scratchram_WriteArrayC800+08: Block array X position to place in $C800 table.
 ; -!Scratchram_WriteArrayC800+09 to !Scratchram_WriteArrayC800+10: Block array Y position to place in $C800 table.
