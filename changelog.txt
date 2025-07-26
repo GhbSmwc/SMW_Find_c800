@@ -1,6 +1,8 @@
-2025-07-15 v4.1.0 (layer 2 XY)
+2025-07-15 v4.1.1 (minor change)
  - Added info in "C800DataFormatExplained.html" to explain on how to convert XY position
    to layer 2.
+ - Fixed negative coordinates in the "JS_C800Calculator.html" when hovering the mouse
+   over the left and/or top margin of the SVG.
 2025-07-15 v4.1.0
  - C800 calculator updated so that instead of disabling the other inputs if the user
    enters an out of range value, it instead changes background of the the input the user
