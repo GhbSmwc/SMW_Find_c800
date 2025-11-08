@@ -72,11 +72,11 @@
 	</ol>
 </div>
 <h1><a id="TOC_Introduction" href="#TOCBack_Introduction">^</a>Introduction</h1>
-<p>In SMW, during levels, save for boss levels, is loaded, the tile data, which keeps track of every tile on how Mario and sprites interact with blocks on layer 1 (or layer 2), are stored in RAM <a href="https://smwc.me/m/smw/ram/7EC800"><kbd>$7EC800</kbd></a> for low byte map16 numbers and <a href="https://smwc.me/m/smw/ram/7FC800"><kbd>$7FC800</kbd></a> for the high bytes.</p>
+<p>In SMW, during levels, save for boss levels, is loaded, the tile data, which keeps track of every tile on how Mario and spritess interact with blocks on layer 1 (or layer 2), are stored in RAM <a href="https://smwc.me/m/smw/ram/7EC800"><kbd>$7EC800</kbd></a> for low byte map16 numbers and <a href="https://smwc.me/m/smw/ram/7FC800"><kbd>$7FC800</kbd></a> for the high bytes.</p>
 
 <p>In a SA-1 game, it would be at address <kbd>$40C800</kbd> and <kbd>$41C800</kbd> instead.</p>
 
-<p>Because the 2 lower bytes (low word, or &ldquo;page&rdquo;) of the 24-bit (3-bit) address are the same on different banks (leftmost byte of the 3-byte), I'll be referring the blocks by their page.</p>
+<p>Because the 2 lower bytes (low word, or &ldquo;page&rdquo;) of the 24-bit (3-byte) address are the same on different banks (leftmost byte of the 3-byte), I'll be referring the blocks by their page.</p>
 
 <p>When a block is in a level, its map16 number, which each being 2 bytes long, are written on both banks on the same page, with the low byte on the lower bank value ($7E/$40) and the high byte in the higher bank value ($7F/$41). For example a cement block, which is tile <kbd>$<span style="color: #ff0000">01</span><span style="color: #0000ff">30</span></kbd>, placed at the top-left of the level, which is <kbd>X: $0000, Y: $0000</kbd> in block units (not pixels),
 would mean <kbd>$7E/40:C800: $<span style="color: #0000ff">30</span></kbd> and <kbd>$7F/41:C800: $<span style="color: #ff0000">01</span></kbd>. Each byte on both banks correspond to a block, using the same example but at <kbd>X: $0001, Y: $0000</kbd> would cause the cement block to to be written to <kbd>$C801</kbd> of both banks instead. Here is what it looks like:
@@ -114,7 +114,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 <p>Notes:
 	<ul>
 		<li>
-			Coordinates discussed here are in units of blocks, not pixels. To convert pixel coordinates to block coordinates, do <span class="MathFormula">BlockXPos = floor(PixelXPos/16)</span> and <span class="MathFormula">BlockYPos = floor(PixelYPos/16)</span>. <a href="https://en.wikipedia.org/wiki/Floor_and_ceiling_functions"><kbd>floor()</kbd></a> is a function
+			Coordinates discussed here will be in units of blocks, not pixels. To convert pixel coordinates to block coordinates, do <span class="MathFormula">BlockXPos = floor(PixelXPos/16)</span> and <span class="MathFormula">BlockYPos = floor(PixelYPos/16)</span>. <a href="https://en.wikipedia.org/wiki/Floor_and_ceiling_functions"><kbd>floor()</kbd></a> is a function
 			that rounds down a number; picking the highest integer less-than or equal to the input. In ASM programming, division by 16 and rounding down can be performed via <span class="MathFormula">LSR #4</span> (shift bits to the right by 4 bits).
 			<ul>
 				<li>As a side note, RAM <kbd>$98~$99</kbd> (Y position) and <kbd>$9A~$9B</kbd> (X position) are entity collision point positions <b>in pixels</b>, as they are used to handle collision points currently processed by Mario and
@@ -205,7 +205,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 <div class="Indent">
 	<ul>
 	<li><p>When using Layer 2 (or layer 3) levels, the width of the level in horizontal levels or the height in vertical levels is halved, rounded downwards to
-	the nearest screen boundary. The other &ldquo;half&rdquo; (in quotes because it is not always exactly) of the $C800 table is used up by layer 2/3 in the
+	the nearest screen boundary. The other &ldquo;half&rdquo; (in quotes because it is not always exactly) of the <kbd>$C800</kbd> table is used up by layer 2/3 in the
 	same data format order pattern as layer 1.</p></li>
 	
 	<li>For layer 2 levels, to get the corresponding position of something relative to layer 1 but on layer 2 that may be moved around, you would do this:
@@ -250,7 +250,7 @@ CODE_00E976:        E2 20         SEP #$20                  ; Accum (8 bit)
 	I placed the blocks in an increasing map16 number order, with layer 1 blocks on the bottom of the last screen and layer 2 on the top of the first screen so you can see
 	it easier when viewed on a debugger. Looking at memory editor we can see there is an unused gap:<br>
 	<img src="Readme_files/GapBetweenLayer1And2Dbg.png"><br>
-	Notice the gap ranging from <kbd>$7EE220</kbd> to <kbd>$7EE47F</kbd> (this also applies to the other bank, as their data position corresponds). This gap is 608 ($260 in hex) bytes long, this is also
+	Notice the gap ranging from <kbd>$7EE220</kbd> to <kbd>$7EE47F</kbd> (this also applies to the other bank, as their data position corresponds). This gap is 608 (<kbd>$260</kbd> in hex) bytes long, this is also
 	the number of blocks per screen column (16*38 = 608). This gap being the number of blocks per screen column bytes long always exists when having any odd-number
 	of H-screens for a layer 2 level, except the 1-screen wide area (setting $1C), which you shouldn't probably use (0-screen wide area = black void).
 	It's unknown why <a href="https://www.smwcentral.net/?p=profile&id=8251">Vitor Vilela</a>/<a href="https://www.smwcentral.net/?p=profile&id=9435">FuSoYa</a>
