@@ -907,8 +907,8 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 		let MouseXRelativeToElement = event.offsetX
 		let MouseYRelativeToElement = event.offsetY
 		
-		let BlockXPos = BigintClamp(BigInt(Math.floor(MouseXRelativeToElement/16)), 0n, 65535n) //Need to clamp to prevent negative coordinates from showing when hovering mouse over the left and top margin of the SVG.
-		let BlockYPos = BigintClamp(BigInt(Math.floor(MouseYRelativeToElement/16)), 0n, 65535n) //
+		let BlockXPos = BigintClamp(BigInt(Math.floor(MouseXRelativeToElement/16)), 0n, Statistic_Value_RightmostXPos) //Need to clamp to prevent negative coordinates from showing when hovering mouse over the left and top margin of the SVG.
+		let BlockYPos = BigintClamp(BigInt(Math.floor(MouseYRelativeToElement/16)), 0n, Statistic_Value_BottommostYPos) //
 		
 		document.getElementById("SVGMouseOverBlockXY").textContent = "X: " + BlockXPos.toString(10).padStart(Setting_PadLength_Decimal_XPos, "0") + " ($" + BlockXPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_XPos, "0") + ")\nY: " + BlockYPos.toString(10).padStart(Setting_PadLength_Decimal_YPos, "0") + " ($" + BlockYPos.toString(16).toUpperCase().padStart(Setting_PadLength_Hex_YPos, "0") + ")"
 		
