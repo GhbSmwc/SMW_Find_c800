@@ -1,3 +1,6 @@
+2025-12-04
+ - Fixed some grammar issue and a small bug when user clicks the very edges of the block
+   grid SVG.
 2025-07-15 v4.1.1 (minor change)
  - Added info in "C800DataFormatExplained.html" to explain on how to convert XY position
    to layer 2.

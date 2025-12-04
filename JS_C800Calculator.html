@@ -819,8 +819,8 @@ Layer 2 RAM: <span id="XYCoordsToIndexResult_L2Address"></span>
 		let MouseXRelativeToElement = event.offsetX
 		let MouseYRelativeToElement = event.offsetY
 		
-		let ClickedBlockXPos = BigInt(Math.floor(MouseXRelativeToElement/16))
-		let ClickedBlockYPos = BigInt(Math.floor(MouseYRelativeToElement/16))
+		let ClickedBlockXPos = BigintClamp(BigInt(Math.floor(MouseXRelativeToElement/16)), 0n, Statistic_Value_RightmostXPos) //Clamp to prevent a minor bug that a user can click on the very edge of the SVG.
+		let ClickedBlockYPos = BigintClamp(BigInt(Math.floor(MouseYRelativeToElement/16)), 0n, Statistic_Value_BottommostYPos)
 		SetSVGSelectedTileXY(ClickedBlockXPos, ClickedBlockYPos)
 		document.getElementById("BlockCoordinate_X_Dec").value = ClickedBlockXPos.toString(10)
 		document.getElementById("BlockCoordinate_X_Hex").value = ClickedBlockXPos.toString(16).toUpperCase().padStart(4, "0")

@@ -72,11 +72,11 @@
 	</ol>
 </div>
 <h1><a id="TOC_Introduction" href="#TOCBack_Introduction">^</a>Introduction</h1>
-<p>In SMW, during levels, save for boss levels, is loaded, the tile data, which keeps track of every tile on how Mario and spritess interact with blocks on layer 1 (or layer 2), are stored in RAM <a href="https://smwc.me/m/smw/ram/7EC800"><kbd>$7EC800</kbd></a> for low byte map16 numbers and <a href="https://smwc.me/m/smw/ram/7FC800"><kbd>$7FC800</kbd></a> for the high bytes.</p>
+<p>In SMW, during levels, save for mode 7 boss levels, is loaded, the tile data, which keeps track of every tile on how Mario and sprites interact with blocks on layer 1 (or layer 2), are stored in RAM <a href="https://smwc.me/m/smw/ram/7EC800"><kbd>$7EC800</kbd></a> for low byte map16 numbers and <a href="https://smwc.me/m/smw/ram/7FC800"><kbd>$7FC800</kbd></a> for the high bytes.</p>
 
 <p>In a SA-1 game, it would be at address <kbd>$40C800</kbd> and <kbd>$41C800</kbd> instead.</p>
 
-<p>Because the 2 lower bytes (low word, or &ldquo;page&rdquo;) of the 24-bit (3-byte) address are the same on different banks (leftmost byte of the 3-byte), I'll be referring the blocks by their page.</p>
+<p>Because the 2 lower bytes (<kbd>$xx<u>XXXX</u></kbd> low word, or &ldquo;page&rdquo;) of the 24-bit (3-byte) address are the same on different banks (leftmost byte of the 3-byte; <kbd>$<u>XX</u>xxxx</kbd>), I'll be referring the blocks by their page.</p>
 
 <p>When a block is in a level, its map16 number, which each being 2 bytes long, are written on both banks on the same page, with the low byte on the lower bank value ($7E/$40) and the high byte in the higher bank value ($7F/$41). For example a cement block, which is tile <kbd>$<span style="color: #ff0000">01</span><span style="color: #0000ff">30</span></kbd>, placed at the top-left of the level, which is <kbd>X: $0000, Y: $0000</kbd> in block units (not pixels),
 would mean <kbd>$7E/40:C800: $<span style="color: #0000ff">30</span></kbd> and <kbd>$7F/41:C800: $<span style="color: #ff0000">01</span></kbd>. Each byte on both banks correspond to a block, using the same example but at <kbd>X: $0001, Y: $0000</kbd> would cause the cement block to to be written to <kbd>$C801</kbd> of both banks instead. Here is what it looks like:
@@ -119,7 +119,7 @@ differs depending on horizontal level and vertical level. Since LM added custom 
 			<ul>
 				<li>As a side note, RAM <kbd>$98~$99</kbd> (Y position) and <kbd>$9A~$9B</kbd> (X position) are entity collision point positions <b>in pixels</b>, as they are used to handle collision points currently processed by Mario and
 				Sprite to see if a given pixel coordinate is within which block in a 16x16 block grid. Various routines such as &ldquo;ChangeMap16&rdquo; or &ldquo;GetMap16&rdquo;, using <kbd>$98~$9B</kbd> however, rounds these values to the nearest
-				multiple of 16 (done via <kbd>AND #$FFF0</kbd>) internally.</li>
+				multiple of 16 (done via <kbd>AND #$FFF0</kbd>, clearing the low 4 bits) internally.</li>
 			</ul>
 		</li>
 		<li>As always, X increases going rightwards, and Y increases going downwards. 2D Computer graphics often have the Y-axis orientated downwards, the same way how we read English text. Here is what it looks like:<br>
